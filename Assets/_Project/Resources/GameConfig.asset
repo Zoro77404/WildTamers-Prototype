@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78a23494d054e1a43b44ec298642e1d2, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Core.GameConfig
+  fightRange: 13
+  maxWildAnimals: 8
+  minSpawnDistance: 7
+  maxSpawnDistance: 40
+  despawnDistance: 60
+  minSpawnSeparation: 7
+  spawnIntervalRange: {x: 1.2, y: 3}
+  wildLifetimeRange: {x: 150, y: 300}
+  wildLevelSpread: 2
+  wildLevelWeights:
+  - 25
+  - 30
+  - 25
+  - 15
+  - 5
+  maxLevel: 50
+  wildAnimalScale: 1.7
+  starterLevel: 5
+  teamHealPerSecond: 0.015
+  damageScale: 0.85
+  damageSpread: {x: 0.85, y: 1.15}
+  critChance: 0.12
+  critMultiplier: 1.5
+  defendMultiplier: 0.5
+  levelDamageBonus: 0.01
+  maxLevelDamageBonus: 0.1
+  runBaseChance: 0.15
+  runSpeedWeight: 0.8
+  runBonusPerFail: 0.15
+  runChanceLimits: {x: 0.2, y: 0.95}
+  aiSkillChance: 0.8
+  aiDefendBelowHP: 0.35
+  aiDefendChance: 0.4
+  xpRewardBase: 10
+  xpRewardPerLevel: 8
+  xpLevelGapFactor: 0.15
+  xpGapLimits: {x: 0.5, y: 1.6}
+  xpToNextBase: 20
+  xpToNextPerLevel: 10

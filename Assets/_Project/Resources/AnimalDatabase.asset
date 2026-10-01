@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e989383bbe395d343913f47d492cf7b7, type: 3}
+  m_Name: AnimalDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalDatabase
+  animals:
+  - {fileID: 11400000, guid: 3a1d3d3a2e542a649b3a3376f13259aa, type: 2}
+  - {fileID: 11400000, guid: 44c2a015a7e45e14e82252ad11704bee, type: 2}
+  - {fileID: 11400000, guid: 102847d67d0f1204aa254a15ef581708, type: 2}
+  - {fileID: 11400000, guid: 29e2cfd3cd64d7d4cb798b46755c68d5, type: 2}
+  - {fileID: 11400000, guid: 3a01e30ec5e51f645a3d2e536e754948, type: 2}
+  - {fileID: 11400000, guid: baea3e1aa9c335d499e7ccf850684e63, type: 2}
+  starters:
+  - {fileID: 11400000, guid: 3a1d3d3a2e542a649b3a3376f13259aa, type: 2}
+  - {fileID: 11400000, guid: 44c2a015a7e45e14e82252ad11704bee, type: 2}
+  - {fileID: 11400000, guid: 102847d67d0f1204aa254a15ef581708, type: 2}

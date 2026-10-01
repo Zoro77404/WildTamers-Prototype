@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b82adf0581195e4ebe7fda22e0e9a86, type: 3}
+  m_Name: Frog
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
+  id: frog
+  displayName: Frog
+  styleLabel: Sturdy & steady
+  description: A bouncy, tough little friend that is hard to knock down.
+  themeColor: {r: 0.41960785, g: 0.79607844, b: 0.23137255, a: 1}
+  prefab: {fileID: 5986716806950839192, guid: 659c1a6c6585efd489adba3dff8f88db, type: 3}
+  mapScale: 1
+  maxHP: 46
+  attack: 11
+  defense: 14
+  speed: 10
+  growthPerLevel: 0.06
+  normalAttackName: Tongue Lash
+  skill:
+    skillName: Big Splash
+    power: 2
+    cooldownTurns: 3
+    description: A belly-flop that soaks the foe.
+  spawnWeight: 1.2

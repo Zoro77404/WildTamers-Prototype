@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b82adf0581195e4ebe7fda22e0e9a86, type: 3}
+  m_Name: Stag
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
+  id: stag
+  displayName: Stag
+  styleLabel: Swift glass cannon
+  description: Elegant and swift. Hits very hard but bruises easily.
+  themeColor: {r: 0.83137256, g: 0.6392157, b: 0.4509804, a: 1}
+  prefab: {fileID: 6702634078409091718, guid: b1ed739e83f2d3c4fb62ac2531b10f7f, type: 3}
+  mapScale: 1
+  maxHP: 29
+  attack: 16
+  defense: 7
+  speed: 17
+  growthPerLevel: 0.06
+  normalAttackName: Antler Jab
+  skill:
+    skillName: Crown Charge
+    power: 2.4
+    cooldownTurns: 3
+    description: Charges antlers-first.
+  spawnWeight: 0.8
