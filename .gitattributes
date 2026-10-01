@@ -9,90 +9,44 @@
 *.anim     text merge=unityyamlmerge eol=lf
 *.controller text merge=unityyamlmerge eol=lf
 *.meta     text eol=lf
-# ---- Git LFS ----
-# 3D models
-*.fbx  filter=lfs diff=lfs merge=lfs -text
-*.FBX  filter=lfs diff=lfs merge=lfs -text
-*.obj  filter=lfs diff=lfs merge=lfs -text
-*.glb  filter=lfs diff=lfs merge=lfs -text
-*.gltf filter=lfs diff=lfs merge=lfs -text
-*.blend filter=lfs diff=lfs merge=lfs -text
-*.dae  filter=lfs diff=lfs merge=lfs -text
-*.3ds  filter=lfs diff=lfs merge=lfs -text
-*.max  filter=lfs diff=lfs merge=lfs -text
-*.ma   filter=lfs diff=lfs merge=lfs -text
-*.mb   filter=lfs diff=lfs merge=lfs -text
-# Textures / images
-*.png  filter=lfs diff=lfs merge=lfs -text
-*.jpg  filter=lfs diff=lfs merge=lfs -text
-*.jpeg filter=lfs diff=lfs merge=lfs -text
-*.tga  filter=lfs diff=lfs merge=lfs -text
-*.tif  filter=lfs diff=lfs merge=lfs -text
-*.tiff filter=lfs diff=lfs merge=lfs -text
-*.psd  filter=lfs diff=lfs merge=lfs -text
-*.exr  filter=lfs diff=lfs merge=lfs -text
-*.hdr  filter=lfs diff=lfs merge=lfs -text
-*.bmp  filter=lfs diff=lfs merge=lfs -text
-*.gif  filter=lfs diff=lfs merge=lfs -text
-*.cubemap filter=lfs diff=lfs merge=lfs -text
-# Audio
-*.wav  filter=lfs diff=lfs merge=lfs -text
-*.mp3  filter=lfs diff=lfs merge=lfs -text
-*.ogg  filter=lfs diff=lfs merge=lfs -text
-*.aif  filter=lfs diff=lfs merge=lfs -text
-*.aiff filter=lfs diff=lfs merge=lfs -text
-*.flac filter=lfs diff=lfs merge=lfs -text
-# Video
-*.mp4  filter=lfs diff=lfs merge=lfs -text
-*.mov  filter=lfs diff=lfs merge=lfs -text
-*.webm filter=lfs diff=lfs merge=lfs -text
-# Fonts
-*.ttf  filter=lfs diff=lfs merge=lfs -text
-*.otf  filter=lfs diff=lfs merge=lfs -text
-# Binaries / archives
-*.dll  filter=lfs diff=lfs merge=lfs -text
-*.so   filter=lfs diff=lfs merge=lfs -text
-*.a    filter=lfs diff=lfs merge=lfs -text
-*.zip  filter=lfs diff=lfs merge=lfs -text
-*.7z   filter=lfs diff=lfs merge=lfs -text
-*.rar  filter=lfs diff=lfs merge=lfs -text
-*.fbx !text !filter !merge !diff
-*.FBX !text !filter !merge !diff
-*.obj !text !filter !merge !diff
-*.glb !text !filter !merge !diff
-*.gltf !text !filter !merge !diff
-*.blend !text !filter !merge !diff
-*.dae !text !filter !merge !diff
-*.3ds !text !filter !merge !diff
-*.max !text !filter !merge !diff
-*.ma !text !filter !merge !diff
-*.mb !text !filter !merge !diff
-*.png !text !filter !merge !diff
-*.jpg !text !filter !merge !diff
-*.jpeg !text !filter !merge !diff
-*.tga !text !filter !merge !diff
-*.tif !text !filter !merge !diff
-*.tiff !text !filter !merge !diff
-*.psd !text !filter !merge !diff
-*.exr !text !filter !merge !diff
-*.hdr !text !filter !merge !diff
-*.bmp !text !filter !merge !diff
-*.gif !text !filter !merge !diff
-*.cubemap !text !filter !merge !diff
-*.wav !text !filter !merge !diff
-*.mp3 !text !filter !merge !diff
-*.ogg !text !filter !merge !diff
-*.aif !text !filter !merge !diff
-*.aiff !text !filter !merge !diff
-*.flac !text !filter !merge !diff
-*.mp4 !text !filter !merge !diff
-*.mov !text !filter !merge !diff
-*.webm !text !filter !merge !diff
-*.ttf !text !filter !merge !diff
-*.otf !text !filter !merge !diff
-*.dll !text !filter !merge !diff
-*.so !text !filter !merge !diff
-*.a !text !filter !merge !diff
-*.zip !text !filter !merge !diff
-*.7z !text !filter !merge !diff
-*.rar !text !filter !merge !diff
+# ---- Binary files (stored as normal git blobs, no LFS) ----
+*.fbx binary
+*.FBX binary
+*.obj binary
+*.glb binary
+*.gltf binary
+*.blend binary
+*.dae binary
+*.3ds binary
+*.max binary
+*.ma binary
+*.mb binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.tga binary
+*.tif binary
+*.tiff binary
+*.psd binary
+*.exr binary
+*.hdr binary
+*.bmp binary
+*.gif binary
+*.cubemap binary
+*.wav binary
+*.mp3 binary
+*.ogg binary
+*.aif binary
+*.aiff binary
+*.flac binary
+*.mp4 binary
+*.mov binary
+*.webm binary
+*.ttf binary
+*.otf binary
+*.dll binary
+*.so binary
+*.a binary
+*.zip binary
+*.7z binary
+*.rar binary
