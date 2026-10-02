@@ -71,3 +71,6 @@ crashlytics-buildid.txt
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local backups
+_backup/
