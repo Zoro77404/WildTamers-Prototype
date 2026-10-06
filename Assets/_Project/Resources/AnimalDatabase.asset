@@ -13,13 +13,15 @@ MonoBehaviour:
   m_Name: AnimalDatabase
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalDatabase
   animals:
-  - {fileID: 11400000, guid: 3a1d3d3a2e542a649b3a3376f13259aa, type: 2}
-  - {fileID: 11400000, guid: 44c2a015a7e45e14e82252ad11704bee, type: 2}
-  - {fileID: 11400000, guid: 102847d67d0f1204aa254a15ef581708, type: 2}
-  - {fileID: 11400000, guid: 29e2cfd3cd64d7d4cb798b46755c68d5, type: 2}
-  - {fileID: 11400000, guid: 3a01e30ec5e51f645a3d2e536e754948, type: 2}
-  - {fileID: 11400000, guid: baea3e1aa9c335d499e7ccf850684e63, type: 2}
+  - {fileID: 11400000, guid: 58fdd215a05b75b43950f0f4632079f5, type: 2}
+  - {fileID: 11400000, guid: 510767dc55959f841a2c54917ab639b1, type: 2}
+  - {fileID: 11400000, guid: e1e1f73c461bd0c48b9f1029bd67eab0, type: 2}
+  - {fileID: 11400000, guid: 25ecfc6513aacee4f9060be4f33b47a2, type: 2}
+  - {fileID: 11400000, guid: df97a51a4553f0d499cb6cda9e38c38f, type: 2}
+  - {fileID: 11400000, guid: 4ca3b5b68c7a980458beba4c96a0a9f7, type: 2}
+  - {fileID: 11400000, guid: dc6fd52083b51654282acf36e5063054, type: 2}
+  - {fileID: 11400000, guid: 76ea872664e62a242acd17501866235a, type: 2}
   starters:
-  - {fileID: 11400000, guid: 3a1d3d3a2e542a649b3a3376f13259aa, type: 2}
-  - {fileID: 11400000, guid: 44c2a015a7e45e14e82252ad11704bee, type: 2}
-  - {fileID: 11400000, guid: 102847d67d0f1204aa254a15ef581708, type: 2}
+  - {fileID: 11400000, guid: 58fdd215a05b75b43950f0f4632079f5, type: 2}
+  - {fileID: 11400000, guid: 510767dc55959f841a2c54917ab639b1, type: 2}
+  - {fileID: 11400000, guid: e1e1f73c461bd0c48b9f1029bd67eab0, type: 2}

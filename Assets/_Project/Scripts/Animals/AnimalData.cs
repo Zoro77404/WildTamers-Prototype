@@ -24,7 +24,10 @@ namespace WildTamers.Animals
         public string displayName;
         [Tooltip("Short stat style shown in UI, e.g. 'Fast & fragile'.")]
         public string styleLabel;
-        [TextArea(2, 4)] public string description;
+        [Tooltip("What the animal is (2–3 short, simple sentences).")]
+        [TextArea(2, 5)] public string description;
+        [Tooltip("How this animal helped people in Saudi / Arab history and culture (2–3 short, simple sentences, real facts only).")]
+        [TextArea(2, 6)] public string history;
         public Color themeColor = Color.white;
 
         [Header("Visuals")]

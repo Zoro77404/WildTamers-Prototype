@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b82adf0581195e4ebe7fda22e0e9a86, type: 3}
+  m_Name: ArabianWolf
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
+  id: arabian_wolf
+  displayName: Arabian Wolf
+  styleLabel: Well-rounded hunter
+  description: The Arabian wolf is a small wolf that lives in the deserts and rocky
+    hills of Arabia. It has a short, sandy coat and big ears. It hunts at night for
+    hares, rodents and birds, alone or in small packs.
+  history: Shepherds in Arabia knew the wolf well and kept careful watch over their
+    flocks at night. The wolf also appears in many old Arabic proverbs and stories.
+    By hunting rodents and hares, it helps keep the desert in balance.
+  themeColor: {r: 0.65882355, g: 0.5921569, b: 0.4862745, a: 1}
+  prefab: {fileID: 3923979581458231734, guid: 521552b004e6c6e48a74ea9e617ed9e1, type: 3}
+  mapScale: 1
+  maxHP: 38
+  attack: 14
+  defense: 9
+  speed: 15
+  growthPerLevel: 0.06
+  normalAttackName: Bite
+  skill:
+    skillName: Howling Fang
+    power: 2.2
+    cooldownTurns: 3
+    description: A howl-charged bite.
+  spawnWeight: 1

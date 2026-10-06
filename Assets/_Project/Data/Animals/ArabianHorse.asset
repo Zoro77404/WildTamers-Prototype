@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b82adf0581195e4ebe7fda22e0e9a86, type: 3}
+  m_Name: ArabianHorse
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
+  id: arabian_horse
+  displayName: Arabian Horse
+  styleLabel: Fast & enduring
+  description: The Arabian horse is one of the oldest horse breeds in the world.
+    It has a proud high tail, a curved face and lots of stamina. Arabians are quick,
+    smart and gentle with people.
+  history: Bedouin families in Arabia carefully raised Arabian horses for many centuries.
+    The horses carried riders across the desert on long journeys, and mares were
+    cherished almost like family. Today, Arabian blood helps make many other horse
+    breeds fast and strong.
+  themeColor: {r: 0.56078434, g: 0.65882355, b: 0.7607843, a: 1}
+  prefab: {fileID: 1266621631236417895, guid: 9da9fd0a90694674e945204958f4d220, type: 3}
+  mapScale: 1
+  maxHP: 40
+  attack: 13
+  defense: 9
+  speed: 17
+  growthPerLevel: 0.06
+  normalAttackName: Kick
+  skill:
+    skillName: Desert Gallop
+    power: 2.2
+    cooldownTurns: 3
+    description: A thundering charge across the sand.
+  spawnWeight: 0.9

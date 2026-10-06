@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b82adf0581195e4ebe7fda22e0e9a86, type: 3}
+  m_Name: ArabianGazelle
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
+  id: arabian_gazelle
+  displayName: Arabian Gazelle
+  styleLabel: Graceful & quick
+  description: Gazelles are small, graceful antelopes with slim legs and curved horns.
+    They can run very fast and leap high to escape danger. They live in dry plains
+    and rocky hills, and eat leaves and grass.
+  history: Bedouin hunters followed gazelles with salukis and falcons, and gazelle
+    meat was a valued food. Arab poets also praised the gazelle's beauty, often comparing
+    lovely eyes to a gazelle's. Today, protected reserves in Saudi Arabia help gazelles
+    stay safe.
+  themeColor: {r: 0.8784314, g: 0.6313726, b: 0.35686275, a: 1}
+  prefab: {fileID: 8189007836469060117, guid: 38911c61d1d487e4c836d4fad4cf2c16, type: 3}
+  mapScale: 1
+  maxHP: 30
+  attack: 12
+  defense: 7
+  speed: 19
+  growthPerLevel: 0.06
+  normalAttackName: Quick Kick
+  skill:
+    skillName: Leap Dash
+    power: 2.2
+    cooldownTurns: 3
+    description: A high spring followed by a fast strike.
+  spawnWeight: 1

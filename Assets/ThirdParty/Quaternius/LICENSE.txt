@@ -5,3 +5,6 @@ UltimateAnimatedAnimals/: Ultimate Animated Animal Pack (July 2021), GLB copies 
   Stag https://poly.pizza/m/tQdzbZ1Cmw
 EasyEnemyPack/: Easy Enemy Pack ("Animated Enemies" bundle on Poly Pizza)
   Snake https://poly.pizza/m/x9x0viZs8V | Frog https://poly.pizza/m/9Z2V8fpazF
+UltimateAnimatedAnimals/ (added for the Arabian roster): Alpaca https://poly.pizza/m/bCVFD48i2l | White Horse https://poly.pizza/m/bEdE4rmZy9 | Husky https://poly.pizza/m/wcWiuEqwzq
+  Deer https://poly.pizza/m/T6Cs7tmMHJ
+AnimalPackVol2/: "Animal Pack Vol.2 by @Quaternius" (Eagle; FBX) https://opengameart.org/content/animated-animales-low-poly — CC0

@@ -31,6 +31,23 @@ namespace WildTamers.Animals
             }
         }
 
+        /// <summary>
+        /// Animals from older versions of the game and the species that replaced them.
+        /// Old saves keep their level, XP and HP; only the species changes.
+        /// </summary>
+        private static readonly Dictionary<string, string> LegacySpecies = new Dictionary<string, string>
+        {
+            { "fox", "arabian_fox" },
+            { "wolf", "arabian_wolf" },
+            { "bull", "camel" },
+            { "stag", "arabian_gazelle" },
+            { "frog", "arabian_oryx" },
+            { "snake", "saluki" },
+            { "bear", "camel" },
+            { "boar", "arabian_oryx" },
+        };
+
+        /// <summary>Exact lookup by current species id (null if unknown).</summary>
         public AnimalData Get(string id)
         {
             if (string.IsNullOrEmpty(id)) return null;
@@ -42,6 +59,17 @@ namespace WildTamers.Animals
             }
             return byId.TryGetValue(id, out var data) ? data : null;
         }
+
+        /// <summary>Like <see cref="Get"/>, but also maps species that were removed to the animal that replaced them.</summary>
+        public AnimalData Resolve(string id)
+        {
+            var direct = Get(id);
+            if (direct != null) return direct;
+            return !string.IsNullOrEmpty(id) && LegacySpecies.TryGetValue(id, out var replacement) ? Get(replacement) : null;
+        }
+
+        /// <summary>True if <paramref name="id"/> is an old species that has been replaced.</summary>
+        public static bool IsLegacy(string id) => !string.IsNullOrEmpty(id) && LegacySpecies.ContainsKey(id);
 
         /// <summary>Weighted random species for a wild spawn.</summary>
         public AnimalData PickRandomWild()

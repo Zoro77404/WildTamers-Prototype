@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,61 +7,186 @@ using UnityEditor.Animations;
 using UnityEngine;
 using WildTamers.Animals;
 using WildTamers.Core;
+using WildTamers.Map;
+using Object = UnityEngine.Object;
 
 namespace WildTamers.EditorTools
 {
     /// <summary>
     /// Turns the imported low-poly animal models into game-ready assets:
     /// animation clip copies with proper looping, a shared-state Animator Controller per animal,
-    /// a size-normalized prefab with <see cref="AnimalVisual"/>, and the AnimalData / database assets.
-    /// Safe to re-run: existing AnimalData stats are kept (only the prefab link is refreshed).
+    /// a size-normalized prefab with <see cref="AnimalVisual"/> (recolored, with the extras that make each species
+    /// readable: camel hump, oryx and gazelle horns, big fox ears), and the AnimalData / database assets.
+    /// The roster below is the source of truth: edit it and re-run to refresh every asset.
     /// </summary>
     public static class AnimalAssetBuilder
     {
         private const string AnimFolder = "Assets/_Project/Animations";
         private const string PrefabFolder = "Assets/_Project/Prefabs/Animals";
         private const string DataFolder = "Assets/_Project/Data/Animals";
+        private const string MaterialFolder = "Assets/_Project/Materials/Animals";
+        private const string MeshFolder = "Assets/_Project/Art/Meshes/Animals";
         private const string DatabasePath = "Assets/_Project/Resources/AnimalDatabase.asset";
         private const string ConfigPath = "Assets/_Project/Resources/GameConfig.asset";
         private const string Uaa = "Assets/ThirdParty/Quaternius/UltimateAnimatedAnimals/";
-        private const string Eep = "Assets/ThirdParty/Quaternius/EasyEnemyPack/";
+        private const string Vol2 = "Assets/ThirdParty/Quaternius/AnimalPackVol2/";
+
+        /// <summary>Assets of species that were removed from the game; deleted on every build (exact paths only).</summary>
+        private static readonly string[] ObsoleteNames = { "Bull", "Fox", "Frog", "Snake", "Stag", "Wolf" };
+        private static readonly string[] ObsoleteModels =
+        {
+            "Assets/ThirdParty/Quaternius/UltimateAnimatedAnimals/Bull.glb",
+            "Assets/ThirdParty/Quaternius/EasyEnemyPack/Frog.glb",
+            "Assets/ThirdParty/Quaternius/EasyEnemyPack/Snake.glb",
+        };
 
         private class Species
         {
-            public string Name, Model, Style, Description, Attack, Skill, SkillDescription, Theme;
-            public float SkillPower, Size, Weight = 1f;
+            public string Id, Name, Model, Style, Description, History, Attack, Skill, SkillDescription, Theme;
+            public float SkillPower, Size, Weight = 1f, Hover, MapScale = 1f;
+            /// <summary>Non-uniform tweak of the model's proportions (x = width, y = height, z = length).</summary>
+            public Vector3 Stretch = Vector3.one;
             public int Cooldown, HP, Atk, Def, Spd;
+            /// <summary>Original material name → new sRGB hex.</summary>
+            public Dictionary<string, string> Colors;
+            /// <summary>Animator state → candidate clip names (replaces the defaults for that state).</summary>
+            public Dictionary<string, string[]> Clips;
+            public string[] HideChildren;
+            public Action<PosedModel, Species> Customize;
         }
 
         private static readonly Species[] Roster =
         {
-            new Species { Name = "Fox", Model = Uaa + "Fox.glb", Size = 2.3f, Theme = "#FF8A3D", Weight = 1.2f,
-                Style = "Fast & fragile", Description = "A quick, clever fox. It strikes first, but can't take many hits.",
-                HP = 33, Atk = 15, Def = 7, Spd = 20, Attack = "Scratch",
-                Skill = "Fox Fire", SkillPower = 2f, Cooldown = 2, SkillDescription = "A blazing-fast double strike." },
-            new Species { Name = "Frog", Model = Eep + "Frog.glb", Size = 2.0f, Theme = "#6BCB3B", Weight = 1.2f,
-                Style = "Sturdy & steady", Description = "A bouncy, tough little friend that is hard to knock down.",
-                HP = 46, Atk = 11, Def = 14, Spd = 10, Attack = "Tongue Lash",
-                Skill = "Big Splash", SkillPower = 2f, Cooldown = 3, SkillDescription = "A belly-flop that soaks the foe." },
-            new Species { Name = "Wolf", Model = Uaa + "Wolf.glb", Size = 2.7f, Theme = "#7F95B8", Weight = 1f,
-                Style = "Well-rounded hunter", Description = "A fierce pack hunter with a mighty bite.",
+            new Species
+            {
+                Id = "camel", Name = "Camel", Model = Uaa + "Alpaca.glb", Size = 3.0f, Theme = "#D4A24C", Weight = 0.9f,
+                Style = "Slow & tanky",
+                Description = "The camel is a tall desert animal with one big hump. The hump stores fat, so a camel can travel a long way without food. Its wide feet walk easily on soft sand.",
+                History = "For thousands of years, people in Arabia travelled the desert on camels. Camel caravans carried frankincense, spices and trade goods between faraway towns. Bedouin families also drank camel milk and made cloth from its hair.",
+                HP = 50, Atk = 12, Def = 12, Spd = 7, Attack = "Stomp",
+                Skill = "Sandstorm Slam", SkillPower = 2.3f, Cooldown = 4, SkillDescription = "A heavy stomp that throws up a cloud of sand.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Main", "#C99A56" }, { "Main_Light", "#E4C78F" }, { "Main_Dark", "#A57E46" },
+                    { "Muzzle", "#7C5E38" }, { "Hooves", "#5E4A34" },
+                },
+                Clips = new Dictionary<string, string[]> { { AnimalVisual.Attack, new[] { "Attack_Headbutt" } } },
+                Stretch = new Vector3(1.05f, 0.9f, 1.12f),
+                Customize = AttachCamelHump,
+            },
+            new Species
+            {
+                Id = "arabian_horse", Name = "Arabian Horse", Model = Uaa + "WhiteHorse.glb", Size = 3.2f, Theme = "#8FA8C2", Weight = 0.9f,
+                Style = "Fast & enduring",
+                Description = "The Arabian horse is one of the oldest horse breeds in the world. It has a proud high tail, a curved face and lots of stamina. Arabians are quick, smart and gentle with people.",
+                History = "Bedouin families in Arabia carefully raised Arabian horses for many centuries. The horses carried riders across the desert on long journeys, and mares were cherished almost like family. Today, Arabian blood helps make many other horse breeds fast and strong.",
+                HP = 40, Atk = 13, Def = 9, Spd = 17, Attack = "Kick",
+                Skill = "Desert Gallop", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A thundering charge across the sand.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Main", "#C7CBCC" }, { "Main_Light", "#E8EBEB" }, { "Hair", "#6B7078" },
+                    { "Muzzle", "#4A4743" }, { "Hooves", "#3F3B37" },
+                },
+                Clips = new Dictionary<string, string[]> { { AnimalVisual.Attack, new[] { "Attack_Kick" } } },
+            },
+            new Species
+            {
+                Id = "falcon", Name = "Falcon", Model = Vol2 + "Eagle.fbx", Size = 2.5f, Theme = "#C27C3C", Weight = 0.9f, Hover = 0.55f,
+                Style = "Swift glass cannon",
+                Description = "Falcons are fast birds of prey with sharp eyes and strong claws. A diving peregrine falcon can fly faster than 300 kilometres an hour. That makes it the fastest animal in the world.",
+                History = "Falconry, hunting with trained falcons, has been part of Arab life for many centuries. Bedouin hunters used falcons to catch hares and birds, bringing fresh food to the desert camp. Today falconry is a proud tradition in Saudi Arabia, and UNESCO lists it as living cultural heritage.",
+                HP = 28, Atk = 16, Def = 6, Spd = 20, Attack = "Talon Strike",
+                Skill = "Hunting Dive", SkillPower = 2.6f, Cooldown = 3, SkillDescription = "A lightning-fast dive from the sky.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Wings", "#70492F" }, { "Head", "#B38D61" }, { "Beak", "#4A4A4A" }, { "Claws", "#E3B84A" },
+                },
+                Clips = new Dictionary<string, string[]>
+                {
+                    { AnimalVisual.Idle, new[] { "Flying" } }, { AnimalVisual.Walk, new[] { "Flying" } }, { AnimalVisual.Run, new[] { "Flying" } },
+                },
+                // Falcon wings are shorter and more pointed than the eagle's.
+                Stretch = new Vector3(0.72f, 1f, 1f),
+            },
+            new Species
+            {
+                Id = "saluki", Name = "Saluki", Model = Uaa + "Husky.glb", Size = 2.6f, Theme = "#DDAA66", Weight = 1f,
+                Style = "Speedy sprinter",
+                Description = "The Saluki is a slim, long-legged hunting dog with a silky coat. It is one of the oldest dog breeds and runs very fast over long distances. Its soft eyes make it look kind and calm.",
+                History = "Bedouin people kept salukis to help hunt gazelles and hares in the open desert, often together with falcons. The Saluki was so respected that it was called El Hor, the noble one. Many tribes did not sell their salukis, but gave them as gifts.",
+                HP = 34, Atk = 13, Def = 8, Spd = 18, Attack = "Bite",
+                Skill = "Sprint Chase", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A burst of speed and a quick snap.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Material", "#D3A363" }, { "Material.001", "#F3E3C3" }, { "Material.006", "#9A7442" },
+                },
+            },
+            new Species
+            {
+                Id = "arabian_oryx", Name = "Arabian Oryx", Model = Uaa + "Stag.glb", Size = 3.0f, Theme = "#C9A27A", Weight = 0.7f,
+                Style = "Sturdy horn fighter",
+                Description = "The Arabian oryx is a pale antelope with two long, straight horns. Its white coat reflects the hot sun, and it can live a long time without drinking. It walks on wide hooves that suit soft sand.",
+                History = "Desert people hunted the oryx for meat and hide, and it nearly disappeared. By 1972 it was gone from the wild. Breeding programmes in zoos saved it, and today oryx live again in reserves in Saudi Arabia and Oman.",
+                HP = 44, Atk = 14, Def = 12, Spd = 9, Attack = "Horn Jab",
+                Skill = "Spear Charge", SkillPower = 2.4f, Cooldown = 4, SkillDescription = "Lowers its long horns and charges.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Material", "#F4EFE4" }, { "Material.003", "#FFFFFF" }, { "Material.010", "#8A6A50" },
+                },
+                Clips = new Dictionary<string, string[]> { { AnimalVisual.Attack, new[] { "Attack_Headbutt" } } },
+                HideChildren = new[] { "Stag_Horns" },
+                Customize = AttachOryxHorns,
+            },
+            new Species
+            {
+                Id = "arabian_gazelle", Name = "Arabian Gazelle", Model = Uaa + "Deer.glb", Size = 2.7f, Theme = "#E0A15B", Weight = 1f,
+                Style = "Graceful & quick",
+                Description = "Gazelles are small, graceful antelopes with slim legs and curved horns. They can run very fast and leap high to escape danger. They live in dry plains and rocky hills, and eat leaves and grass.",
+                History = "Bedouin hunters followed gazelles with salukis and falcons, and gazelle meat was a valued food. Arab poets also praised the gazelle's beauty, often comparing lovely eyes to a gazelle's. Today, protected reserves in Saudi Arabia help gazelles stay safe.",
+                HP = 30, Atk = 12, Def = 7, Spd = 19, Attack = "Quick Kick",
+                Skill = "Leap Dash", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A high spring followed by a fast strike.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Main", "#CC9C62" }, { "Main_Light", "#F7EEDB" }, { "Main_Dark", "#8C6540" },
+                },
+                Clips = new Dictionary<string, string[]> { { AnimalVisual.Attack, new[] { "Attack_Kick" } } },
+                Customize = AttachGazelleHorns,
+            },
+            new Species
+            {
+                Id = "arabian_wolf", Name = "Arabian Wolf", Model = Uaa + "Wolf.glb", Size = 2.7f, Theme = "#A8977C", Weight = 1f,
+                Style = "Well-rounded hunter",
+                Description = "The Arabian wolf is a small wolf that lives in the deserts and rocky hills of Arabia. It has a short, sandy coat and big ears. It hunts at night for hares, rodents and birds, alone or in small packs.",
+                History = "Shepherds in Arabia knew the wolf well and kept careful watch over their flocks at night. The wolf also appears in many old Arabic proverbs and stories. By hunting rodents and hares, it helps keep the desert in balance.",
                 HP = 38, Atk = 14, Def = 9, Spd = 15, Attack = "Bite",
-                Skill = "Howling Fang", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A howl-charged bite." },
-            new Species { Name = "Bull", Model = Uaa + "Bull.glb", Size = 3.3f, Theme = "#A47148", Weight = 0.6f,
-                Style = "Slow & tanky", Description = "Slow to start, impossible to stop. Shrugs off almost anything.",
-                HP = 48, Atk = 12, Def = 10, Spd = 6, Attack = "Headbutt",
-                Skill = "Stampede", SkillPower = 2.4f, Cooldown = 4, SkillDescription = "A full-force charge." },
-            new Species { Name = "Stag", Model = Uaa + "Stag.glb", Size = 3.1f, Theme = "#D4A373", Weight = 0.8f,
-                Style = "Swift glass cannon", Description = "Elegant and swift. Hits very hard but bruises easily.",
-                HP = 29, Atk = 16, Def = 7, Spd = 17, Attack = "Antler Jab",
-                Skill = "Crown Charge", SkillPower = 2.4f, Cooldown = 3, SkillDescription = "Charges antlers-first." },
-            new Species { Name = "Snake", Model = Eep + "Snake.glb", Size = 2.2f, Theme = "#2EC4B6", Weight = 1f,
-                Style = "Sneaky burst", Description = "Patient and sneaky. Its venom strike packs a huge punch.",
-                HP = 36, Atk = 14, Def = 8, Spd = 13, Attack = "Bite",
-                Skill = "Venom Strike", SkillPower = 2.6f, Cooldown = 3, SkillDescription = "A rare but devastating bite." },
+                Skill = "Howling Fang", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A howl-charged bite.",
+                Colors = new Dictionary<string, string> { { "Main", "#B8A586" }, { "Main_Light", "#EADFCB" } },
+            },
+            new Species
+            {
+                Id = "arabian_fox", Name = "Arabian Fox", Model = Uaa + "Fox.glb", Size = 2.3f, Theme = "#E5A653", Weight = 1.2f,
+                Style = "Sly & speedy",
+                Description = "The Arabian fox is a small desert fox with huge ears and pale, sandy fur. Its big ears give off heat to keep it cool, and furry paws protect it from hot sand. It hunts at night for insects, mice and fruit.",
+                History = "Bedouin travellers knew the fox as a quick, clever survivor of the desert. It appears in many Arabic folk stories as a smart trickster. Foxes also eat mice and insects, which helps protect camps and farms from pests.",
+                HP = 33, Atk = 15, Def = 7, Spd = 17, Attack = "Scratch",
+                Skill = "Sand Dash", SkillPower = 2.0f, Cooldown = 2, SkillDescription = "Kicks up sand, then strikes in a flash.",
+                Colors = new Dictionary<string, string>
+                {
+                    { "Main", "#E9CC9B" }, { "Main_Light", "#FFF6E2" }, { "Grey", "#B8A07C" },
+                },
+                Customize = (pose, s) =>
+                {
+                    // Big sand-fox ears.
+                    foreach (var ear in new[] { "Ear1.L", "Ear1.R" })
+                    {
+                        var t = pose.Bone(ear);
+                        if (t != null) t.localScale = Vector3.one * 1.55f;
+                    }
+                },
+            },
         };
 
-        private static readonly string[] StarterNames = { "Fox", "Frog", "Wolf" };
+        private static readonly string[] StarterIds = { "camel", "arabian_horse", "falcon" };
 
         /// <summary>Stat growth per level for every species (balanced with the battle formula in GameConfig).</summary>
         private const float GrowthPerLevel = 0.06f;
@@ -68,21 +194,22 @@ namespace WildTamers.EditorTools
         // State -> candidate clip names (matched against the part after the last '|').
         private static readonly (string state, bool loop, string[] clips)[] StateClips =
         {
-            (AnimalVisual.Idle, true, new[] { "Idle", "Snake_Idle", "Frog_Idle" }),
-            (AnimalVisual.Walk, true, new[] { "Walk", "Snake_Walk" }),
+            (AnimalVisual.Idle, true, new[] { "Idle" }),
+            (AnimalVisual.Walk, true, new[] { "Walk" }),
             (AnimalVisual.Run, true, new[] { "Gallop" }),
-            (AnimalVisual.Attack, false, new[] { "Attack", "Attack_Headbutt", "Snake_Attack", "Frog_Attack" }),
+            (AnimalVisual.Attack, false, new[] { "Attack", "Attack_Headbutt" }),
             (AnimalVisual.Hit, false, new[] { "Idle_HitReact_Left" }),
-            (AnimalVisual.Death, false, new[] { "Death", "Frog_Death" }),
-            (AnimalVisual.Jump, false, new[] { "Jump_ToIdle", "Jump_toIdle", "Snake_Jump", "Frog_Jump" }),
+            (AnimalVisual.Death, false, new[] { "Death" }),
+            (AnimalVisual.Jump, false, new[] { "Jump_ToIdle", "Jump_toIdle" }),
             (AnimalVisual.Eat, true, new[] { "Eating" }),
         };
 
         [MenuItem("Wild Tamers/Build/Animal Assets")]
         public static void BuildAll()
         {
-            foreach (var f in new[] { AnimFolder, PrefabFolder, DataFolder, "Assets/_Project/Resources" })
+            foreach (var f in new[] { AnimFolder, PrefabFolder, DataFolder, MaterialFolder, MeshFolder, "Assets/_Project/Resources" })
                 Directory.CreateDirectory(f);
+            DeleteObsolete();
 
             var datas = new List<AnimalData>();
             foreach (var s in Roster)
@@ -107,7 +234,7 @@ namespace WildTamers.EditorTools
             }
             var so = new SerializedObject(db);
             SetList(so.FindProperty("animals"), datas);
-            SetList(so.FindProperty("starters"), StarterNames.Select(n => datas.FirstOrDefault(d => d.displayName == n)).Where(d => d != null).ToList());
+            SetList(so.FindProperty("starters"), StarterIds.Select(id => datas.FirstOrDefault(d => d.id == id)).Where(d => d != null).ToList());
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(db);
 
@@ -115,29 +242,48 @@ namespace WildTamers.EditorTools
                 AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<GameConfig>(), ConfigPath);
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             Debug.Log($"[Wild Tamers] Built {datas.Count} animals.");
         }
 
+        private static void DeleteObsolete()
+        {
+            foreach (var name in ObsoleteNames)
+            {
+                bool kept = Roster.Any(r => r.Name == name);
+                if (kept) continue;
+                AssetDatabase.DeleteAsset($"{PrefabFolder}/{name}.prefab");
+                AssetDatabase.DeleteAsset($"{DataFolder}/{name}.asset");
+                AssetDatabase.DeleteAsset($"{AnimFolder}/{name}");
+            }
+            foreach (var model in ObsoleteModels) AssetDatabase.DeleteAsset(model);
+        }
+
+        // ------------------------------------------------------------------
+        // Animation
+        // ------------------------------------------------------------------
+
         private static Dictionary<string, AnimationClip> BuildClips(Species s, out AnimationClip idle)
         {
-            var folder = $"{AnimFolder}/{s.Name}";
+            var folder = $"{AnimFolder}/{s.Name.Replace(" ", "")}";
             Directory.CreateDirectory(folder);
             var sources = AssetDatabase.LoadAllAssetRepresentationsAtPath(s.Model).OfType<AnimationClip>().ToList();
             var result = new Dictionary<string, AnimationClip>();
 
-            foreach (var (state, loop, candidates) in StateClips)
+            foreach (var (state, loop, defaults) in StateClips)
             {
+                var candidates = s.Clips != null && s.Clips.TryGetValue(state, out var custom) ? custom : defaults;
                 AnimationClip src = null;
                 foreach (var c in candidates)
                 {
                     // Prefer the short-named clip over the 'Armature|' duplicate.
                     src = sources.FirstOrDefault(a => a.name == c) ??
-                          sources.FirstOrDefault(a => ShortName(a.name).Equals(c, System.StringComparison.OrdinalIgnoreCase));
+                          sources.FirstOrDefault(a => ShortName(a.name).Equals(c, StringComparison.OrdinalIgnoreCase));
                     if (src != null) break;
                 }
                 if (src == null) continue;
 
-                var path = $"{folder}/{s.Name}_{state}.anim";
+                var path = $"{folder}/{s.Name.Replace(" ", "")}_{state}.anim";
                 var clip = AssetDatabase.LoadAssetAtPath<AnimationClip>(path);
                 if (clip == null)
                 {
@@ -148,7 +294,7 @@ namespace WildTamers.EditorTools
                 {
                     EditorUtility.CopySerialized(src, clip);
                 }
-                clip.name = $"{s.Name}_{state}";
+                clip.name = $"{s.Name.Replace(" ", "")}_{state}";
                 var settings = AnimationUtility.GetAnimationClipSettings(clip);
                 settings.loopTime = loop;
                 AnimationUtility.SetAnimationClipSettings(clip, settings);
@@ -167,7 +313,7 @@ namespace WildTamers.EditorTools
 
         private static AnimatorController BuildController(Species s, Dictionary<string, AnimationClip> clips)
         {
-            var path = $"{AnimFolder}/{s.Name}/{s.Name}.controller";
+            var path = $"{AnimFolder}/{s.Name.Replace(" ", "")}/{s.Name.Replace(" ", "")}.controller";
             if (AssetDatabase.LoadAssetAtPath<AnimatorController>(path) != null) AssetDatabase.DeleteAsset(path);
             var controller = AnimatorController.CreateAnimatorControllerAtPath(path);
             var sm = controller.layers[0].stateMachine;
@@ -201,20 +347,43 @@ namespace WildTamers.EditorTools
             return controller;
         }
 
+        // ------------------------------------------------------------------
+        // Prefab
+        // ------------------------------------------------------------------
+
         private static GameObject BuildPrefab(Species s, GameObject model, AnimatorController controller, AnimationClip idle)
         {
-            var root = new GameObject(s.Name);
+            var fileName = s.Name.Replace(" ", "");
+            var root = new GameObject(fileName);
             var visual = root.AddComponent<AnimalVisual>();
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(model);
             instance.name = "Model";
             instance.transform.SetParent(root.transform, false);
 
             if (idle != null) idle.SampleAnimation(instance, Mathf.Min(0.3f, idle.length * 0.5f));
+
+            // Recolor, then add the species extras while the model is still at its native size and posed.
+            foreach (var r in instance.GetComponentsInChildren<Renderer>(true))
+            {
+                if (s.Colors != null && r is SkinnedMeshRenderer) r.sharedMaterials = Recolor(s, r.sharedMaterials);
+            }
+            if (s.HideChildren != null)
+            {
+                foreach (var hide in s.HideChildren)
+                {
+                    var child = instance.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == hide);
+                    if (child != null) child.gameObject.SetActive(false);
+                }
+            }
+            if (s.Customize != null) s.Customize(new PosedModel(instance, fileName), s);
+            if (idle != null) idle.SampleAnimation(instance, Mathf.Min(0.3f, idle.length * 0.5f));
+
             var bounds = BakedBounds(instance);
-            float longest = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            var size = Vector3.Scale(bounds.size, s.Stretch);
+            float longest = Mathf.Max(size.x, size.y, size.z);
             float scale = longest > 0.001f ? s.Size / longest : 1f;
-            instance.transform.localScale = Vector3.one * scale;
-            instance.transform.localPosition = new Vector3(0f, -bounds.min.y * scale, 0f);
+            instance.transform.localScale = Vector3.Scale(Vector3.one * scale, s.Stretch);
+            instance.transform.localPosition = new Vector3(0f, -bounds.min.y * scale * s.Stretch.y + s.Hover, 0f);
 
             // Not '??': Unity's fake-null for a missing component would skip the AddComponent.
             var animator = instance.GetComponent<Animator>();
@@ -233,10 +402,43 @@ namespace WildTamers.EditorTools
             so.FindProperty("animator").objectReferenceValue = animator;
             so.ApplyModifiedPropertiesWithoutUndo();
 
-            var path = $"{PrefabFolder}/{s.Name}.prefab";
+            var path = $"{PrefabFolder}/{fileName}.prefab";
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
             return prefab;
+        }
+
+        private static Material[] Recolor(Species s, Material[] source)
+        {
+            var result = new Material[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                var src = source[i];
+                result[i] = src;
+                if (src == null || !s.Colors.TryGetValue(src.name, out var hex)) continue;
+
+                var path = $"{MaterialFolder}/{s.Name.Replace(" ", "")}_{src.name}.mat";
+                var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
+                if (mat == null)
+                {
+                    mat = new Material(src);
+                    AssetDatabase.CreateAsset(mat, path);
+                }
+                else
+                {
+                    mat.shader = src.shader;
+                    mat.CopyPropertiesFromMaterial(src);
+                }
+                var color = MaterialLibrary.Hex(hex);
+                foreach (var prop in new[] { "baseColorFactor", "_BaseColor", "_Color" })
+                    if (mat.HasProperty(prop)) mat.SetColor(prop, color);
+                // Untextured: drop any baked texture so the flat color shows.
+                foreach (var tex in new[] { "baseColorTexture", "_BaseMap", "_MainTex" })
+                    if (mat.HasProperty(tex)) mat.SetTexture(tex, null);
+                EditorUtility.SetDirty(mat);
+                result[i] = mat;
+            }
+            return result;
         }
 
         /// <summary>Exact bounds of the posed model (bakes skinned meshes), relative to its root.</summary>
@@ -260,7 +462,7 @@ namespace WildTamers.EditorTools
             }
             foreach (var mf in go.GetComponentsInChildren<MeshFilter>())
             {
-                if (mf.sharedMesh == null) continue;
+                if (mf.sharedMesh == null || !mf.gameObject.activeInHierarchy) continue;
                 var m = root.worldToLocalMatrix * mf.transform.localToWorldMatrix;
                 foreach (var v in mf.sharedMesh.vertices)
                 {
@@ -275,26 +477,28 @@ namespace WildTamers.EditorTools
 
         private static AnimalData BuildData(Species s, GameObject prefab)
         {
-            var path = $"{DataFolder}/{s.Name}.asset";
+            var path = $"{DataFolder}/{s.Name.Replace(" ", "")}.asset";
             var data = AssetDatabase.LoadAssetAtPath<AnimalData>(path);
             if (data == null)
             {
                 data = ScriptableObject.CreateInstance<AnimalData>();
-                data.id = s.Name.ToLowerInvariant();
-                data.displayName = s.Name;
-                data.styleLabel = s.Style;
-                data.description = s.Description;
-                data.themeColor = MaterialLibrary.Hex(s.Theme);
-                data.maxHP = s.HP;
-                data.attack = s.Atk;
-                data.defense = s.Def;
-                data.speed = s.Spd;
-                data.normalAttackName = s.Attack;
-                data.skill = new SkillData { skillName = s.Skill, power = s.SkillPower, cooldownTurns = s.Cooldown, description = s.SkillDescription };
-                data.spawnWeight = s.Weight;
-                data.growthPerLevel = GrowthPerLevel;
                 AssetDatabase.CreateAsset(data, path);
             }
+            data.id = s.Id;
+            data.displayName = s.Name;
+            data.styleLabel = s.Style;
+            data.description = s.Description;
+            data.history = s.History;
+            data.themeColor = MaterialLibrary.Hex(s.Theme);
+            data.maxHP = s.HP;
+            data.attack = s.Atk;
+            data.defense = s.Def;
+            data.speed = s.Spd;
+            data.normalAttackName = s.Attack;
+            data.skill = new SkillData { skillName = s.Skill, power = s.SkillPower, cooldownTurns = s.Cooldown, description = s.SkillDescription };
+            data.spawnWeight = s.Weight;
+            data.mapScale = s.MapScale;
+            data.growthPerLevel = GrowthPerLevel;
             data.prefab = prefab;
             EditorUtility.SetDirty(data);
             return data;
@@ -304,6 +508,180 @@ namespace WildTamers.EditorTools
         {
             list.arraySize = items.Count;
             for (int i = 0; i < items.Count; i++) list.GetArrayElementAtIndex(i).objectReferenceValue = items[i];
+        }
+
+        // ------------------------------------------------------------------
+        // Species extras (attached to bones so they follow every animation)
+        // ------------------------------------------------------------------
+
+        /// <summary>The posed model at its native size: bones by name and the world-space skin vertices.</summary>
+        private class PosedModel
+        {
+            private readonly Transform[] all;
+            public readonly GameObject Root;
+            public readonly string Name;
+            public readonly List<Vector3> Verts = new List<Vector3>();
+
+            public PosedModel(GameObject root, string name)
+            {
+                Root = root;
+                Name = name;
+                all = root.GetComponentsInChildren<Transform>(true);
+                var mesh = new Mesh();
+                foreach (var smr in root.GetComponentsInChildren<SkinnedMeshRenderer>())
+                {
+                    smr.BakeMesh(mesh, false);
+                    var m = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
+                    foreach (var v in mesh.vertices) Verts.Add(m.MultiplyPoint3x4(v));
+                }
+                Object.DestroyImmediate(mesh);
+            }
+
+            public Transform Bone(string boneName) => all.FirstOrDefault(t => t.name == boneName);
+
+            /// <summary>Shoulder-to-hip distance: a size reference that works for every four-legged model.</summary>
+            public float BodyLength()
+            {
+                var front = Bone("FrontShoulder.L");
+                var back = Bone("BackShoulder.L");
+                return front != null && back != null ? Mathf.Abs(front.position.z - back.position.z) : 1f;
+            }
+
+            /// <summary>Highest skin point over a small patch of the back around a world position.</summary>
+            public float BackTop(Vector3 around, float radius)
+            {
+                float top = float.MinValue;
+                foreach (var v in Verts)
+                {
+                    var d = new Vector2(v.x - around.x, v.z - around.z);
+                    if (d.sqrMagnitude < radius * radius) top = Mathf.Max(top, v.y);
+                }
+                return top == float.MinValue ? around.y : top;
+            }
+        }
+
+        private static Material AttachmentMaterial(Species s, string part, string hex, float smoothness = 0.1f)
+        {
+            return MaterialLibrary.Lit($"{MaterialFolder}/{s.Name.Replace(" ", "")}_{part}.mat", MaterialLibrary.Hex(hex), smoothness);
+        }
+
+        private static Mesh SaveMesh(Mesh mesh, string path)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (existing != null)
+            {
+                existing.Clear();
+                EditorUtility.CopySerialized(mesh, existing);
+                Object.DestroyImmediate(mesh);
+                EditorUtility.SetDirty(existing);
+                return existing;
+            }
+            AssetDatabase.CreateAsset(mesh, path);
+            return mesh;
+        }
+
+        private static GameObject AttachMesh(string name, Mesh mesh, Material material, Transform bone, Vector3 worldPosition)
+        {
+            var go = new GameObject(name);
+            go.AddComponent<MeshFilter>().sharedMesh = mesh;
+            var r = go.AddComponent<MeshRenderer>();
+            r.sharedMaterial = material;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            go.transform.position = worldPosition;
+            go.transform.SetParent(bone, true);
+            return go;
+        }
+
+        /// <summary>One big faceted hump on the back (the alpaca body becomes a dromedary).</summary>
+        private static void AttachCamelHump(PosedModel pose, Species s)
+        {
+            var bone = pose.Bone("Torso2") ?? pose.Bone("Back");
+            if (bone == null) return;
+            float len = pose.BodyLength();
+            float top = pose.BackTop(bone.position, len * 0.12f);
+            var mb = new MeshBuilder(1);
+            mb.Sphere(0, Vector3.zero, new Vector3(len * 0.2f, len * 0.3f, len * 0.3f), 5, 9);
+            var mesh = SaveMesh(mb.Build("CamelHump", out _), $"{MeshFolder}/Camel_Hump.asset");
+            var color = s.Colors["Main"];
+            var center = new Vector3(0f, top - len * 0.02f, bone.position.z + len * 0.04f);
+            AttachMesh("Hump", mesh, AttachmentMaterial(s, "Hump", color, 0.1f), bone, center);
+            // Camels have small, rounded ears (the alpaca's are tall and pointy).
+            foreach (var ear in new[] { "Ear1.L", "Ear1.R" })
+            {
+                var t = pose.Bone(ear);
+                if (t != null) t.localScale = Vector3.one * 0.6f;
+            }
+        }
+
+        private static void AttachOryxHorns(PosedModel pose, Species s)
+        {
+            var head = pose.Bone("Head");
+            if (head == null) return;
+            float len = pose.BodyLength();
+            var mesh = new Mesh[2];
+            for (int i = 0; i < 2; i++)
+                mesh[i] = SaveMesh(BuildHorn("OryxHorn", i == 0 ? -1f : 1f, len * 0.62f, len * 0.026f, 0.42f, 0.12f, 0.1f), $"{MeshFolder}/Oryx_Horn_{(i == 0 ? "L" : "R")}.asset");
+            var mat = AttachmentMaterial(s, "Horn", "#3E322C", 0.25f);
+            for (int i = 0; i < 2; i++)
+            {
+                float side = i == 0 ? -1f : 1f;
+                var basePos = head.position + new Vector3(side * len * 0.03f, len * 0.03f, len * 0.055f);
+                AttachMesh(i == 0 ? "Horn.L" : "Horn.R", mesh[i], mat, head, basePos);
+            }
+        }
+
+        private static void AttachGazelleHorns(PosedModel pose, Species s)
+        {
+            var head = pose.Bone("Head");
+            if (head == null) return;
+            float len = pose.BodyLength();
+            var mesh = new Mesh[2];
+            for (int i = 0; i < 2; i++)
+                mesh[i] = SaveMesh(BuildHorn("GazelleHorn", i == 0 ? -1f : 1f, len * 0.34f, len * 0.02f, 0.75f, 0.18f, 0.55f), $"{MeshFolder}/Gazelle_Horn_{(i == 0 ? "L" : "R")}.asset");
+            var mat = AttachmentMaterial(s, "Horn", "#34302D", 0.25f);
+            for (int i = 0; i < 2; i++)
+            {
+                float side = i == 0 ? -1f : 1f;
+                var basePos = head.position + new Vector3(side * len * 0.028f, len * 0.025f, len * 0.05f);
+                AttachMesh(i == 0 ? "Horn.L" : "Horn.R", mesh[i], mat, head, basePos);
+            }
+        }
+
+        /// <summary>
+        /// A tapered, faceted horn growing up from the origin in model space (y up, z forward).
+        /// <paramref name="sweep"/> leans it backwards, <paramref name="splay"/> outwards and <paramref name="hook"/> curls the tip.
+        /// </summary>
+        private static Mesh BuildHorn(string name, float side, float length, float baseRadius, float sweep, float splay, float hook)
+        {
+            const int segments = 6, sides = 5;
+            var centers = new Vector3[segments + 1];
+            var radii = new float[segments + 1];
+            for (int i = 0; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                float back = sweep * t + hook * t * t * t;
+                centers[i] = new Vector3(side * splay * t * length, t * length * (1f - 0.35f * hook * t), -back * t * length * 0.6f);
+                radii[i] = Mathf.Lerp(baseRadius, baseRadius * 0.12f, Mathf.Pow(t, 0.9f));
+            }
+
+            var mb = new MeshBuilder(1);
+            for (int i = 0; i < segments; i++)
+            {
+                var axis = (centers[i + 1] - centers[i]).normalized;
+                var u = Vector3.Cross(axis, Vector3.right).sqrMagnitude > 0.01f ? Vector3.Cross(axis, Vector3.right).normalized : Vector3.Cross(axis, Vector3.forward).normalized;
+                var v = Vector3.Cross(axis, u).normalized;
+                for (int k = 0; k < sides; k++)
+                {
+                    float a0 = k * Mathf.PI * 2f / sides, a1 = (k + 1) * Mathf.PI * 2f / sides;
+                    Vector3 Ring(int ring, float a) => centers[ring] + (u * Mathf.Cos(a) + v * Mathf.Sin(a)) * radii[ring];
+                    // Both windings so the horn is visible from every side whatever the winding convention.
+                    mb.Quad(0, Ring(i, a0), Ring(i + 1, a0), Ring(i + 1, a1), Ring(i, a1));
+                    mb.Quad(0, Ring(i, a1), Ring(i + 1, a1), Ring(i + 1, a0), Ring(i, a0));
+                }
+            }
+            var mesh = mb.Build(name, out _);
+            mesh.name = name + (side < 0f ? "_L" : "_R");
+            return mesh;
         }
     }
 }
