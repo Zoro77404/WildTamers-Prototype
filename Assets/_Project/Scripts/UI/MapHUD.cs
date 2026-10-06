@@ -6,7 +6,7 @@ using WildTamers.Core;
 
 namespace WildTamers.UI
 {
-    /// <summary>Map overlay: Team button, active-animal chip (with HP) and a controls hint.</summary>
+    /// <summary>Map overlay: Team button, lead-animal chip (first animal of your last fight team, with HP) and a controls hint.</summary>
     public class MapHUD : MonoBehaviour
     {
         [SerializeField] private Button teamButton;
@@ -48,7 +48,7 @@ namespace WildTamers.UI
 
         private void Refresh()
         {
-            var active = session.ActiveAnimal;
+            var active = session.LeadAnimal;
             bool has = active != null;
             teamButton.gameObject.SetActive(has);
             if (activeChip != null)
@@ -74,7 +74,7 @@ namespace WildTamers.UI
         /// <summary>The active animal heals while walking; keep its bar in step.</summary>
         private void UpdateHP(bool instant)
         {
-            var active = session.ActiveAnimal;
+            var active = session.LeadAnimal;
             if (activeHp == null || active == null || active.CurrentHP == shownHP) return;
             shownHP = active.CurrentHP;
             activeHp.Set(active.CurrentHP, active.MaxHP, instant);

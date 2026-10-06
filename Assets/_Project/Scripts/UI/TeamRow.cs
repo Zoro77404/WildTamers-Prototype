@@ -7,7 +7,7 @@ using WildTamers.Animals;
 
 namespace WildTamers.UI
 {
-    /// <summary>One animal in the team list: portrait, name, level and HP. Tap it to make it the active fighter.</summary>
+    /// <summary>One animal in the team list: portrait, name, level and HP. Tap it to see its info card.</summary>
     public class TeamRow : MonoBehaviour
     {
         [SerializeField] private AnimalPreviewImage portrait;
@@ -19,7 +19,7 @@ namespace WildTamers.UI
         [SerializeField] private GameObject activeBadge;
         [SerializeField] private Image highlight;
         [SerializeField] private Button selectButton;
-        [Tooltip("'Choose' pill shown on rows that are not the active animal.")]
+        [Tooltip("'Info' pill shown on rows that are not in the last fight team.")]
         [SerializeField] private GameObject choosePill;
 
         private AnimalInstance animal;
@@ -28,13 +28,14 @@ namespace WildTamers.UI
         private Coroutine bounce;
 
         public int Index { get; private set; }
+        public AnimalInstance Animal => animal;
 
         private void Awake()
         {
             if (selectButton != null) selectButton.onClick.AddListener(() => onSelected?.Invoke(this));
         }
 
-        public void Setup(AnimalInstance animal, int index, bool isActive, Action<TeamRow> selected)
+        public void Setup(AnimalInstance animal, int index, bool inLastTeam, Action<TeamRow> selected)
         {
             this.animal = animal;
             Index = index;
@@ -45,9 +46,9 @@ namespace WildTamers.UI
             levelText.text = $"Lv. {animal.Level}";
             shownHP = -1;
             RefreshHP(instant: true);
-            if (activeBadge != null) activeBadge.SetActive(isActive);
-            if (choosePill != null) choosePill.SetActive(!isActive);
-            if (highlight != null) highlight.enabled = isActive;
+            if (activeBadge != null) activeBadge.SetActive(inLastTeam);
+            if (choosePill != null) choosePill.SetActive(!inLastTeam);
+            if (highlight != null) highlight.enabled = inLastTeam;
             if (data != null)
             {
                 if (portraitBackdrop != null) portraitBackdrop.color = Color.Lerp(data.themeColor, Color.white, 0.65f);
@@ -64,7 +65,7 @@ namespace WildTamers.UI
             hpText.text = $"HP {animal.CurrentHP}/{animal.MaxHP}";
         }
 
-        /// <summary>Happy little pop when this row becomes the active animal.</summary>
+        /// <summary>Happy little pop when this row is tapped.</summary>
         public void PlaySelected()
         {
             if (!isActiveAndEnabled) return;

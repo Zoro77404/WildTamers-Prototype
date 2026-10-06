@@ -16,14 +16,19 @@ namespace WildTamers.Core
         public int currentHP;
     }
 
-    /// <summary>Everything written to disk: the team and which animal is active.</summary>
+    /// <summary>Everything written to disk: the animals, the last fight team and which "New animal!" cards were seen.</summary>
     [Serializable]
     public class SaveData
     {
         public int version = SaveSystem.Version;
         public string savedAt;
+        /// <summary>Version 1 only (single active animal); read once when an old save is migrated.</summary>
         public int activeIndex;
         public List<AnimalSaveData> team = new List<AnimalSaveData>();
+        /// <summary>Uids of the animals picked for the last fight (the team select screen starts from these).</summary>
+        public List<string> lastTeam = new List<string>();
+        /// <summary>Species ids whose "New animal!" card has already been shown.</summary>
+        public List<string> seenSpecies = new List<string>();
     }
 
     /// <summary>
@@ -32,7 +37,7 @@ namespace WildTamers.Core
     /// </summary>
     public static class SaveSystem
     {
-        public const int Version = 1;
+        public const int Version = 2;
         private const string FileName = "wildtamers_save.json";
 
         public static string FilePath => Path.Combine(Application.persistentDataPath, FileName);

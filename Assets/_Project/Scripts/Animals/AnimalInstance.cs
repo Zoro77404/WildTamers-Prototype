@@ -19,6 +19,8 @@ namespace WildTamers.Animals
 
         [NonSerialized] private AnimalData data;
         [NonSerialized] private float regenCarry;
+        // Boss multipliers only exist while a wild animal is being fought; they are never saved.
+        [NonSerialized] private float bossHP = 1f, bossAttack = 1f, bossDefense = 1f;
 
         public AnimalInstance(AnimalData species, int level)
         {
@@ -48,10 +50,29 @@ namespace WildTamers.Animals
         public int Level => level;
         public int Experience => experience;
 
-        public int MaxHP => Data != null ? Data.GetMaxHP(level) : 1;
-        public int Attack => Data != null ? Data.GetAttack(level) : 1;
-        public int Defense => Data != null ? Data.GetDefense(level) : 1;
+        public int MaxHP => Data != null ? Mathf.Max(1, Mathf.RoundToInt(Data.GetMaxHP(level) * bossHP)) : 1;
+        public int Attack => Data != null ? Mathf.Max(1, Mathf.RoundToInt(Data.GetAttack(level) * bossAttack)) : 1;
+        public int Defense => Data != null ? Mathf.Max(1, Mathf.RoundToInt(Data.GetDefense(level) * bossDefense)) : 1;
         public int Speed => Data != null ? Data.GetSpeed(level) : 1;
+
+        /// <summary>True while this animal is fought as a boss (more HP, a bit stronger).</summary>
+        public bool IsBoss => bossHP != 1f || bossAttack != 1f || bossDefense != 1f;
+
+        /// <summary>Turns this wild animal into a boss for one battle (full HP at the new maximum).</summary>
+        public void MakeBoss(GameConfig config)
+        {
+            bossHP = Mathf.Max(1f, config.bossHPMultiplier);
+            bossAttack = Mathf.Max(0.5f, config.bossAttackMultiplier);
+            bossDefense = Mathf.Max(0.5f, config.bossDefenseMultiplier);
+            currentHP = MaxHP;
+        }
+
+        /// <summary>Back to a normal animal (when it joins the team).</summary>
+        public void ClearBoss()
+        {
+            bossHP = bossAttack = bossDefense = 1f;
+            currentHP = Mathf.Min(currentHP, MaxHP);
+        }
 
         public int CurrentHP
         {
@@ -102,6 +123,7 @@ namespace WildTamers.Animals
                 OldSpeed = Speed
             };
 
+            bool wasAlive = currentHP > 0;
             experience += Mathf.Max(0, amount);
             while (level < config.maxLevel && experience >= config.ExperienceToNext(level))
             {
@@ -116,7 +138,8 @@ namespace WildTamers.Animals
             result.NewAttack = Attack;
             result.NewDefense = Defense;
             result.NewSpeed = Speed;
-            CurrentHP = currentHP + (result.NewMaxHP - result.OldMaxHP);
+            // A fainted animal still levels up, but stays fainted until it rests.
+            if (wasAlive) CurrentHP = currentHP + (result.NewMaxHP - result.OldMaxHP);
             return result;
         }
 
@@ -131,11 +154,11 @@ namespace WildTamers.Animals
             currentHP = currentHP
         };
 
-        /// <summary>Rebuilds an animal from the save file; null if the species no longer exists.</summary>
+        /// <summary>Rebuilds an animal from the save file (old species become their replacement); null if the species is unknown.</summary>
         public static AnimalInstance FromSave(AnimalSaveData save, AnimalDatabase database, GameConfig config)
         {
             if (save == null || database == null) return null;
-            var species = database.Get(save.animalId);
+            var species = database.Resolve(save.animalId);
             if (species == null) return null;
 
             var animal = new AnimalInstance
@@ -146,8 +169,8 @@ namespace WildTamers.Animals
                 level = Mathf.Clamp(save.level, 1, config.maxLevel)
             };
             animal.experience = animal.level >= config.maxLevel ? 0 : Mathf.Clamp(save.experience, 0, config.ExperienceToNext(animal.level) - 1);
-            // A saved 0 HP can only come from an interrupted battle; never start fainted.
-            animal.currentHP = save.currentHP <= 0 ? animal.MaxHP : Mathf.Min(save.currentHP, animal.MaxHP);
+            // Fainted animals (0 HP) are kept as they are: they rest on the map and recover slowly.
+            animal.currentHP = Mathf.Clamp(save.currentHP, 0, animal.MaxHP);
             return animal;
         }
     }

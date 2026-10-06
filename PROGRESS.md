@@ -14,11 +14,11 @@ updated: 2026-10-06 18:00
 ## Steps
 - [x] 3.1 Models imported (Eagle Vol.2; Alpaca, White Horse, Husky, Deer UAA), licenses logged
 - [x] 3.2 8 Arabian species built: data, description, history, prefabs (recolor, hump, horns); old six deleted
-- [ ] 3.3 Save v2: migration of old animals, starters, last team, seen species; session API + tests
-- [ ] 3.4 3v1 battle rules: boss multipliers, turn order, weakest-target AI, team run, shared XP; balance sim
-- [ ] 3.5 Battle scene: 3 player spots, HUD (3 small HP + boss HP, turn highlight), results for 3
-- [ ] 3.6 Team select screen before each fight (remembers last team, <3 healthy handled)
-- [ ] 3.7 Animal card: "New animal!" popup (map + battle) and tap-to-view in Team screen
+- [x] 3.3 Save v2 + migration (old animals → new species, missing starters added), last team, seen cards; 22 EditMode tests green
+- [x] 3.4 3v1 rules: boss ×3 HP/×1.5 ATK/×1.1 DEF, speed order for 4, weakest-target AI, team run, XP for all 3; sim ~80% win
+- [~] 3.5 Battle scene built (3 spots, HUD, results for 3) — needs visual check in Play Mode
+- [~] 3.6 Team select screen built — needs Play Mode check
+- [~] 3.7 Animal card built (map + battle + Team screen) — needs Play Mode check
 - [ ] 3.8 Play-test win / lose / run / restart; tests green; docs
 
 ## Done

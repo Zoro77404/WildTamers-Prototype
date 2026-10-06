@@ -19,7 +19,7 @@ namespace WildTamers.EditorTools
         public const string MarkerPrefab = "Assets/_Project/Prefabs/Player/DestinationMarker.prefab";
         public const string WildAnimalPrefab = "Assets/_Project/Prefabs/Animals/WildAnimal.prefab";
         public const string PuffPrefab = "Assets/_Project/Prefabs/Map/SpawnPuff.prefab";
-        public const string StarterCardPrefab = "Assets/_Project/Prefabs/UI/StarterCard.prefab";
+        public const string TeamPickRowPrefab = "Assets/_Project/Prefabs/UI/TeamPickRow.prefab";
         public const string TeamRowPrefab = "Assets/_Project/Prefabs/UI/TeamRow.prefab";
         private const string MeshFolder = "Assets/_Project/Art/Meshes";
 
@@ -36,8 +36,8 @@ namespace WildTamers.EditorTools
             BuildWildAnimal();
             BuildPlayer();
             BuildMarker();
-            BuildStarterCard();
             BuildTeamRow();
+            BuildTeamPickRow();
             AssetDatabase.SaveAssets();
         }
 
@@ -248,60 +248,6 @@ namespace WildTamers.EditorTools
 
         // ---------- UI prefabs ----------
 
-        private static void BuildStarterCard()
-        {
-            var root = new GameObject("StarterCard", typeof(RectTransform));
-            var rt = (RectTransform)root.transform;
-            rt.sizeDelta = new Vector2(980f, 480f);
-            root.AddComponent<CanvasGroup>();
-
-            var body = UIBuild.Stretch("Body", rt);
-            UIBuild.Round(body, Palette.Panel, 44f);
-            UIBuild.DropShadow(body, 30f, -12f, 0.18f);
-
-            var accent = UIBuild.Rect("Accent", body, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(18f, 480f));
-            var accentImg = UIBuild.Round(accent, Palette.Primary, 9f);
-            accent.anchorMin = new Vector2(0f, 0f);
-            accent.anchorMax = new Vector2(0f, 1f);
-            accent.offsetMin = new Vector2(0f, 40f);
-            accent.offsetMax = new Vector2(18f, -40f);
-
-            var backdrop = UIBuild.Rect("PreviewBackdrop", body, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(40f, 0f), new Vector2(390f, 400f));
-            var backdropImg = UIBuild.Round(backdrop, Palette.PanelAlt, 40f);
-            var previewRt = UIBuild.Stretch("Preview", backdrop);
-            previewRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
-            var preview = previewRt.gameObject.AddComponent<AnimalPreviewImage>();
-
-            const float x = 462f;
-            var name = UIBuild.Label("Name", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(x, -28f), new Vector2(480f, 76f),
-                "Fox", 64f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
-            var style = UIBuild.Label("Style", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(x, -100f), new Vector2(480f, 44f),
-                "Fast & fragile", 34f, Palette.Muted, TextAlignmentOptions.MidlineLeft);
-            var moves = UIBuild.Label("Moves", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(x, -140f), new Vector2(480f, 40f),
-                "Scratch • Fox Fire", 28f, Palette.Ink, TextAlignmentOptions.MidlineLeft);
-
-            var stats = BuildStats(body, new Vector2(x, -186f), 480f, 30f, 8f, 27f);
-
-            var choose = UIBuild.CandyButton("Choose", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(x, 30f), new Vector2(480f, 100f),
-                "Choose", Palette.Primary, Palette.PrimaryDark, 40f, 42f, out _, out var faceImage);
-            // Face and lip are tinted with the animal's color at runtime.
-
-            var card = root.AddComponent<StarterCard>();
-            UIBuild.Set(card, "preview", preview);
-            UIBuild.Set(card, "previewBackdrop", backdropImg);
-            UIBuild.Set(card, "accentStripe", accentImg);
-            UIBuild.Set(card, "nameText", name);
-            UIBuild.Set(card, "styleText", style);
-            UIBuild.Set(card, "moveText", moves);
-            UIBuild.Set(card, "stats", stats);
-            UIBuild.Set(card, "chooseButton", choose);
-            UIBuild.Set(card, "chooseButtonImage", faceImage);
-            UIBuild.Set(card, "chooseButtonLip", choose.GetComponent<Image>());
-            SetPreviewBackground(preview, Color.white);
-            SetUILayer(root);
-            Save(root, StarterCardPrefab);
-        }
-
         /// <summary>Four stat rows stacked from a top-left point.</summary>
         public static AnimalStatsView BuildStats(RectTransform parent, Vector2 topLeft, float width, float rowHeight, float spacing, float fontSize)
         {
@@ -358,12 +304,12 @@ namespace WildTamers.EditorTools
 
             var badge = UIBuild.Rect("ActiveBadge", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -26f), new Vector2(170f, 56f));
             UIBuild.Round(badge, Palette.Teal, 28f);
-            UIBuild.Text(UIBuild.Stretch("Text", badge), "ACTIVE", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Text(UIBuild.Stretch("Text", badge), "TEAM", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
 
-            // Other rows show a "Choose" pill; tapping anywhere on the row makes that animal the active fighter.
+            // Rows of the last fight team show "TEAM", the others "INFO"; tapping anywhere on a row opens the animal's info card.
             var choose = UIBuild.Rect("ChoosePill", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -26f), new Vector2(170f, 56f));
             UIBuild.Round(choose, new Color(Palette.Teal.r, Palette.Teal.g, Palette.Teal.b, 0.2f), 28f);
-            UIBuild.Text(UIBuild.Stretch("Text", choose), "CHOOSE", 28f, Palette.TealDark, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Text(UIBuild.Stretch("Text", choose), "INFO", 28f, Palette.TealDark, TextAlignmentOptions.Center, bold: true);
 
             var button = root.AddComponent<Button>();
             button.targetGraphic = bgImg;
@@ -391,6 +337,103 @@ namespace WildTamers.EditorTools
             UIBuild.Set(row, "choosePill", choose.gameObject);
             SetUILayer(root);
             Save(root, TeamRowPrefab);
+            AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Wild Tamers/Build/Team Pick Row Prefab")]
+        public static void BuildTeamPickRow()
+        {
+            UIBuild.LoadAssets();
+            var root = new GameObject("TeamPickRow", typeof(RectTransform));
+            var rt = (RectTransform)root.transform;
+            rt.sizeDelta = new Vector2(940f, 168f);
+            var le = root.AddComponent<LayoutElement>();
+            le.preferredHeight = 168f;
+            le.minHeight = 168f;
+            var group = root.AddComponent<CanvasGroup>();
+
+            // Teal frame shows when the animal is picked; the background sits on top of it with a small inset.
+            var frame = UIBuild.Stretch("PickedFrame", rt);
+            var frameImg = UIBuild.Round(frame, Palette.Teal, 38f);
+            var bg = UIBuild.Stretch("Background", rt, 6f, 6f, 6f, 6f);
+            var bgImg = UIBuild.Round(bg, Palette.PanelAlt, 32f, raycast: true);
+
+            var portraitBg = UIBuild.Rect("PortraitBackdrop", rt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(26f, 0f), new Vector2(124f, 124f));
+            var portraitBgImg = UIBuild.Disc(portraitBg, Palette.Line);
+            var portraitRt = UIBuild.Stretch("Portrait", portraitBg, -5f, -5f, -5f, -5f);
+            portraitRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
+            var portrait = portraitRt.gameObject.AddComponent<AnimalPreviewImage>();
+            UIBuild.SetBool(portrait, "live", false);
+
+            var name = UIBuild.Label("Name", rt, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(172f, -20f), new Vector2(400f, 58f),
+                "Camel", 46f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+            var level = UIBuild.Label("Level", rt, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(172f, -74f), new Vector2(160f, 40f),
+                "Lv. 5", 32f, Palette.Muted, TextAlignmentOptions.MidlineLeft);
+
+            var hpRt = UIBuild.Rect("HP", rt, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(172f, 24f), new Vector2(330f, 24f));
+            var hpBar = UIBuild.Bar(hpRt, Palette.Line, Palette.HpGood);
+            var hpText = UIBuild.Label("HPText", rt, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(516f, 16f), new Vector2(210f, 40f),
+                "HP 40/40", 28f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+
+            // Tag for animals that can't fight right now.
+            var resting = UIBuild.Rect("RestingTag", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -22f), new Vector2(170f, 44f));
+            UIBuild.Round(resting, Palette.Neutral, 22f);
+            var restingText = UIBuild.Text(UIBuild.Stretch("Text", resting), "RESTING", 24f, Color.white, TextAlignmentOptions.Center, bold: true);
+            resting.gameObject.SetActive(false);
+
+            // Pick badge (numbered tick) or an empty circle.
+            var pick = UIBuild.Rect("PickBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -6f), new Vector2(80f, 80f));
+            UIBuild.Disc(pick, Palette.Teal);
+            var pickNumber = UIBuild.Text(UIBuild.Stretch("Number", pick), "1", 46f, Color.white, TextAlignmentOptions.Center, bold: true);
+            pick.gameObject.SetActive(false);
+            var empty = UIBuild.Rect("EmptyBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -6f), new Vector2(80f, 80f));
+            UIBuild.Disc(empty, Palette.Line);
+            var emptyInner = UIBuild.Rect("Inner", empty, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(56f, 56f));
+            UIBuild.Disc(emptyInner, Palette.PanelAlt);
+
+            // Info button.
+            var info = UIBuild.Rect("InfoButton", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-136f, -6f), new Vector2(72f, 72f));
+            var infoImg = UIBuild.Disc(info, Palette.Neutral, raycast: true);
+            UIBuild.Text(UIBuild.Stretch("Text", info), "i", 44f, Color.white, TextAlignmentOptions.Center, bold: true);
+            var infoButton = info.gameObject.AddComponent<Button>();
+            infoButton.targetGraphic = infoImg;
+            var infoNav = infoButton.navigation;
+            infoNav.mode = Navigation.Mode.None;
+            infoButton.navigation = infoNav;
+
+            var button = root.AddComponent<Button>();
+            button.targetGraphic = bgImg;
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(0.97f, 0.98f, 1f, 1f);
+            colors.pressedColor = new Color(0.88f, 0.92f, 0.96f, 1f);
+            colors.selectedColor = Color.white;
+            colors.disabledColor = Color.white;
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
+            var nav = button.navigation;
+            nav.mode = Navigation.Mode.None;
+            button.navigation = nav;
+
+            var row = root.AddComponent<TeamPickRow>();
+            UIBuild.Set(row, "portrait", portrait);
+            UIBuild.Set(row, "portraitBackdrop", portraitBgImg);
+            UIBuild.Set(row, "nameText", name);
+            UIBuild.Set(row, "levelText", level);
+            UIBuild.Set(row, "hpBar", hpBar);
+            UIBuild.Set(row, "hpText", hpText);
+            UIBuild.Set(row, "background", bgImg);
+            UIBuild.Set(row, "pickedFrame", frameImg);
+            UIBuild.Set(row, "pickBadge", pick.gameObject);
+            UIBuild.Set(row, "pickNumber", pickNumber);
+            UIBuild.Set(row, "emptyBadge", empty.gameObject);
+            UIBuild.Set(row, "restingTag", resting.gameObject);
+            UIBuild.Set(row, "restingText", restingText);
+            UIBuild.Set(row, "selectButton", button);
+            UIBuild.Set(row, "infoButton", infoButton);
+            UIBuild.Set(row, "group", group);
+            SetUILayer(root);
+            Save(root, TeamPickRowPrefab);
             AssetDatabase.SaveAssets();
         }
 

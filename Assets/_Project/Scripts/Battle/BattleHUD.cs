@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,13 +10,15 @@ using WildTamers.UI;
 namespace WildTamers.Battle
 {
     /// <summary>
-    /// Portrait battle UI: both fighter cards, the one-line battle log, the four action buttons,
-    /// floating damage numbers and the result sheet. Keys 1–4 also pick actions when testing on PC.
+    /// Portrait battle UI: a big card for the wild boss on top, a small card for each of your (up to 3) animals,
+    /// the one-line battle log, the four action buttons, floating damage numbers and the result sheet.
+    /// The card of the animal whose turn it is lights up. Keys 1–4 also pick actions when testing on PC.
     /// </summary>
     public class BattleHUD : MonoBehaviour
     {
         [Header("Cards")]
-        [SerializeField] private FighterCard playerCard;
+        [Tooltip("Left, middle and right. One animal uses the middle card, two use the outer cards.")]
+        [SerializeField] private FighterCard[] partyCards = new FighterCard[3];
         [SerializeField] private FighterCard wildCard;
 
         [Header("Log")]
@@ -37,6 +40,7 @@ namespace WildTamers.Battle
         [SerializeField] private DamageNumbers damageNumbers;
         [SerializeField] private BattleResultPanel resultPanel;
 
+        private readonly Dictionary<BattleFighter, FighterCard> cards = new Dictionary<BattleFighter, FighterCard>();
         private bool actionsOpen;
         private Coroutine logRoutine;
         private Coroutine panelRoutine;
@@ -44,7 +48,6 @@ namespace WildTamers.Battle
 
         public event Action<BattleAction> ActionChosen;
 
-        public FighterCard PlayerCard => playerCard;
         public FighterCard WildCard => wildCard;
         public DamageNumbers Numbers => damageNumbers;
         public BattleResultPanel Result => resultPanel;
@@ -59,29 +62,72 @@ namespace WildTamers.Battle
             SetActionsVisible(false, instant: true);
         }
 
-        public void Bind(BattleFighter player, BattleFighter wild, GameConfig config)
+        /// <summary>Card slot (0 left, 1 middle, 2 right) for the <paramref name="index"/>-th of <paramref name="count"/> animals.</summary>
+        public static int SlotFor(int index, int count) => count <= 1 ? 1 : count == 2 ? index * 2 : index;
+
+        public void Bind(IReadOnlyList<BattleFighter> party, BattleFighter wild, GameConfig config)
         {
-            playerCard.Bind(player.Animal, config);
+            cards.Clear();
+            var used = new HashSet<int>();
+            for (int i = 0; i < party.Count; i++)
+            {
+                int slot = SlotFor(i, party.Count);
+                used.Add(slot);
+                partyCards[slot].gameObject.SetActive(true);
+                partyCards[slot].Bind(party[i].Animal, config);
+                cards[party[i]] = partyCards[slot];
+            }
+            for (int i = 0; i < partyCards.Length; i++)
+                if (!used.Contains(i)) partyCards[i].gameObject.SetActive(false);
             wildCard.Bind(wild.Animal, config);
+            cards[wild] = wildCard;
+        }
+
+        public FighterCard CardFor(BattleFighter fighter) => cards[fighter];
+
+        // ---------- Turn highlight ----------
+
+        /// <summary>
+        /// Numbers the cards in turn order and lights up the card of whoever acts now.
+        /// <paramref name="currentIndex"/> is the position in <paramref name="order"/> of the animal whose turn it is.
+        /// </summary>
+        public void ShowTurn(IReadOnlyList<BattleFighter> order, int currentIndex)
+        {
+            for (int i = 0; i < order.Count; i++)
+            {
+                var card = cards[order[i]];
+                card.SetTurn(i == currentIndex);
+                card.SetOrder(i >= currentIndex ? i + 1 : 0);
+            }
+        }
+
+        /// <summary>Clears every highlight and number (between turns / at the end).</summary>
+        public void ClearTurn()
+        {
+            foreach (var card in cards.Values)
+            {
+                card.SetTurn(false);
+                card.SetOrder(0);
+            }
         }
 
         // ---------- Actions ----------
 
-        public void RefreshActions(BattleFighter player, float escapeChance)
+        public void RefreshActions(BattleFighter fighter, float escapeChance)
         {
-            attackButton.Set("Attack", player.AttackName);
+            attackButton.Set("Attack", fighter.AttackName);
             attackButton.SetInteractable(true);
 
-            bool ready = player.SkillReady;
-            int left = player.SkillCooldown;
-            skillButton.Set(player.SkillName, ready ? $"Ready!  ×{player.SkillPower:0.#} power" : left == 1 ? "Ready next turn" : $"Ready in {left} turns");
+            bool ready = fighter.SkillReady;
+            int left = fighter.SkillCooldown;
+            skillButton.Set("Skill", ready ? fighter.SkillName : left == 1 ? "Ready next turn" : $"Ready in {left} turns");
             skillButton.SetInteractable(ready);
             skillButton.SetBadge(ready ? null : left.ToString());
 
-            defendButton.Set("Defend", "Half damage this turn");
+            defendButton.Set("Defend", "Half damage");
             defendButton.SetInteractable(true);
 
-            runButton.Set("Run", $"{Mathf.RoundToInt(escapeChance * 100f)}% to escape");
+            runButton.Set("Run", $"{Mathf.RoundToInt(escapeChance * 100f)}% team escape");
             runButton.SetInteractable(true);
         }
 
@@ -224,8 +270,6 @@ namespace WildTamers.Battle
         }
 
         // ---------- Status ----------
-
-        public FighterCard CardFor(BattleFighter fighter) => fighter.IsPlayer ? playerCard : wildCard;
 
         public void ShowGuard(BattleFighter fighter, bool on) => CardFor(fighter).SetGuard(on);
     }

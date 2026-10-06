@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using WildTamers.Core;
 
@@ -42,38 +44,64 @@ namespace WildTamers.Battle
             return hit;
         }
 
-        /// <summary>Chance (0–1) that running away works: faster animals escape more easily, and every failed try helps.</summary>
-        public static float EscapeChance(BattleFighter runner, BattleFighter foe, GameConfig config)
+        /// <summary>Average speed of the animals in the party that can still run.</summary>
+        public static float TeamSpeed(IEnumerable<BattleFighter> party)
         {
-            float mine = runner.Animal.Speed;
-            float theirs = foe.Animal.Speed;
-            float share = mine / Mathf.Max(1f, mine + theirs);
-            float chance = config.runBaseChance + config.runSpeedWeight * share + config.runBonusPerFail * runner.FailedEscapes;
+            var alive = party.Where(f => !f.IsFainted).ToList();
+            return alive.Count == 0 ? 1f : (float)alive.Average(f => f.Animal.Speed);
+        }
+
+        /// <summary>
+        /// Chance (0–1) that the whole team gets away: a faster team escapes more easily, and every failed try helps.
+        /// </summary>
+        public static float EscapeChance(float teamSpeed, float foeSpeed, int failedTries, GameConfig config)
+        {
+            float share = teamSpeed / Mathf.Max(1f, teamSpeed + foeSpeed);
+            float chance = config.runBaseChance + config.runSpeedWeight * share + config.runBonusPerFail * failedTries;
             return Mathf.Clamp(chance, config.runChanceLimits.x, config.runChanceLimits.y);
         }
 
-        /// <summary>True if <paramref name="a"/> acts before <paramref name="b"/> this round (speed, ties broken at random).</summary>
-        public static bool GoesFirst(BattleFighter a, BattleFighter b)
-        {
-            int sa = a.Animal.Speed, sb = b.Animal.Speed;
-            return sa != sb ? sa > sb : Random.value < 0.5f;
-        }
+        public static float EscapeChance(IEnumerable<BattleFighter> party, BattleFighter foe, int failedTries, GameConfig config) =>
+            EscapeChance(TeamSpeed(party), foe.Animal.Speed, failedTries, config);
+    }
 
-        /// <summary>Defend and Run happen before attacks, so guarding always covers this round's hit.</summary>
-        public static bool IsPriority(BattleAction action) => action == BattleAction.Defend || action == BattleAction.Run;
+    /// <summary>Who acts in what order: everybody who can still fight, fastest first (ties broken at random).</summary>
+    public static class TurnOrder
+    {
+        public static List<BattleFighter> Build(IEnumerable<BattleFighter> fighters)
+        {
+            return fighters.Where(f => !f.IsFainted)
+                .Select(f => (fighter: f, tie: Random.value))
+                .OrderByDescending(x => x.fighter.Animal.Speed)
+                .ThenBy(x => x.tie)
+                .Select(x => x.fighter)
+                .ToList();
+        }
     }
 
     /// <summary>
-    /// Wild animal brain: mostly attacks, uses its skill when it is ready, and sometimes defends when low on HP.
+    /// Wild boss brain: mostly attacks, uses its skill when it is ready, sometimes defends when low on HP,
+    /// and mostly hits your weakest animal.
     /// </summary>
     public static class BattleAI
     {
-        public static BattleAction Choose(BattleFighter self, BattleFighter foe, GameConfig config, bool guardedLastTurn)
+        public static BattleAction Choose(BattleFighter self, GameConfig config, bool guardedLastTurn)
         {
             bool low = self.Animal.HPFraction <= config.aiDefendBelowHP;
             if (low && !guardedLastTurn && Random.value < config.aiDefendChance) return BattleAction.Defend;
             if (self.SkillReady && Random.value < config.aiSkillChance) return BattleAction.Skill;
             return BattleAction.Attack;
+        }
+
+        /// <summary>The weakest (lowest HP) animal that can still fight most of the time, otherwise a random one.</summary>
+        public static BattleFighter ChooseTarget(IReadOnlyList<BattleFighter> party, GameConfig config)
+        {
+            var alive = party.Where(f => !f.IsFainted).ToList();
+            if (alive.Count == 0) return null;
+            if (alive.Count == 1) return alive[0];
+            if (Random.value < config.bossFocusWeakest)
+                return alive.OrderBy(f => f.Animal.CurrentHP).ThenBy(f => f.Animal.Defense).First();
+            return alive[Random.Range(0, alive.Count)];
         }
     }
 }

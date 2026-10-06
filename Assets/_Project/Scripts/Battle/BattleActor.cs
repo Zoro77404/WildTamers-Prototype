@@ -25,6 +25,12 @@ namespace WildTamers.Battle
         [SerializeField] private Material flashMaterial;
         [SerializeField] private ParticleSystem puffPrefab;
 
+        [Header("Turn marker")]
+        [Tooltip("Bobbing arrow above the head while it is this animal's turn.")]
+        [SerializeField] private Transform turnArrow;
+        [Tooltip("Pulsing ring on the ground while it is this animal's turn.")]
+        [SerializeField] private Transform turnRing;
+
         [Header("Feel")]
         [SerializeField] private float lungeShare = 0.42f;
         [SerializeField] private float skillLungeShare = 0.55f;
@@ -43,6 +49,9 @@ namespace WildTamers.Battle
         private Coroutine flashRoutine;
         private Coroutine shakeRoutine;
         private Coroutine guardRoutine;
+        private bool turnOn;
+        private float turnStarted;
+        private Vector3 turnRingScale = Vector3.one;
 
         public bool HasModel => visual != null;
         public AnimalVisual Visual => visual;
@@ -129,6 +138,48 @@ namespace WildTamers.Battle
                 any = true;
             }
             else bounds.Encapsulate(point);
+        }
+
+        // ------------------------------------------------------------------
+        // Turn marker
+        // ------------------------------------------------------------------
+
+        /// <summary>Shows or hides the arrow and ground ring that say "it's this animal's turn".</summary>
+        public void SetTurnMarker(bool on)
+        {
+            turnOn = on;
+            turnStarted = Time.unscaledTime;
+            if (turnArrow != null) turnArrow.gameObject.SetActive(on);
+            if (turnRing != null)
+            {
+                turnRing.gameObject.SetActive(on);
+                if (on) turnRingScale = Vector3.one * Mathf.Clamp(length * 0.5f + 1.1f, 1.8f, 3.6f);
+            }
+            if (on) UpdateTurnMarker();
+        }
+
+        private void Update()
+        {
+            if (turnOn) UpdateTurnMarker();
+        }
+
+        private void UpdateTurnMarker()
+        {
+            float t = Time.unscaledTime;
+            float pop = Mathf.Clamp01((t - turnStarted) / 0.25f);
+            float popScale = UIEase.OutBack(pop, 2.4f);
+            if (turnArrow != null)
+            {
+                float bob = Mathf.Sin(t * 6f) * 0.16f;
+                turnArrow.localPosition = new Vector3(0f, height + 0.7f + bob, 0f);
+                turnArrow.localScale = Vector3.one * popScale;
+                turnArrow.localRotation = Quaternion.Euler(0f, t * 120f, 0f);
+            }
+            if (turnRing != null)
+            {
+                float pulse = 1f + Mathf.Sin(t * 5f) * 0.05f;
+                turnRing.localScale = turnRingScale * (pulse * popScale);
+            }
         }
 
         // ------------------------------------------------------------------

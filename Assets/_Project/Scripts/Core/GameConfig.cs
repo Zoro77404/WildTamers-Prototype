@@ -38,6 +38,20 @@ namespace WildTamers.Core
         [Tooltip("Fraction of max HP every team animal recovers per second while on the map.")]
         [Range(0f, 0.2f)] public float teamHealPerSecond = 0.015f;
 
+        [Header("Battle — party and boss")]
+        [Tooltip("How many of your animals fight together.")]
+        [Range(1, 3)] public int partySize = 3;
+        [Tooltip("The wild animal is a boss: its max HP is multiplied by this so 3 vs 1 stays a fair fight.")]
+        [Min(1f)] public float bossHPMultiplier = 3f;
+        [Tooltip("The boss also hits much harder (one boss action per round faces three of yours).")]
+        [Min(0.5f)] public float bossAttackMultiplier = 1.5f;
+        [Tooltip("...and takes a bit less damage.")]
+        [Min(0.5f)] public float bossDefenseMultiplier = 1.1f;
+        [Tooltip("Chance the boss goes for your weakest (lowest HP) animal instead of a random one.")]
+        [Range(0f, 1f)] public float bossFocusWeakest = 0.7f;
+        [Tooltip("An animal below this fraction of its max HP is too hurt to be picked for a fight (unless nobody is fit).")]
+        [Range(0f, 1f)] public float fightReadyHPFraction = 0.25f;
+
         [Header("Battle — damage")]
         [Tooltip("Damage = scale × power × ATK² / (ATK + DEF) × level bonus × spread × crit × guard.")]
         [Min(0.01f)] public float damageScale = 0.85f;

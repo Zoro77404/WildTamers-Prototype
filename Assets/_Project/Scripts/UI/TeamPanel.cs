@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,7 +7,7 @@ using WildTamers.Core;
 
 namespace WildTamers.UI
 {
-    /// <summary>List of the player's animals (name, level, HP). Tap one to make it the active fighter; small "Reset save" for testing.</summary>
+    /// <summary>List of the player's animals (name, level, HP). Tap one to see its info card; small "Reset save" for testing.</summary>
     public class TeamPanel : UIPanel
     {
         [SerializeField] private RectTransform listContent;
@@ -15,6 +16,7 @@ namespace WildTamers.UI
         [SerializeField] private Button closeButton;
         [SerializeField] private Button backdropButton;
         [SerializeField] private ScrollRect scroll;
+        [SerializeField] private AnimalCardPanel animalCard;
         [Tooltip("Hint shown under the list.")]
         [SerializeField] private RectTransform footer;
         [Tooltip("The card hugs the list between these heights (a small team doesn't get a mostly empty sheet).")]
@@ -81,12 +83,13 @@ namespace WildTamers.UI
         {
             var session = GameSession.Instance;
             var team = session.Team;
+            var lastTeam = session.LastTeam.ToList();
             while (rows.Count < team.Count) rows.Add(Instantiate(rowPrefab, listContent));
             for (int i = 0; i < rows.Count; i++)
             {
                 bool used = i < team.Count;
                 rows[i].gameObject.SetActive(used);
-                if (used) rows[i].Setup(team[i], i, i == session.ActiveIndex, OnRowSelected);
+                if (used) rows[i].Setup(team[i], i, lastTeam.Contains(team[i]), OnRowSelected);
             }
             if (countText != null) countText.text = team.Count == 1 ? "1 animal" : $"{team.Count} animals";
             if (footer != null) footer.SetAsLastSibling();
@@ -95,10 +98,8 @@ namespace WildTamers.UI
 
         private void OnRowSelected(TeamRow row)
         {
-            var session = GameSession.Instance;
-            if (row.Index == session.ActiveIndex) return;
-            session.SetActive(row.Index); // raises TeamChanged → Rebuild
             row.PlaySelected();
+            if (animalCard != null && !animalCard.IsVisible) animalCard.OpenInfo(row.Animal.Data, row.Animal.Level);
         }
 
         private void FitCard()

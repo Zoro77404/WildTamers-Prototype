@@ -12,26 +12,31 @@ using WildTamers.UI;
 namespace WildTamers.EditorTools
 {
     /// <summary>
-    /// Builds BattleScene: a small grassy arena, the two animal stages, camera and effects,
-    /// and the portrait battle UI (fighter cards, log line, four action buttons, damage numbers, result sheet).
+    /// Builds BattleScene: a small grassy arena, the stages for your three animals and the wild boss, camera and effects,
+    /// and the portrait battle UI (boss card, three team cards, log line, four action buttons, damage numbers, result sheet, animal card).
     /// </summary>
     public static class BattleSceneBuilder
     {
         public const string ScenePath = "Assets/_Project/Scenes/BattleScene.unity";
         private const string MeshPath = "Assets/_Project/Art/Meshes/BattleArena.asset";
         private const string DomeMeshPath = "Assets/_Project/Art/Meshes/GuardDome.asset";
+        private const string GemMeshPath = "Assets/_Project/Art/Meshes/TurnGem.asset";
+        private const string TurnRingMeshPath = "Assets/_Project/Art/Meshes/TurnRing.asset";
         private const string OutlineFontPath = "Assets/_Project/Fonts/Fredoka-Bold SDF Outline.mat";
 
-        private static readonly Vector3 CameraPosition = new Vector3(0f, 10f, -10f);
-        private static readonly Vector3 CameraTarget = new Vector3(0f, 1f, 6f);
-        private const float CameraFov = 38f;
+        private static readonly Vector3 CameraPosition = new Vector3(0f, 10.5f, -11f);
+        private static readonly Vector3 CameraTarget = new Vector3(0f, 1.2f, 6.5f);
+        private const float CameraFov = 40f;
 
-        // Where each animal's feet land on the portrait screen (viewport 0–1): the player's animal on the left just above
-        // the log, the wild one right of center under the top card. The stage spots are solved from these for the camera above.
-        private static readonly Vector2 PlayerScreenPoint = new Vector2(0.27f, 0.335f);
-        private static readonly Vector2 WildScreenPoint = new Vector2(0.70f, 0.60f);
+        // Where each animal's feet land on the portrait screen (viewport 0–1): your three animals in a shallow arc just above the
+        // team cards, the wild boss behind them under its card. The stage spots are solved from these for the camera above.
+        private static readonly Vector2[] PartyScreenPoints =
+        {
+            new Vector2(0.21f, 0.405f), new Vector2(0.50f, 0.35f), new Vector2(0.79f, 0.405f)
+        };
+        private static readonly Vector2 WildScreenPoint = new Vector2(0.55f, 0.6f);
 
-        private static Vector3 playerSpot;
+        private static Vector3[] partySpots = new Vector3[3];
         private static Vector3 wildSpot;
 
         [MenuItem("Wild Tamers/Build/Battle Scene")]
@@ -63,10 +68,18 @@ namespace WildTamers.EditorTools
             var guardMat = MaterialLibrary.LitTransparent(MaterialLibrary.FxFolder + "/FX_Guard.mat", new Color(0.56f, 0.83f, 1f, 0.32f), 0.85f);
             var domeMesh = BuildDomeMesh();
             var puff = AssetDatabase.LoadAssetAtPath<ParticleSystem>(PrefabBuilder.PuffPrefab);
+            var gemMesh = BuildGemMesh();
+            var ringMesh = BuildTurnRingMesh();
+            var gemMat = MaterialLibrary.Unlit(MaterialLibrary.FxFolder + "/FX_TurnGem.mat", MaterialLibrary.Hex("#FFC93C"));
+            var ringMat = MaterialLibrary.UnlitTransparent(MaterialLibrary.FxFolder + "/FX_TurnRing.mat", new Color(1f, 0.79f, 0.24f, 0.85f), null, 12);
+            var turnFx = new TurnFx { Gem = gemMesh, GemMaterial = gemMat, Ring = ringMesh, RingMaterial = ringMat };
 
             var stage = SceneSetup.Group("--Animals--");
-            var playerActor = BuildStage(stage.transform, "PlayerSpot", playerSpot, wildSpot, 1.7f, 3.4f, flash, guardMat, domeMesh, puff);
-            var wildActor = BuildStage(stage.transform, "WildSpot", wildSpot, playerSpot, 2.05f, 3.8f, flash, guardMat, domeMesh, puff);
+            var partyActors = new BattleActor[3];
+            string[] names = { "PartySpotLeft", "PartySpotMiddle", "PartySpotRight" };
+            for (int i = 0; i < 3; i++)
+                partyActors[i] = BuildStage(stage.transform, names[i], partySpots[i], wildSpot, 1.25f, 3.0f, flash, guardMat, domeMesh, puff, turnFx);
+            var wildActor = BuildStage(stage.transform, "WildSpot", wildSpot, partySpots[1], 1.85f, 4.2f, flash, guardMat, domeMesh, puff, turnFx);
 
             // ---------- Effects ----------
             var fx = SceneSetup.Group("--FX--");
@@ -89,10 +102,12 @@ namespace WildTamers.EditorTools
             var uiGroup = SceneSetup.Group("--UI--");
             var canvas = SceneSetup.Canvas("BattleCanvas", uiGroup.transform);
             var hud = BuildUI(canvas.transform, cam);
+            var animalCard = CardBuilder.BuildAnimalCard(canvas.transform);
 
-            UIBuild.Set(controller, "playerActor", playerActor);
+            UIBuild.SetArray(controller, "playerActors", partyActors);
             UIBuild.Set(controller, "wildActor", wildActor);
             UIBuild.Set(controller, "hud", hud);
+            UIBuild.Set(controller, "animalCard", animalCard);
             UIBuild.Set(controller, "cameraShake", shake);
             UIBuild.Set(controller, "sparks", sparks);
 
@@ -116,7 +131,7 @@ namespace WildTamers.EditorTools
                 cam.fieldOfView = CameraFov;
                 cam.transform.position = CameraPosition;
                 cam.transform.LookAt(CameraTarget);
-                playerSpot = OnGround(cam, PlayerScreenPoint);
+                for (int i = 0; i < 3; i++) partySpots[i] = OnGround(cam, PartyScreenPoints[i]);
                 wildSpot = OnGround(cam, WildScreenPoint);
             }
             finally
@@ -133,8 +148,14 @@ namespace WildTamers.EditorTools
             return new Vector3(Mathf.Round(p.x * 100f) / 100f, 0f, Mathf.Round(p.z * 100f) / 100f);
         }
 
+        private class TurnFx
+        {
+            public Mesh Gem, Ring;
+            public Material GemMaterial, RingMaterial;
+        }
+
         private static BattleActor BuildStage(Transform parent, string name, Vector3 position, Vector3 facing, float scale, float maxHeight,
-            Material flash, Material guard, Mesh dome, ParticleSystem puff)
+            Material flash, Material guard, Mesh dome, ParticleSystem puff, TurnFx turn)
         {
             var spot = new GameObject(name).transform;
             spot.SetParent(parent, false);
@@ -147,7 +168,7 @@ namespace WildTamers.EditorTools
             shadow.transform.SetParent(spot, false);
             shadow.transform.localPosition = new Vector3(0f, 0.3f, 0f);
             shadow.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            shadow.transform.localScale = new Vector3(4.4f, 4.4f, 1f);
+            shadow.transform.localScale = new Vector3(4.4f, 4.4f, 1f) * (scale / 1.85f * 0.5f + 0.55f);
             var sr = shadow.GetComponent<MeshRenderer>();
             sr.sharedMaterial = PrefabBuilder.BlobMaterial;
             sr.shadowCastingMode = ShadowCastingMode.Off;
@@ -161,6 +182,28 @@ namespace WildTamers.EditorTools
             br.receiveShadows = false;
             bubble.SetActive(false);
 
+            // Turn marker: a spinning gem above the head and a pulsing ring on the ground.
+            var arrow = new GameObject("TurnArrow");
+            arrow.transform.SetParent(spot, false);
+            var gem = new GameObject("Gem");
+            gem.transform.SetParent(arrow.transform, false);
+            gem.AddComponent<MeshFilter>().sharedMesh = turn.Gem;
+            var gr = gem.AddComponent<MeshRenderer>();
+            gr.sharedMaterial = turn.GemMaterial;
+            gr.shadowCastingMode = ShadowCastingMode.Off;
+            gr.receiveShadows = false;
+            arrow.SetActive(false);
+
+            var ring = new GameObject("TurnRing");
+            ring.transform.SetParent(spot, false);
+            ring.transform.localPosition = new Vector3(0f, 0.34f, 0f);
+            ring.AddComponent<MeshFilter>().sharedMesh = turn.Ring;
+            var rr = ring.AddComponent<MeshRenderer>();
+            rr.sharedMaterial = turn.RingMaterial;
+            rr.shadowCastingMode = ShadowCastingMode.Off;
+            rr.receiveShadows = false;
+            ring.SetActive(false);
+
             var actor = spot.gameObject.AddComponent<BattleActor>();
             UIBuild.SetFloat(actor, "displayScale", scale);
             UIBuild.SetFloat(actor, "maxHeight", maxHeight);
@@ -168,6 +211,8 @@ namespace WildTamers.EditorTools
             UIBuild.Set(actor, "guardDome", bubble.transform);
             UIBuild.Set(actor, "flashMaterial", flash);
             UIBuild.Set(actor, "puffPrefab", puff);
+            UIBuild.Set(actor, "turnArrow", arrow.transform);
+            UIBuild.Set(actor, "turnRing", ring.transform);
             return actor;
         }
 
@@ -175,8 +220,25 @@ namespace WildTamers.EditorTools
         {
             var mb = new MeshBuilder(1);
             mb.Sphere(0, Vector3.zero, Vector3.one, 6, 12);
-            var mesh = mb.Build("GuardDome", out _);
-            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(DomeMeshPath);
+            return SaveMesh(mb.Build("GuardDome", out _), DomeMeshPath);
+        }
+
+        /// <summary>Faceted diamond (octahedron) that hovers above the animal whose turn it is.</summary>
+        private static Mesh BuildGemMesh()
+        {
+            var mb = new MeshBuilder(1);
+            mb.Sphere(0, Vector3.zero, new Vector3(0.34f, 0.5f, 0.34f), 2, 4);
+            return SaveMesh(mb.Build("TurnGem", out _), GemMeshPath);
+        }
+
+        private static Mesh BuildTurnRingMesh()
+        {
+            return SaveMesh(RingMesh.Create(0.82f, 1f, 48, false, "TurnRing"), TurnRingMeshPath);
+        }
+
+        private static Mesh SaveMesh(Mesh mesh, string path)
+        {
+            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
             if (existing != null)
             {
                 existing.Clear();
@@ -185,7 +247,7 @@ namespace WildTamers.EditorTools
                 EditorUtility.SetDirty(existing);
                 return existing;
             }
-            AssetDatabase.CreateAsset(mesh, DomeMeshPath);
+            AssetDatabase.CreateAsset(mesh, path);
             return mesh;
         }
 
@@ -235,30 +297,42 @@ namespace WildTamers.EditorTools
         {
             var ground = new MeshBuilder(FakeMapTileProvider.MaterialCount);
             var props = new MeshBuilder(FakeMapTileProvider.MaterialCount);
-            var mid = (playerSpot + wildSpot) * 0.5f;
+            var middle = partySpots[1];
+            var mid = (middle + wildSpot) * 0.5f;
             ground.Disc((int)MapMaterial.Grass, Vector3.zero, 120f, 56);
-            ground.Disc((int)MapMaterial.Park, new Vector3(mid.x, 0.03f, mid.z), 9.5f, 32);
-            // Platforms under both animals.
-            props.Cylinder((int)MapMaterial.Sand, playerSpot + Vector3.down * 0.05f, 2.4f, 0.3f, 16, (int)MapMaterial.Path);
-            props.Cylinder((int)MapMaterial.Sand, wildSpot + Vector3.down * 0.05f, 2.6f, 0.3f, 16, (int)MapMaterial.Path);
+            ground.Disc((int)MapMaterial.Park, new Vector3(mid.x, 0.03f, mid.z), 11f, 32);
+            // Platforms under your three animals and the boss.
+            foreach (var spot in partySpots)
+                props.Cylinder((int)MapMaterial.Sand, spot + Vector3.down * 0.05f, 2.0f, 0.3f, 16, (int)MapMaterial.Path);
+            props.Cylinder((int)MapMaterial.Sand, wildSpot + Vector3.down * 0.05f, 3.0f, 0.3f, 16, (int)MapMaterial.Path);
 
             var rng = new System.Random(7);
             float R() => (float)rng.NextDouble();
 
+            bool NearAnimal(Vector3 p, float margin)
+            {
+                foreach (var s in partySpots) if (Vector3.Distance(p, s) < 3.2f + margin) return true;
+                return Vector3.Distance(p, wildSpot) < 4.2f + margin;
+            }
+
             // A few hand-placed bushes and flower beds where the camera sees open grass.
-            var bushes = new[] { new Vector3(-6.2f, 0f, 9.5f), new Vector3(-4.6f, 0f, 14.8f), new Vector3(6.4f, 0f, 16.5f), new Vector3(4.2f, 0f, 3.2f) };
+            var bushes = new[] { new Vector3(-7.2f, 0f, 9.5f), new Vector3(-6.4f, 0f, 15.8f), new Vector3(7.4f, 0f, 16.5f), new Vector3(7.0f, 0f, 5.2f) };
             foreach (var b in bushes)
             {
+                if (NearAnimal(b, 1.2f)) continue;
                 props.Blob((int)MapMaterial.Leaves1, b + Vector3.up * 0.5f, new Vector3(1.5f, 1f, 1.3f), 0.16f, rng, R() * 360f);
                 props.Blob((int)MapMaterial.Leaves0, b + new Vector3(0.9f, 0.35f, 0.5f), new Vector3(0.9f, 0.7f, 0.9f), 0.16f, rng, R() * 360f);
             }
-            var beds = new[] { new Vector3(-3.4f, 0f, 7.2f), new Vector3(-7.5f, 0f, 12.6f), new Vector3(5.2f, 0f, 8.8f) };
+            var beds = new[] { new Vector3(-3.4f, 0f, 9.2f), new Vector3(-8.5f, 0f, 12.6f), new Vector3(5.6f, 0f, 9.8f) };
             for (int i = 0; i < beds.Length; i++)
+            {
+                if (NearAnimal(beds[i], 0.8f)) continue;
                 for (int f = 0; f < 9; f++)
                     props.Blob(f % 3 == 0 ? (int)MapMaterial.FlowerWhite : f % 3 == 1 ? (int)MapMaterial.FlowerYellow : (int)MapMaterial.FlowerPink,
                         beds[i] + new Vector3(R() * 2.4f - 1.2f, 0.2f, R() * 2.4f - 1.2f), Vector3.one * 0.22f, 0.1f, null);
+            }
 
-            // Forest edge behind the wild animal and along the sides (the camera looks down, so this frames the top of the screen).
+            // Forest edge behind the wild boss and along the sides (the camera looks down, so this frames the top of the screen).
             for (int i = 0; i < 70; i++)
             {
                 float x = -26f + R() * 52f;
@@ -269,8 +343,8 @@ namespace WildTamers.EditorTools
             for (int i = 0; i < 40; i++)
             {
                 float side = R() < 0.5f ? -1f : 1f;
-                float x = side * (9f + R() * 16f);
-                float z = playerSpot.z - 6f + R() * 18f;
+                float x = side * (11f + R() * 16f);
+                float z = middle.z - 6f + R() * 18f;
                 Tree(props, new Vector3(x, 0f, z), 0.9f + R() * 0.6f, rng);
             }
 
@@ -278,10 +352,10 @@ namespace WildTamers.EditorTools
             for (int i = 0; i < 34; i++)
             {
                 float a = R() * Mathf.PI * 2f;
-                float d = 5f + R() * 9f;
-                var p = new Vector3(mid.x + Mathf.Sin(a) * d * 1.1f, 0f, mid.z + Mathf.Cos(a) * d);
-                if (Vector3.Distance(p, playerSpot) < 4.2f || Vector3.Distance(p, wildSpot) < 4.5f) continue;
-                if (Mathf.Abs(p.x - mid.x) < 3f && p.z > playerSpot.z && p.z < wildSpot.z) continue; // keep the lunge lane clear
+                float d = 6f + R() * 9f;
+                var p = new Vector3(mid.x + Mathf.Sin(a) * d * 1.15f, 0f, mid.z + Mathf.Cos(a) * d);
+                if (NearAnimal(p, 0.5f)) continue;
+                if (Mathf.Abs(p.x - mid.x) < 5f && p.z > middle.z - 3f && p.z < wildSpot.z + 2f) continue; // keep the lunge lanes clear
                 float pick = R();
                 if (pick < 0.35f)
                     props.Blob((int)MapMaterial.Rock, p + Vector3.up * 0.25f, new Vector3(1f, 0.6f, 0.85f) * (0.5f + R() * 0.7f), 0.22f, rng, R() * 360f);
@@ -343,32 +417,39 @@ namespace WildTamers.EditorTools
             var root = UIBuild.Stretch("BattleHUD", canvas);
             var hud = root.gameObject.AddComponent<BattleHUD>();
 
-            var wildCard = BuildCard(root, "WildCard", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -64f), new Vector2(600f, 172f), wild: true);
-            var playerCard = BuildCard(root, "PlayerCard", new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-36f, 612f), new Vector2(600f, 214f), wild: false);
+            // Big card for the wild boss on top, three small cards for your animals above the log.
+            var wildCard = BuildCard(root, "WildCard", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(984f, 214f), CardKind.Wild);
+            var partyCards = new FighterCard[3];
+            string[] cardNames = { "PartyCardLeft", "PartyCardMiddle", "PartyCardRight" };
+            for (int i = 0; i < 3; i++)
+                partyCards[i] = BuildCard(root, cardNames[i], new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2((i - 1) * 344f, 396f), new Vector2(320f, 206f), CardKind.Party);
 
             // Log line above the buttons (in a group so it can fade out under the result sheet).
             var logGroupRt = UIBuild.Stretch("LogGroup", root);
             var logGroup = logGroupRt.gameObject.AddComponent<CanvasGroup>();
             logGroup.blocksRaycasts = false;
-            var log = UIBuild.Rect("Log", logGroupRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 462f), new Vector2(1008f, 128f));
+            var log = UIBuild.Rect("Log", logGroupRt, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 276f), new Vector2(1008f, 100f));
             UIBuild.DropShadow(log, 26f, -10f, 0.2f);
-            UIBuild.Round(log, new Color(1f, 1f, 1f, 0.97f), 44f);
-            var logText = UIBuild.Text(UIBuild.Stretch("Text", log, 44f, 14f, 44f, 14f), "A wild Wolf appeared!", 40f, Palette.Ink,
+            UIBuild.Round(log, new Color(1f, 1f, 1f, 0.97f), 40f);
+            var logText = UIBuild.Text(UIBuild.Stretch("Text", log, 40f, 8f, 40f, 8f), "A wild Camel appeared!", 36f, Palette.Ink,
                 TextAlignmentOptions.MidlineLeft, bold: true, wrap: true);
             logText.richText = true;
+            logText.enableAutoSizing = true;
+            logText.fontSizeMin = 26f;
+            logText.fontSizeMax = 36f;
 
-            // Action buttons, 2 × 2.
-            var actions = UIBuild.Rect("Actions", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(1008f, 380f));
+            // Action buttons in one row.
+            var actions = UIBuild.Rect("Actions", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(1008f, 200f));
             var group = actions.gameObject.AddComponent<CanvasGroup>();
-            var attack = ActionButton(actions, "AttackButton", 0, 1, "Attack", "Scratch", UISpriteGenerator.Claw, Palette.Primary, Palette.PrimaryDark);
-            var skill = ActionButton(actions, "SkillButton", 1, 1, "Fox Fire", "Ready!", UISpriteGenerator.Star, MaterialLibrary.Hex("#9B7BFF"), MaterialLibrary.Hex("#7A5AD9"));
-            var defend = ActionButton(actions, "DefendButton", 0, 0, "Defend", "Half damage", UISpriteGenerator.Shield, Palette.Def, MaterialLibrary.Hex("#2F7FD6"));
-            var run = ActionButton(actions, "RunButton", 1, 0, "Run", "62% to escape", UISpriteGenerator.Dash, Palette.Neutral, Palette.NeutralDark);
+            var attack = ActionButton(actions, "AttackButton", 0, "Attack", "Stomp", UISpriteGenerator.Claw, Palette.Primary, Palette.PrimaryDark);
+            var skill = ActionButton(actions, "SkillButton", 1, "Skill", "Ready!", UISpriteGenerator.Star, MaterialLibrary.Hex("#9B7BFF"), MaterialLibrary.Hex("#7A5AD9"));
+            var defend = ActionButton(actions, "DefendButton", 2, "Defend", "Half damage", UISpriteGenerator.Shield, Palette.Def, MaterialLibrary.Hex("#2F7FD6"));
+            var run = ActionButton(actions, "RunButton", 3, "Run", "62% team escape", UISpriteGenerator.Dash, Palette.Neutral, Palette.NeutralDark);
 
             var numbers = BuildDamageNumbers(root, cam);
             var result = BuildResultPanel(root);
 
-            UIBuild.Set(hud, "playerCard", playerCard);
+            UIBuild.SetArray(hud, "partyCards", partyCards);
             UIBuild.Set(hud, "wildCard", wildCard);
             UIBuild.Set(hud, "logGroup", logGroup);
             UIBuild.Set(hud, "logPanel", log);
@@ -383,96 +464,162 @@ namespace WildTamers.EditorTools
             return hud;
         }
 
-        private static FighterCard BuildCard(RectTransform parent, string name, Vector2 anchor, Vector2 pivot, Vector2 pos, Vector2 size, bool wild)
+        private enum CardKind { Party, Wild }
+
+        private static FighterCard BuildCard(RectTransform parent, string name, Vector2 anchor, Vector2 pivot, Vector2 pos, Vector2 size, CardKind kind)
         {
+            bool wild = kind == CardKind.Wild;
             var card = UIBuild.Rect(name, parent, anchor, pivot, pos, size);
+            card.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            var group = card.GetComponent<CanvasGroup>();
+
+            // Glowing frame behind the card: lights up on this animal's turn.
+            var glowRt = UIBuild.Stretch("TurnGlow", card, -12f, -12f, -12f, -12f);
+            var glow = UIBuild.Round(glowRt, MaterialLibrary.Hex("#FFC93C"), wild ? 58f : 50f);
+            glowRt.gameObject.SetActive(false);
+
             var body = UIBuild.Stretch("Body", card);
-            UIBuild.Round(body, new Color(1f, 1f, 1f, 0.97f), 44f);
+            UIBuild.Round(body, new Color(1f, 1f, 1f, 0.97f), wild ? 52f : 42f);
             UIBuild.DropShadow(body, 26f, -10f, 0.2f);
 
-            var accent = UIBuild.Rect("Accent", body, new Vector2(0f, 0f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
-            accent.anchorMin = new Vector2(0f, 0f);
-            accent.anchorMax = new Vector2(0f, 1f);
-            accent.offsetMin = new Vector2(0f, 34f);
-            accent.offsetMax = new Vector2(14f, -34f);
-            var accentImg = UIBuild.Round(accent, Palette.Primary, 7f);
+            Image accentImg = null;
+            AnimalPreviewImage portrait = null;
+            Image portraitBgImg = null;
+            TMP_Text nameText, levelText;
+            HealthBar hp;
+            RectTransform guardRt;
 
-            var nameText = UIBuild.Label("Name", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(40f, -18f), new Vector2(330f, 70f),
-                "Wolf", 54f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
-            var level = UIBuild.Label("Level", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-34f, -22f), new Vector2(150f, 60f),
-                "Lv. 5", 40f, Palette.Muted, TextAlignmentOptions.MidlineRight, bold: true);
             if (wild)
             {
-                var tag = UIBuild.Rect("WildTag", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-188f, -30f), new Vector2(104f, 44f));
-                UIBuild.Round(tag, Palette.Danger, 22f);
-                UIBuild.Text(UIBuild.Stretch("Text", tag), "WILD", 26f, Color.white, TextAlignmentOptions.Center, bold: true);
+                var accent = UIBuild.Rect("Accent", body, new Vector2(0f, 0f), new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+                accent.anchorMin = new Vector2(0f, 0f);
+                accent.anchorMax = new Vector2(0f, 1f);
+                accent.offsetMin = new Vector2(0f, 38f);
+                accent.offsetMax = new Vector2(16f, -38f);
+                accentImg = UIBuild.Round(accent, Palette.Primary, 8f);
+
+                nameText = UIBuild.Label("Name", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(48f, -18f), new Vector2(560f, 78f),
+                    "Arabian Gazelle", 64f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+                ((TextMeshProUGUI)nameText).enableAutoSizing = true;
+                ((TextMeshProUGUI)nameText).fontSizeMin = 40f;
+                ((TextMeshProUGUI)nameText).fontSizeMax = 64f;
+                var tag = UIBuild.Rect("WildTag", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -28f), new Vector2(214f, 52f));
+                UIBuild.Round(tag, Palette.Danger, 26f);
+                UIBuild.Text(UIBuild.Stretch("Text", tag), "WILD BOSS", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+                levelText = UIBuild.Label("Level", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(48f, -96f), new Vector2(150f, 50f),
+                    "Lv. 5", 40f, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
+
+                var hpText = UIBuild.Label("HPText", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -96f), new Vector2(300f, 50f),
+                    "120/120", 40f, Palette.Ink, TextAlignmentOptions.MidlineRight, bold: true);
+                var hpRt = UIBuild.Rect("HPBar", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(48f, 30f), new Vector2(888f, 44f));
+                hp = UIBuild.HealthBar(hpRt, hpText);
+                guardRt = UIBuild.Rect("GuardChip", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(214f, -96f), new Vector2(190f, 50f));
             }
-
-            float hpY = wild ? 32f : 76f;
-            UIBuild.Label("HPLabel", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(40f, hpY - 6f), new Vector2(70f, 42f),
-                "HP", 30f, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
-            var hpText = UIBuild.Label("HPText", body, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-34f, hpY - 8f), new Vector2(150f, 46f),
-                "38/41", 32f, Palette.Ink, TextAlignmentOptions.MidlineRight, bold: true);
-            var hpRt = UIBuild.Rect("HPBar", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(98f, hpY), new Vector2(330f, 30f));
-            var hp = UIBuild.HealthBar(hpRt, hpText);
-
-            StatBar xp = null;
-            if (!wild)
+            else
             {
-                UIBuild.Label("XPLabel", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(40f, 22f), new Vector2(70f, 36f),
-                    "XP", 26f, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
-                var xpRt = UIBuild.Rect("XPBar", body, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(98f, 30f), new Vector2(468f, 18f));
-                xp = UIBuild.Bar(xpRt, Palette.Line, Palette.Def);
+                var portraitBg = UIBuild.Rect("PortraitBackdrop", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(14f, -14f), new Vector2(98f, 98f));
+                portraitBgImg = UIBuild.Disc(portraitBg, Palette.Line);
+                var portraitRt = UIBuild.Stretch("Portrait", portraitBg, -4f, -4f, -4f, -4f);
+                portraitRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
+                portrait = portraitRt.gameObject.AddComponent<AnimalPreviewImage>();
+                UIBuild.SetBool(portrait, "live", false);
+
+                nameText = UIBuild.Label("Name", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(122f, -14f), new Vector2(188f, 46f),
+                    "Arabian Gazelle", 34f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+                ((TextMeshProUGUI)nameText).enableAutoSizing = true;
+                ((TextMeshProUGUI)nameText).fontSizeMin = 20f;
+                ((TextMeshProUGUI)nameText).fontSizeMax = 34f;
+                levelText = UIBuild.Label("Level", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(122f, -62f), new Vector2(110f, 40f),
+                    "Lv. 5", 30f, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
+
+                var hpText = UIBuild.Label("HPText", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(288f, 34f),
+                    "38/41", 28f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
+                var hpRt = UIBuild.Rect("HPBar", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 46f), new Vector2(288f, 28f));
+                hp = UIBuild.HealthBar(hpRt, hpText);
+                guardRt = UIBuild.Rect("GuardChip", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-14f, -64f), new Vector2(76f, 40f));
             }
 
-            // Guard chip pops up above the card's corner while the animal defends.
-            var chip = UIBuild.Rect("GuardChip", body, new Vector2(1f, 1f), new Vector2(1f, 0f), new Vector2(-24f, -14f), new Vector2(190f, 58f));
-            var chipGroup = chip.gameObject.AddComponent<CanvasGroup>();
+            // Guard chip pops up while the animal defends.
+            var chipGroup = guardRt.gameObject.AddComponent<CanvasGroup>();
             chipGroup.blocksRaycasts = false;
-            UIBuild.Round(chip, Palette.Def, 29f);
-            var chipIcon = UIBuild.Rect("Icon", chip, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(40f, 40f));
+            UIBuild.Round(guardRt, Palette.Def, guardRt.sizeDelta.y * 0.5f);
+            float iconSize = guardRt.sizeDelta.y - 10f;
+            var chipIcon = UIBuild.Rect("Icon", guardRt, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(wild ? 14f : 20f, 0f), new Vector2(iconSize, iconSize));
             var chipImg = chipIcon.gameObject.AddComponent<Image>();
             chipImg.sprite = UISpriteGenerator.Load(UISpriteGenerator.Shield);
             chipImg.preserveAspect = true;
             chipImg.raycastTarget = false;
-            UIBuild.Text(UIBuild.Stretch("Text", chip, 60f, 0f, 14f, 0f), "GUARD", 28f, Color.white, TextAlignmentOptions.MidlineLeft, bold: true);
-            chip.gameObject.SetActive(false);
+            if (wild)
+                UIBuild.Text(UIBuild.Stretch("Text", guardRt, 64f, 0f, 14f, 0f), "GUARD", 28f, Color.white, TextAlignmentOptions.MidlineLeft, bold: true);
+            guardRt.gameObject.SetActive(false);
+
+            // "TURN" tag shown while it is this animal's turn.
+            var turnTag = wild
+                ? UIBuild.Rect("TurnBadge", card, new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0f, -14f), new Vector2(170f, 46f))
+                : UIBuild.Rect("TurnBadge", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(140f, 44f));
+            UIBuild.DropShadow(turnTag, 10f, -4f, 0.25f);
+            UIBuild.Round(turnTag, MaterialLibrary.Hex("#FFC93C"), 22f);
+            UIBuild.Text(UIBuild.Stretch("Text", turnTag), "TURN", 28f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
+            turnTag.gameObject.SetActive(false);
+
+            // Turn-order number in the corner.
+            var order = UIBuild.Rect("OrderBadge", card, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(wild ? -8f : -6f, wild ? -4f : -2f), new Vector2(54f, 54f));
+            UIBuild.DropShadow(order, 8f, -3f, 0.25f);
+            UIBuild.Disc(order, Palette.Ink);
+            var orderText = UIBuild.Text(UIBuild.Stretch("Text", order), "1", 32f, Color.white, TextAlignmentOptions.Center, bold: true);
+            order.gameObject.SetActive(false);
+
+            // Shown on animals that have fainted.
+            var out_ = UIBuild.Rect("FaintedBadge", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(wild ? 240f : 150f, 56f));
+            UIBuild.Round(out_, Palette.Danger, 28f);
+            UIBuild.Text(UIBuild.Stretch("Text", out_), "FAINTED", wild ? 34f : 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            out_.gameObject.SetActive(false);
 
             var fighter = card.gameObject.AddComponent<FighterCard>();
             UIBuild.Set(fighter, "nameText", nameText);
-            UIBuild.Set(fighter, "levelText", level);
+            UIBuild.Set(fighter, "levelText", levelText);
             UIBuild.Set(fighter, "hpBar", hp);
-            UIBuild.Set(fighter, "xpBar", xp);
             UIBuild.Set(fighter, "accent", accentImg);
             UIBuild.Set(fighter, "guardChip", chipGroup);
             UIBuild.Set(fighter, "body", body);
+            UIBuild.Set(fighter, "portrait", portrait);
+            UIBuild.Set(fighter, "portraitBackdrop", portraitBgImg);
+            UIBuild.Set(fighter, "turnGlow", glow);
+            UIBuild.Set(fighter, "turnBadge", turnTag.gameObject);
+            UIBuild.Set(fighter, "orderBadge", order.gameObject);
+            UIBuild.Set(fighter, "orderText", orderText);
+            UIBuild.Set(fighter, "faintedBadge", out_.gameObject);
+            UIBuild.Set(fighter, "group", group);
             return fighter;
         }
 
-        private static BattleActionButton ActionButton(RectTransform parent, string name, int column, int row, string label, string hint,
+        private static BattleActionButton ActionButton(RectTransform parent, string name, int column, string label, string hint,
             string iconPath, Color face, Color lip)
         {
-            const float w = 492f, h = 178f, gap = 24f;
-            var pos = new Vector2(column * (w + gap), row * (h + gap));
+            const float w = 240f, h = 200f, gap = 16f;
+            var pos = new Vector2(column * (w + gap), 0f);
             var button = UIBuild.CandyButton(name, parent, Vector2.zero, Vector2.zero, pos, new Vector2(w, h),
-                "", face, lip, 48f, 10f, out var text, out var faceImg);
+                "", face, lip, 44f, 10f, out var text, out var faceImg);
             Object.DestroyImmediate(text.gameObject);
             var root = (RectTransform)button.transform;
 
-            var icon = UIBuild.Rect("Icon", faceImg.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(34f, 0f), new Vector2(96f, 96f));
+            var icon = UIBuild.Rect("Icon", faceImg.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -16f), new Vector2(74f, 74f));
             var iconImg = icon.gameObject.AddComponent<Image>();
             iconImg.sprite = UISpriteGenerator.Load(iconPath);
             iconImg.preserveAspect = true;
             iconImg.raycastTarget = false;
 
-            var labelText = UIBuild.Label("Label", faceImg.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(150f, -4f), new Vector2(320f, 62f),
-                label, 50f, Color.white, TextAlignmentOptions.BottomLeft, bold: true);
-            var hintText = UIBuild.Label("Hint", faceImg.transform, new Vector2(0f, 0.5f), new Vector2(0f, 1f), new Vector2(150f, -6f), new Vector2(320f, 40f),
-                hint, 28f, new Color(1f, 1f, 1f, 0.9f), TextAlignmentOptions.TopLeft);
+            var labelText = UIBuild.Label("Label", faceImg.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -92f), new Vector2(228f, 50f),
+                label, 42f, Color.white, TextAlignmentOptions.Center, bold: true);
+            var hintText = UIBuild.Label("Hint", faceImg.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 14f), new Vector2(228f, 40f),
+                hint, 24f, new Color(1f, 1f, 1f, 0.92f), TextAlignmentOptions.Center);
+            hintText.enableAutoSizing = true;
+            hintText.fontSizeMin = 18f;
+            hintText.fontSizeMax = 24f;
 
-            var badge = UIBuild.Rect("Badge", root, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-20f, -16f), new Vector2(72f, 72f));
+            var badge = UIBuild.Rect("Badge", root, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-18f, -14f), new Vector2(58f, 58f));
             UIBuild.Disc(badge, Color.white);
-            var badgeText = UIBuild.Text(UIBuild.Stretch("Text", badge), "2", 42f, lip, TextAlignmentOptions.Center, bold: true);
+            var badgeText = UIBuild.Text(UIBuild.Stretch("Text", badge), "2", 34f, lip, TextAlignmentOptions.Center, bold: true);
             badge.gameObject.SetActive(false);
 
             var action = root.gameObject.AddComponent<BattleActionButton>();
@@ -541,7 +688,7 @@ namespace WildTamers.EditorTools
             var dim = UIBuild.Stretch("Dim", root);
             UIBuild.Plain(dim, new Color(0.106f, 0.149f, 0.22f, 0.25f), raycast: true);
 
-            var card = UIBuild.Rect("Card", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1008f, 520f));
+            var card = UIBuild.Rect("Card", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1008f, 840f));
             UIBuild.DropShadow(card, 40f, -16f, 0.28f);
             var body = UIBuild.Stretch("Body", card);
             UIBuild.Round(body, Palette.Panel, 56f, raycast: true);
@@ -551,33 +698,13 @@ namespace WildTamers.EditorTools
             var badgeImg = UIBuild.Round(badge, Palette.Primary, 48f);
             var title = UIBuild.Text(UIBuild.Stretch("Text", badge), "Victory!", 58f, Color.white, TextAlignmentOptions.Center, bold: true);
 
-            var message = UIBuild.Label("Message", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -62f), new Vector2(920f, 84f),
-                "Wolf (Lv. 5) joined your team!", 40f, Palette.Ink, TextAlignmentOptions.Center, bold: false, wrap: true);
+            var message = UIBuild.Label("Message", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -66f), new Vector2(940f, 120f),
+                "Wolf (Lv. 5) joined your team!\nEach animal of your team gets +50 XP.", 38f, Palette.Ink, TextAlignmentOptions.Center, bold: false, wrap: true);
             message.richText = true;
 
-            // XP block.
-            var xp = UIBuild.Rect("XP", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(900f, 104f));
-            var xpBg = UIBuild.Stretch("Background", xp);
-            UIBuild.Round(xpBg, Palette.PanelAlt, 30f);
-            var xpName = UIBuild.Label("Name", xp, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -10f), new Vector2(360f, 54f),
-                "Fox", 44f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
-            var xpLevel = UIBuild.Label("Level", xp, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(230f, -12f), new Vector2(200f, 52f),
-                "Lv. 5", 38f, Palette.Teal, TextAlignmentOptions.MidlineLeft, bold: true);
-            var xpGain = UIBuild.Label("Gain", xp, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-30f, -10f), new Vector2(300f, 54f),
-                "+50 XP", 40f, Palette.Def, TextAlignmentOptions.MidlineRight, bold: true);
-            var xpBarRt = UIBuild.Rect("Bar", xp, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 18f), new Vector2(840f, 26f));
-            var xpBar = UIBuild.Bar(xpBarRt, Palette.Line, Palette.Def);
-
-            // Level-up banner.
-            var levelUp = UIBuild.Rect("LevelUp", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -268f), new Vector2(900f, 60f));
-            var levelGroup = levelUp.gameObject.AddComponent<CanvasGroup>();
-            levelGroup.blocksRaycasts = false;
-            var pill = UIBuild.Rect("Pill", levelUp, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(250f, 60f));
-            UIBuild.Round(pill, Palette.Primary, 30f);
-            var levelTitle = UIBuild.Text(UIBuild.Stretch("Text", pill), "Level up!", 36f, Color.white, TextAlignmentOptions.Center, bold: true);
-            var levelStats = UIBuild.Label("Stats", levelUp, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(270f, 0f), new Vector2(630f, 60f),
-                "HP +2   ATK +1   DEF +1   SPD +1", 32f, Palette.Ink, TextAlignmentOptions.MidlineLeft);
-            levelStats.richText = true;
+            // One XP row per animal of your team.
+            var rows = new BattleXpRow[3];
+            for (int i = 0; i < 3; i++) rows[i] = BuildXpRow(body, i);
 
             var cont = UIBuild.CandyButton("ContinueButton", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(500f, 130f),
                 "Continue", Palette.Primary, Palette.PrimaryDark, 48f, 50f, out _, out _);
@@ -588,18 +715,53 @@ namespace WildTamers.EditorTools
             UIBuild.Set(panel, "titleText", title);
             UIBuild.Set(panel, "messageText", message);
             UIBuild.Set(panel, "titleBadge", badgeImg);
-            UIBuild.Set(panel, "xpSection", xp.gameObject);
-            UIBuild.Set(panel, "xpNameText", xpName);
-            UIBuild.Set(panel, "xpLevelText", xpLevel);
-            UIBuild.Set(panel, "xpGainText", xpGain);
-            UIBuild.Set(panel, "xpBar", xpBar);
-            UIBuild.Set(panel, "levelUpGroup", levelGroup);
-            UIBuild.Set(panel, "levelUpTitle", levelTitle);
-            UIBuild.Set(panel, "levelUpStats", levelStats);
+            UIBuild.SetArray(panel, "rows", rows);
             UIBuild.Set(panel, "continueButton", cont);
             UIBuild.SetBool(panel, "blocksMapInput", false);
             root.gameObject.SetActive(false);
             return panel;
+        }
+
+        private static BattleXpRow BuildXpRow(RectTransform body, int index)
+        {
+            var row = UIBuild.Rect("XpRow " + (index + 1), body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -196f - index * 150f), new Vector2(940f, 138f));
+            UIBuild.Round(row, Palette.PanelAlt, 34f);
+
+            var portraitBg = UIBuild.Rect("PortraitBackdrop", row, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(104f, 104f));
+            var portraitBgImg = UIBuild.Disc(portraitBg, Palette.Line);
+            var portraitRt = UIBuild.Stretch("Portrait", portraitBg, -4f, -4f, -4f, -4f);
+            portraitRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
+            var portrait = portraitRt.gameObject.AddComponent<AnimalPreviewImage>();
+            UIBuild.SetBool(portrait, "live", false);
+
+            var name = UIBuild.Label("Name", row, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(144f, -12f), new Vector2(380f, 50f),
+                "Arabian Gazelle", 40f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+            name.enableAutoSizing = true;
+            name.fontSizeMin = 26f;
+            name.fontSizeMax = 40f;
+            var level = UIBuild.Label("Level", row, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(530f, -14f), new Vector2(140f, 46f),
+                "Lv. 5", 36f, Palette.Teal, TextAlignmentOptions.MidlineLeft, bold: true);
+            var gain = UIBuild.Label("Gain", row, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-26f, -14f), new Vector2(230f, 46f),
+                "+50 XP", 38f, Palette.Def, TextAlignmentOptions.MidlineRight, bold: true);
+            var barRt = UIBuild.Rect("Bar", row, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(144f, 24f), new Vector2(520f, 26f));
+            var bar = UIBuild.Bar(barRt, Palette.Line, Palette.Def);
+
+            var chipRt = UIBuild.Rect("LevelUpChip", row, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-24f, 16f), new Vector2(230f, 48f));
+            var chipGroup = chipRt.gameObject.AddComponent<CanvasGroup>();
+            chipGroup.blocksRaycasts = false;
+            UIBuild.Round(chipRt, Palette.Primary, 24f);
+            UIBuild.Text(UIBuild.Stretch("Text", chipRt), "LEVEL UP!", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            chipRt.gameObject.SetActive(false);
+
+            var xp = row.gameObject.AddComponent<BattleXpRow>();
+            UIBuild.Set(xp, "portrait", portrait);
+            UIBuild.Set(xp, "portraitBackdrop", portraitBgImg);
+            UIBuild.Set(xp, "nameText", name);
+            UIBuild.Set(xp, "levelText", level);
+            UIBuild.Set(xp, "gainText", gain);
+            UIBuild.Set(xp, "xpBar", bar);
+            UIBuild.Set(xp, "levelUpChip", chipGroup);
+            return xp;
         }
     }
 }

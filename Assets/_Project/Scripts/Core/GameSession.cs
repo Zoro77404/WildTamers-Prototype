@@ -8,8 +8,8 @@ using WildTamers.Animals;
 namespace WildTamers.Core
 {
     /// <summary>
-    /// Game state that survives scene loads: the player's team (saved to disk), map state (location, wild spawns)
-    /// and the battle hand-off between MapScene and BattleScene. Created on first access.
+    /// Game state that survives scene loads: the player's animals (saved to disk), the last fight team,
+    /// map state (location, wild spawns) and the battle hand-off between MapScene and BattleScene. Created on first access.
     /// </summary>
     [DefaultExecutionOrder(-1000)]
     public class GameSession : MonoBehaviour
@@ -20,11 +20,11 @@ namespace WildTamers.Core
         private static bool quitting;
 
         [SerializeField] private List<AnimalInstance> team = new List<AnimalInstance>();
-        [SerializeField] private int activeIndex;
         [SerializeField] private List<WildSpawnRecord> wildSpawns = new List<WildSpawnRecord>();
 
+        private readonly List<string> lastTeamUids = new List<string>();
+        private readonly List<string> seenSpecies = new List<string>();
         private int nextSpawnId = 1;
-        private bool persistenceEnabled = true;
         private bool saveDirty;
         private float autosaveTimer;
         private string pendingMapMessage;
@@ -53,8 +53,12 @@ namespace WildTamers.Core
         // ---------- Team ----------
         public IReadOnlyList<AnimalInstance> Team => team;
         public bool HasStarter => team.Count > 0;
-        public int ActiveIndex => activeIndex;
-        public AnimalInstance ActiveAnimal => team.Count == 0 ? null : team[Mathf.Clamp(activeIndex, 0, team.Count - 1)];
+
+        /// <summary>The animals picked for the last fight (the team select screen starts from these), in pick order.</summary>
+        public IReadOnlyList<AnimalInstance> LastTeam => lastTeamUids.Select(uid => team.Find(a => a.Uid == uid)).Where(a => a != null).ToList();
+
+        /// <summary>First animal of the last fight team (shown on the map HUD); the first animal owned if there is none yet.</summary>
+        public AnimalInstance LeadAnimal => LastTeam.FirstOrDefault() ?? (team.Count > 0 ? team[0] : null);
 
         /// <summary>
         /// Team strength used for wild levels: average of the three highest levels, rounded (1 when empty).
@@ -63,11 +67,20 @@ namespace WildTamers.Core
         public int TeamLevel => team.Count == 0 ? 1
             : Mathf.Max(1, Mathf.RoundToInt((float)team.Select(a => a.Level).OrderByDescending(l => l).Take(3).Average()));
 
-        /// <summary>Raised when animals join, the active animal changes or a battle changes levels/HP.</summary>
+        /// <summary>Raised when animals join, the last team changes or a battle changes levels/HP.</summary>
         public event Action TeamChanged;
 
-        /// <summary>False for a throwaway debug team (BattleScene played directly without a save).</summary>
-        public bool IsPersistent => persistenceEnabled;
+        /// <summary>True if this animal can be picked for a fight: not fainted and not too hurt.</summary>
+        public bool IsFightReady(AnimalInstance animal) => PartySelection.IsFightReady(animal, Config);
+
+        /// <summary>Animals that can be picked for the next fight (see <see cref="PartySelection.Candidates"/>).</summary>
+        public List<AnimalInstance> GetFightCandidates() => PartySelection.Candidates(team, Config);
+
+        /// <summary>How many animals the next fight takes: the party size, or fewer if fewer animals can fight.</summary>
+        public int PartyCapacity => PartySelection.Capacity(team, Config);
+
+        /// <summary>The remembered team (those that can still fight), topped up with the strongest others.</summary>
+        public List<AnimalInstance> ChooseDefaultParty() => PartySelection.Default(team, lastTeamUids, Config);
 
         // ---------- Map ----------
         public bool HasMapOrigin { get; private set; }
@@ -161,16 +174,8 @@ namespace WildTamers.Core
         {
             var animal = new AnimalInstance(species, level);
             team.Add(animal);
-            if (team.Count == 1) activeIndex = 0;
             CommitTeam();
             return animal;
-        }
-
-        public void SetActive(int index)
-        {
-            if (index < 0 || index >= team.Count || index == activeIndex) return;
-            activeIndex = index;
-            CommitTeam();
         }
 
         public void HealTeam()
@@ -186,50 +191,89 @@ namespace WildTamers.Core
             Save();
         }
 
+        /// <summary>Remembers the fight team for next time and saves.</summary>
+        public void SetLastTeam(IEnumerable<AnimalInstance> party)
+        {
+            lastTeamUids.Clear();
+            foreach (var animal in party)
+                if (animal != null && team.Contains(animal) && !lastTeamUids.Contains(animal.Uid)) lastTeamUids.Add(animal.Uid);
+            TeamChanged?.Invoke();
+            Save();
+        }
+
+        // ---------- "New animal!" cards ----------
+        public bool HasSeen(string speciesId) => seenSpecies.Contains(speciesId);
+
+        /// <summary>Species the player owns but has never seen the "New animal!" card for (in the order they were gained).</summary>
+        public List<AnimalData> GetUnseenSpecies()
+        {
+            var list = new List<AnimalData>();
+            foreach (var animal in team)
+            {
+                if (animal.Data == null || seenSpecies.Contains(animal.AnimalId) || list.Contains(animal.Data)) continue;
+                list.Add(animal.Data);
+            }
+            return list;
+        }
+
+        /// <summary>Call when the card was shown; it never pops up again for this species. Saves.</summary>
+        public void MarkSeen(string speciesId)
+        {
+            if (string.IsNullOrEmpty(speciesId) || seenSpecies.Contains(speciesId)) return;
+            seenSpecies.Add(speciesId);
+            Save();
+        }
+
         // ---------- Save API ----------
         private void LoadSave()
         {
-            if (!SaveSystem.TryLoad(out var data)) return;
+            if (Database == null) return;
+            bool hadSave = SaveSystem.TryLoad(out var data);
+            var result = SaveMigration.Apply(hadSave ? data : new SaveData(), Database, Config);
 
             team.Clear();
-            foreach (var entry in data.team)
-            {
-                var animal = AnimalInstance.FromSave(entry, Database, Config);
-                if (animal != null) team.Add(animal);
-                else Debug.LogWarning($"[Wild Tamers] Skipped unknown animal '{entry?.animalId}' in the save file.");
-            }
-            activeIndex = team.Count == 0 ? 0 : Mathf.Clamp(data.activeIndex, 0, team.Count - 1);
+            team.AddRange(result.Team);
+            lastTeamUids.Clear();
+            lastTeamUids.AddRange(result.LastTeam);
+            seenSpecies.Clear();
+            seenSpecies.AddRange(result.SeenSpecies);
+
+            if (hadSave && (result.Converted > 0 || result.Dropped > 0 || result.StartersAdded > 0))
+                Debug.Log($"[Wild Tamers] Old save updated: {result.Converted} animal(s) became new species, {result.StartersAdded} starter(s) added.");
+            if (!hadSave || result.Changed) Save();
         }
 
-        /// <summary>Writes the team to disk now (no-op for a throwaway debug team).</summary>
+        /// <summary>Writes the animals, the last fight team and the seen cards to disk now.</summary>
         public void Save()
         {
             saveDirty = false;
             autosaveTimer = 0f;
-            if (!persistenceEnabled) return;
             if (team.Count == 0)
             {
                 SaveSystem.Delete();
                 return;
             }
 
-            var data = new SaveData { activeIndex = activeIndex };
+            var data = new SaveData();
             foreach (var animal in team) data.team.Add(animal.ToSave());
+            data.lastTeam.AddRange(lastTeamUids);
+            data.seenSpecies.AddRange(seenSpecies);
             SaveSystem.Write(data);
         }
 
-        /// <summary>Testing helper: wipes the save and restarts at the starter pick.</summary>
+        /// <summary>Testing helper: wipes the save and starts again with the three starter animals.</summary>
         public void ResetSave()
         {
             if (Fader.IsBusy) return;
             SaveSystem.Delete();
             team.Clear();
-            activeIndex = 0;
+            lastTeamUids.Clear();
+            seenSpecies.Clear();
             wildSpawns.Clear();
             CurrentBattle = null;
-            persistenceEnabled = true;
             pendingMapMessage = null;
-            saveDirty = false;
+            team.AddRange(SaveMigration.Apply(new SaveData(), Database, Config).Team);
+            Save();
             TeamChanged?.Invoke();
             Fader.LoadScene(SceneNames.Map);
         }
@@ -276,18 +320,26 @@ namespace WildTamers.Core
         }
 
         // ---------- Battle API ----------
-        /// <summary>Starts a battle against a wild spawn using the active team animal, then loads the battle scene.</summary>
-        public bool StartBattle(WildSpawnRecord wild)
+        /// <summary>
+        /// Starts a battle: <paramref name="party"/> (up to the party size, fainted animals are left out)
+        /// against the wild animal, which becomes a boss for the fight. Remembers the party, then loads the battle scene.
+        /// </summary>
+        public bool StartBattle(WildSpawnRecord wild, IReadOnlyList<AnimalInstance> party)
         {
-            if (wild == null || ActiveAnimal == null || Fader.IsBusy) return false;
+            if (wild == null || party == null || Fader.IsBusy) return false;
             var species = Database != null ? Database.Get(wild.animalId) : null;
             if (species == null)
             {
                 Debug.LogError($"Unknown animal id '{wild.animalId}'.");
                 return false;
             }
+            var fighters = party.Where(a => a != null && !a.IsFainted && team.Contains(a)).Distinct().Take(Config.partySize).ToList();
+            if (fighters.Count == 0) return false;
 
-            CurrentBattle = new BattleRequest(new AnimalInstance(species, wild.level), ActiveAnimal, wild.id);
+            var boss = new AnimalInstance(species, wild.level);
+            boss.MakeBoss(Config);
+            SetLastTeam(fighters);
+            CurrentBattle = new BattleRequest(boss, fighters, wild.id);
             Fader.LoadScene(SceneNames.Battle);
             return true;
         }
@@ -295,22 +347,17 @@ namespace WildTamers.Core
         /// <summary>Used when BattleScene is played directly in the editor.</summary>
         public void CreateDebugBattle()
         {
-            if (Database == null || Database.Animals.Count == 0) return;
-            if (!HasStarter)
-            {
-                // No save yet: fight with a throwaway team so testing the battle never skips the real starter pick.
-                persistenceEnabled = false;
-                Debug.Log("[Wild Tamers] Debug battle with a temporary team (not saved).");
-                AddToTeam(Database.Starters.Count > 0 ? Database.Starters[0] : Database.Animals[0], Config.starterLevel);
-            }
+            if (Database == null || Database.Animals.Count == 0 || team.Count == 0) return;
             var wild = Database.PickRandomWild();
             int level = Mathf.Clamp(TeamLevel + UnityEngine.Random.Range(-1, 2), 1, Config.maxLevel);
-            CurrentBattle = new BattleRequest(new AnimalInstance(wild, level), ActiveAnimal, -1);
+            var boss = new AnimalInstance(wild, level);
+            boss.MakeBoss(Config);
+            CurrentBattle = new BattleRequest(boss, ChooseDefaultParty(), -1);
         }
 
         /// <summary>
-        /// Applies a finished battle: the fought animal leaves the map; a win adds it to the team (full HP)
-        /// and gives XP to the fighter; a loss heals the whole team. Saves right away.
+        /// Applies a finished battle: the fought animal leaves the map; a win adds it to the team (full HP, no longer a boss)
+        /// and gives every animal of the party the same XP; a loss heals the whole team. Saves right away.
         /// </summary>
         public BattleResult CompleteBattle(BattleOutcome outcome)
         {
@@ -325,9 +372,16 @@ namespace WildTamers.Core
             switch (outcome)
             {
                 case BattleOutcome.Won:
-                    result.ExperienceGained = Config.ExperienceReward(battle.Player.Level, battle.Wild.Level);
-                    result.Growth = battle.Player.AddExperience(result.ExperienceGained, Config);
+                    int partyLevel = Mathf.Max(1, Mathf.RoundToInt((float)battle.Party.Average(a => a.Level)));
+                    result.ExperienceGained = Config.ExperienceReward(partyLevel, battle.Wild.Level);
+                    foreach (var animal in battle.Party)
+                    {
+                        bool fainted = animal.IsFainted;
+                        result.Party.Add(new PartyGrowth { Animal = animal, WasFainted = fainted, Growth = animal.AddExperience(result.ExperienceGained, Config) });
+                    }
+                    battle.Wild.ClearBoss();
                     battle.Wild.HealFull();
+                    result.JoinedIsNewSpecies = !seenSpecies.Contains(battle.Wild.AnimalId);
                     team.Add(battle.Wild);
                     result.Joined = battle.Wild;
                     SetMapMessage($"{battle.Wild.Name} joined your team!", false);
@@ -337,7 +391,7 @@ namespace WildTamers.Core
                     SetMapMessage("Your team rested and is fully healed.", false);
                     break;
                 case BattleOutcome.Escaped:
-                    SetMapMessage("Got away safely!", false);
+                    SetMapMessage("Your team got away safely!", false);
                     break;
             }
 

@@ -79,9 +79,12 @@ namespace WildTamers.EditorTools
             var hud = BuildHud(canvas.transform, out var teamButtonParent);
             var teamPanel = BuildTeamPanel(canvas.transform);
             var popup = BuildEncounterPopup(canvas.transform);
-            var starter = BuildStarterScreen(canvas.transform);
+            var teamSelect = BuildTeamSelect(canvas.transform);
+            var animalCard = CardBuilder.BuildAnimalCard(canvas.transform);
             var toast = BuildToast(canvas.transform);
             UIBuild.Set(hud, "teamPanel", teamPanel);
+            UIBuild.Set(teamPanel, "animalCard", animalCard);
+            UIBuild.Set(teamSelect, "infoCard", animalCard);
 
             // ---------- Wiring ----------
             UIBuild.Set(mapView, "locationProvider", location);
@@ -110,7 +113,8 @@ namespace WildTamers.EditorTools
             UIBuild.Set(controller, "player", avatar);
             UIBuild.Set(controller, "rangeIndicator", range);
             UIBuild.Set(controller, "spawner", spawner);
-            UIBuild.Set(controller, "starterScreen", starter);
+            UIBuild.Set(controller, "animalCard", animalCard);
+            UIBuild.Set(controller, "teamSelect", teamSelect);
             UIBuild.Set(controller, "encounterPopup", popup);
             UIBuild.Set(controller, "toast", toast);
 
@@ -303,7 +307,7 @@ namespace WildTamers.EditorTools
             var footer = UIBuild.Rect("Footer", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(880f, 120f));
             var footerLayout = footer.gameObject.AddComponent<LayoutElement>();
             footerLayout.preferredHeight = 120f;
-            UIBuild.Text(UIBuild.Stretch("Text", footer, 20f, 0f, 20f, 0f), "Tap an animal to send it into battle.\nWin fights to grow your team!", 34f, Palette.Muted,
+            UIBuild.Text(UIBuild.Stretch("Text", footer, 20f, 0f, 20f, 0f), "Tap an animal to read its story.\nYou pick your fighters before every battle.", 34f, Palette.Muted,
                 TextAlignmentOptions.Center, wrap: true);
             scroll.content = content;
             scroll.viewport = viewport;
@@ -328,46 +332,100 @@ namespace WildTamers.EditorTools
         }
 
         // ------------------------------------------------------------------
-        // Starter screen
+        // Team select (before every fight)
         // ------------------------------------------------------------------
 
-        private static StarterSelectScreen BuildStarterScreen(Transform canvas)
+        private static TeamSelectScreen BuildTeamSelect(Transform canvas)
         {
-            var root = UIBuild.Stretch("StarterSelectScreen", canvas);
+            var root = UIBuild.Stretch("TeamSelectScreen", canvas);
             root.gameObject.AddComponent<CanvasGroup>();
             var bg = UIBuild.Stretch("Background", root);
             var bgImg = bg.gameObject.AddComponent<Image>();
             bgImg.sprite = UISpriteGenerator.Load(UISpriteGenerator.StarterBackground);
             bgImg.raycastTarget = true;
-
             // Soft bubbles for a friendly backdrop.
-            var bubbles = new[] { (new Vector2(-380f, 760f), 520f), (new Vector2(430f, 420f), 380f), (new Vector2(-460f, -520f), 420f), (new Vector2(470f, -820f), 560f) };
+            var bubbles = new[] { (new Vector2(-400f, 780f), 520f), (new Vector2(440f, 380f), 380f), (new Vector2(-470f, -560f), 420f), (new Vector2(480f, -820f), 560f) };
             foreach (var (pos, size) in bubbles)
             {
                 var b = UIBuild.Rect("Bubble", bg, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), pos, new Vector2(size, size));
                 UIBuild.Disc(b, new Color(1f, 1f, 1f, 0.16f));
             }
 
-            UIBuild.Label("Title", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -100f), new Vector2(1000f, 104f),
-                "Choose your partner!", 78f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
-            UIBuild.Label("Subtitle", root, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -204f), new Vector2(940f, 56f),
-                "Your first animal will fight by your side.", 38f, new Color(Palette.Ink.r, Palette.Ink.g, Palette.Ink.b, 0.7f));
+            var content = UIBuild.Stretch("Content", root);
 
-            var cardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabBuilder.StarterCardPrefab);
-            var cards = new StarterCard[3];
+            UIBuild.Label("Title", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -76f), new Vector2(1000f, 104f),
+                "Choose your team", 78f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
+            var subtitle = UIBuild.Label("Subtitle", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(980f, 56f),
+                "Wild Camel  •  Lv. 5", 42f, new Color(Palette.Ink.r, Palette.Ink.g, Palette.Ink.b, 0.85f), TextAlignmentOptions.Center, bold: true);
+            var note = UIBuild.Label("Note", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -240f), new Vector2(980f, 48f),
+                "Pick 3 animals for this fight.", 34f, new Color(Palette.Ink.r, Palette.Ink.g, Palette.Ink.b, 0.7f), TextAlignmentOptions.Center);
+
+            // The three team slots.
+            var slotBackdrops = new Image[3];
+            var slotPortraits = new AnimalPreviewImage[3];
+            var slotEmpty = new GameObject[3];
             for (int i = 0; i < 3; i++)
             {
-                var go = (GameObject)PrefabUtility.InstantiatePrefab(cardPrefab, root);
-                var rt = (RectTransform)go.transform;
-                rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
-                rt.pivot = new Vector2(0.5f, 1f);
-                rt.anchoredPosition = new Vector2(0f, -290f - i * 504f);
-                go.name = $"StarterCard {i + 1}";
-                cards[i] = go.GetComponent<StarterCard>();
+                var slot = UIBuild.Rect("Slot " + (i + 1), content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2((i - 1) * 270f, -318f), new Vector2(200f, 200f));
+                UIBuild.DropShadow(slot, 14f, -6f, 0.16f);
+                slotBackdrops[i] = UIBuild.Disc(slot, Palette.Line);
+                var portraitRt = UIBuild.Stretch("Portrait", slot, -6f, -6f, -6f, -6f);
+                portraitRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
+                slotPortraits[i] = portraitRt.gameObject.AddComponent<AnimalPreviewImage>();
+                UIBuild.SetBool(slotPortraits[i], "live", false);
+                var empty = UIBuild.Text(UIBuild.Stretch("Empty", slot), (i + 1).ToString(), 80f, new Color(1f, 1f, 1f, 0.95f), TextAlignmentOptions.Center, bold: true);
+                slotEmpty[i] = empty.gameObject;
             }
 
-            var screen = root.gameObject.AddComponent<StarterSelectScreen>();
-            UIBuild.SetArray(screen, "cards", cards);
+            // List of animals.
+            var listCard = UIBuild.Stretch("ListCard", content, 50f, 540f, 50f, 262f);
+            UIBuild.DropShadow(listCard, 26f, -10f, 0.18f);
+            UIBuild.Round(listCard, new Color(1f, 1f, 1f, 0.97f), 52f, raycast: true);
+            var scrollRt = UIBuild.Stretch("Scroll", listCard, 20f, 20f, 20f, 20f);
+            var scroll = scrollRt.gameObject.AddComponent<ScrollRect>();
+            var viewport = UIBuild.Stretch("Viewport", scrollRt);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            UIBuild.Plain(viewport, new Color(1f, 1f, 1f, 0f), raycast: true);
+            var list = UIBuild.Rect("Content", viewport, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, Vector2.zero);
+            list.anchorMin = new Vector2(0f, 1f);
+            list.anchorMax = new Vector2(1f, 1f);
+            list.offsetMin = list.offsetMax = Vector2.zero;
+            var layout = list.gameObject.AddComponent<VerticalLayoutGroup>();
+            layout.spacing = 16f;
+            layout.padding = new RectOffset(0, 0, 6, 12);
+            layout.childControlHeight = true;
+            layout.childControlWidth = true;
+            layout.childForceExpandHeight = false;
+            layout.childForceExpandWidth = true;
+            list.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            scroll.content = list;
+            scroll.viewport = viewport;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.scrollSensitivity = 40f;
+
+            // Buttons.
+            var back = UIBuild.CandyButton("BackButton", content, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-14f, 70f), new Vector2(360f, 150f),
+                "Back", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out _, out _);
+            UIBuild.DropShadow((RectTransform)back.transform, 24f, -10f, 0.2f);
+            var fight = UIBuild.CandyButton("FightButton", content, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(14f, 70f), new Vector2(560f, 150f),
+                "Fight!", Palette.Primary, Palette.PrimaryDark, 48f, 58f, out var fightLabel, out _);
+            UIBuild.DropShadow((RectTransform)fight.transform, 24f, -10f, 0.2f);
+
+            var screen = root.gameObject.AddComponent<TeamSelectScreen>();
+            UIBuild.Set(screen, "card", content);
+            UIBuild.Set(screen, "listContent", list);
+            UIBuild.Set(screen, "rowPrefab", AssetDatabase.LoadAssetAtPath<TeamPickRow>(PrefabBuilder.TeamPickRowPrefab));
+            UIBuild.Set(screen, "scroll", scroll);
+            UIBuild.Set(screen, "subtitleText", subtitle);
+            UIBuild.Set(screen, "noteText", note);
+            UIBuild.Set(screen, "fightButton", fight);
+            UIBuild.Set(screen, "fightLabel", fightLabel);
+            UIBuild.Set(screen, "backButton", back);
+            UIBuild.SetArray(screen, "slotPortraits", slotPortraits);
+            UIBuild.SetArray(screen, "slotBackdrops", slotBackdrops);
+            UIBuild.SetArray(screen, "slotEmpty", slotEmpty);
             root.gameObject.SetActive(false);
             return screen;
         }

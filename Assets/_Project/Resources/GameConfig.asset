@@ -31,6 +31,12 @@ MonoBehaviour:
   wildAnimalScale: 1.7
   starterLevel: 5
   teamHealPerSecond: 0.015
+  partySize: 3
+  bossHPMultiplier: 3
+  bossAttackMultiplier: 1.5
+  bossDefenseMultiplier: 1.1
+  bossFocusWeakest: 0.7
+  fightReadyHPFraction: 0.25
   damageScale: 0.85
   damageSpread: {x: 0.85, y: 1.15}
   critChance: 0.12

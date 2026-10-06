@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,8 +12,9 @@ using WildTamers.UI;
 namespace WildTamers.Battle
 {
     /// <summary>
-    /// End-of-battle sheet. Victory: who joined, XP bar filling up and a "Level up!" banner with stat gains.
-    /// Defeat: fainted message and the team heal note. Continue goes back to the map.
+    /// End-of-battle sheet. Victory: who joined and one XP row per animal of your team (all of them share the win),
+    /// each with its bar filling up and a "Level up!" chip. Defeat: fainted message and the team heal note.
+    /// Continue goes on (new-animal card, then back to the map).
     /// </summary>
     public class BattleResultPanel : UIPanel
     {
@@ -21,22 +23,14 @@ namespace WildTamers.Battle
         [SerializeField] private Image titleBadge;
 
         [Header("Experience")]
-        [SerializeField] private GameObject xpSection;
-        [SerializeField] private TMP_Text xpNameText;
-        [SerializeField] private TMP_Text xpLevelText;
-        [SerializeField] private TMP_Text xpGainText;
-        [SerializeField] private StatBar xpBar;
-
-        [Header("Level up")]
-        [SerializeField] private CanvasGroup levelUpGroup;
-        [SerializeField] private TMP_Text levelUpTitle;
-        [SerializeField] private TMP_Text levelUpStats;
+        [SerializeField] private BattleXpRow[] rows = new BattleXpRow[3];
 
         [SerializeField] private Button continueButton;
         [Header("Card heights")]
-        [SerializeField] private float victoryHeight = 444f;
-        [SerializeField] private float levelUpHeight = 520f;
-        [SerializeField] private float defeatHeight = 384f;
+        [Tooltip("Card height = this + the height of every XP row shown.")]
+        [SerializeField] private float victoryBaseHeight = 408f;
+        [SerializeField] private float rowHeight = 150f;
+        [SerializeField] private float defeatHeight = 400f;
         [SerializeField] private Color victoryColor = new Color32(0xFF, 0x8A, 0x3D, 0xFF);
         [SerializeField] private Color defeatColor = new Color32(0x8F, 0xA3, 0xBF, 0xFF);
 
@@ -52,60 +46,61 @@ namespace WildTamers.Battle
         /// <summary>Fires when the player taps Continue.</summary>
         public void OnContinue(Action action) => onContinue = action;
 
-        public IEnumerator PlayVictory(BattleResult result, AnimalInstance fighter, GameConfig config, FighterCard card)
+        /// <param name="levelChanged">Called with the animal and its new level whenever an XP bar wraps (to update the battle cards).</param>
+        public IEnumerator PlayVictory(BattleResult result, GameConfig config, Action<AnimalInstance, int> levelChanged)
         {
             titleText.text = "Victory!";
             if (titleBadge != null) titleBadge.color = victoryColor;
             var joined = result.Joined;
-            messageText.text = joined != null ? $"<b>{joined.Name}</b> (Lv. {joined.Level}) joined your team!" : "You won!";
-            xpSection.SetActive(true);
-            xpNameText.text = fighter.Name;
-            xpGainText.text = $"+{result.ExperienceGained} XP";
-            levelUpGroup.alpha = 0f;
-            levelUpGroup.gameObject.SetActive(false);
+            string joinText = joined != null ? $"<b>{joined.Name}</b> (Lv. {joined.Level}) joined your team!" : "You won!";
+            messageText.text = $"{joinText}\nEach animal of your team gets +{result.ExperienceGained} XP.";
 
-            var growth = result.Growth;
-            SetHeight(growth.LeveledUp ? levelUpHeight : victoryHeight);
-            int level = growth.OldLevel;
-            xpLevelText.text = $"Lv. {level}";
-            xpBar.SetValue(Fraction(growth.OldExperience, level, config), null, instant: true);
+            int count = Mathf.Min(rows.Length, result.Party.Count);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                bool used = i < count;
+                rows[i].gameObject.SetActive(used);
+                if (used) rows[i].Setup(result.Party[i], result.ExperienceGained, config);
+            }
+            SetHeight(victoryBaseHeight + rowHeight * count);
             SetContinue(false);
             Show();
-            yield return Wait(0.45f);
+            yield return Wait(0.5f);
 
-            // Fill the bar, wrapping once per level gained.
-            float from = Fraction(growth.OldExperience, level, config);
-            while (level < growth.NewLevel)
+            // Every bar fills at the same time.
+            int running = count;
+            for (int i = 0; i < count; i++)
             {
-                yield return FillBar(from, 1f, 0.55f);
-                level++;
-                xpLevelText.text = $"Lv. {level}";
-                card.SetLevel(level);
-                StartCoroutine(Punch(xpLevelText.rectTransform, 1.35f));
-                from = 0f;
+                var growth = result.Party[i];
+                StartCoroutine(RunRow(rows[i], growth, config, levelChanged, () => running--));
             }
-            float to = level >= config.maxLevel ? 1f : Fraction(growth.NewExperience, level, config);
-            yield return FillBar(from, to, 0.45f);
-            card.SetXP(to, instant: false);
+            while (running > 0) yield return null;
 
-            if (growth.LeveledUp)
+            bool anyLevelUp = false;
+            for (int i = 0; i < count; i++)
             {
-                levelUpTitle.text = growth.LevelsGained > 1 ? $"Level up! ×{growth.LevelsGained}" : "Level up!";
-                levelUpStats.text =
-                    $"HP <b>+{growth.NewMaxHP - growth.OldMaxHP}</b>   ATK <b>+{growth.NewAttack - growth.OldAttack}</b>   " +
-                    $"DEF <b>+{growth.NewDefense - growth.OldDefense}</b>   SPD <b>+{growth.NewSpeed - growth.OldSpeed}</b>";
-                yield return ShowLevelUp();
+                if (!rows[i].LevelledUp) continue;
+                anyLevelUp = true;
+                StartCoroutine(rows[i].ShowLevelUp());
             }
+            if (anyLevelUp) yield return Wait(0.5f);
             SetContinue(true);
         }
 
-        public void ShowDefeat(AnimalInstance fighter)
+        private IEnumerator RunRow(BattleXpRow row, PartyGrowth growth, GameConfig config, Action<AnimalInstance, int> levelChanged, Action done)
+        {
+            yield return row.Fill(growth, config, level => levelChanged?.Invoke(growth.Animal, level));
+            done();
+        }
+
+        public void ShowDefeat(IReadOnlyList<AnimalInstance> party)
         {
             titleText.text = "Defeated…";
             if (titleBadge != null) titleBadge.color = defeatColor;
-            messageText.text = $"<b>{fighter.Name}</b> fainted.\nYour team rested and is fully healed.";
-            xpSection.SetActive(false);
-            levelUpGroup.gameObject.SetActive(false);
+            messageText.text = party.Count > 1
+                ? "Your whole team fainted.\nIt rested and is fully healed."
+                : $"<b>{party[0].Name}</b> fainted.\nYour team rested and is fully healed.";
+            foreach (var row in rows) row.gameObject.SetActive(false);
             SetHeight(defeatHeight);
             SetContinue(true);
             Show();
@@ -136,47 +131,6 @@ namespace WildTamers.Battle
             canContinue = value;
             continueButton.interactable = value;
         }
-
-        private IEnumerator FillBar(float from, float to, float duration)
-        {
-            for (float t = 0f; t < duration; t += UIEase.DeltaTime)
-            {
-                xpBar.SetValue(Mathf.Lerp(from, to, Mathf.SmoothStep(0f, 1f, t / duration)), null, instant: true);
-                yield return null;
-            }
-            xpBar.SetValue(to, null, instant: true);
-        }
-
-        private IEnumerator ShowLevelUp()
-        {
-            levelUpGroup.gameObject.SetActive(true);
-            var rt = (RectTransform)levelUpGroup.transform;
-            for (float t = 0f; t < 0.4f; t += UIEase.DeltaTime)
-            {
-                float p = t / 0.4f;
-                levelUpGroup.alpha = Mathf.Clamp01(p * 2f);
-                float s = UIEase.OutBack(p, 2.6f);
-                rt.localScale = new Vector3(s, s, 1f);
-                yield return null;
-            }
-            levelUpGroup.alpha = 1f;
-            rt.localScale = Vector3.one;
-            yield return Wait(0.25f);
-        }
-
-        private static IEnumerator Punch(RectTransform rt, float amount)
-        {
-            for (float t = 0f; t < 0.3f; t += UIEase.DeltaTime)
-            {
-                float s = 1f + (amount - 1f) * Mathf.Sin(t / 0.3f * Mathf.PI);
-                rt.localScale = new Vector3(s, s, 1f);
-                yield return null;
-            }
-            rt.localScale = Vector3.one;
-        }
-
-        private static float Fraction(int xp, int level, GameConfig config) =>
-            level >= config.maxLevel ? 1f : (float)xp / Mathf.Max(1, config.ExperienceToNext(level));
 
         private static IEnumerator Wait(float seconds)
         {
