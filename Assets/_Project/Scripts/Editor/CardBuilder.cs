@@ -27,9 +27,9 @@ namespace WildTamers.EditorTools
             var headerText = UIBuild.Text(UIBuild.Stretch("Text", header), "NEW ANIMAL!", 54f, Color.white, TextAlignmentOptions.Center, bold: true);
 
             // Picture.
-            var previewBg = UIBuild.Rect("PreviewBackdrop", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(860f, 520f));
+            var previewBg = UIBuild.Rect("PreviewBackdrop", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -140f), new Vector2(860f, 560f));
             var previewBgImg = UIBuild.Round(previewBg, Palette.PanelAlt, 46f);
-            var previewRt = UIBuild.Rect("Preview", previewBg, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 520f));
+            var previewRt = UIBuild.Rect("Preview", previewBg, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -2f), new Vector2(650f, 650f));
             previewRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
             var preview = previewRt.gameObject.AddComponent<AnimalPreviewImage>();
             UIBuild.SetBool(preview, "live", true);
@@ -45,8 +45,8 @@ namespace WildTamers.EditorTools
             var star = UISpriteGenerator.Load(UISpriteGenerator.Star);
             var spots = new[]
             {
-                (new Vector2(-440f, -150f), 76f), (new Vector2(440f, -190f), 62f), (new Vector2(-470f, -440f), 54f),
-                (new Vector2(470f, -470f), 80f), (new Vector2(-300f, -40f), 48f), (new Vector2(330f, -30f), 56f),
+                (new Vector2(-440f, -150f), 76f), (new Vector2(440f, -190f), 62f), (new Vector2(-470f, -480f), 54f),
+                (new Vector2(470f, -510f), 80f), (new Vector2(-300f, -40f), 48f), (new Vector2(330f, -30f), 56f),
             };
             var sparkles = new RectTransform[spots.Length];
             for (int i = 0; i < spots.Length; i++)
@@ -60,19 +60,19 @@ namespace WildTamers.EditorTools
                 sparkles[i] = rt;
             }
 
-            var name = UIBuild.Label("Name", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -676f), new Vector2(860f, 100f),
+            var name = UIBuild.Label("Name", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -716f), new Vector2(860f, 100f),
                 "Arabian Horse", 80f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
             name.enableAutoSizing = true;
             name.fontSizeMin = 50f;
             name.fontSizeMax = 80f;
-            var style = UIBuild.Label("Style", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -774f), new Vector2(860f, 50f),
+            var style = UIBuild.Label("Style", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -814f), new Vector2(860f, 50f),
                 "Fast & enduring", 38f, Palette.Muted, TextAlignmentOptions.Center);
 
             // Text blocks.
-            Heading(body, "ABOUT", -846f);
-            var description = Paragraph(body, "Description", -892f, 210f);
-            Heading(body, "HISTORY", -1110f);
-            var history = Paragraph(body, "History", -1156f, 290f);
+            Heading(body, "ABOUT", -884f);
+            var description = Paragraph(body, "Description", -930f, 210f);
+            Heading(body, "HISTORY", -1148f);
+            var history = Paragraph(body, "History", -1194f, 280f);
 
             var close = UIBuild.CandyButton("CloseButton", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(520f, 128f),
                 "Awesome!", Palette.Primary, Palette.PrimaryDark, 46f, 50f, out var closeLabel, out _);

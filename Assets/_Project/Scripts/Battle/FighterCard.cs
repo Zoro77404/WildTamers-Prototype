@@ -73,7 +73,6 @@ namespace WildTamers.Battle
             turn = on && !fainted;
             if (turnGlow != null) turnGlow.gameObject.SetActive(turn);
             if (turnBadge != null) turnBadge.SetActive(turn);
-            if (!turn && body != null && isActiveAndEnabled) scale = 1f;
             if (!isActiveAndEnabled) transform.localScale = Vector3.one;
         }
 

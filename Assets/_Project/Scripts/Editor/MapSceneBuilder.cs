@@ -367,8 +367,7 @@ namespace WildTamers.EditorTools
             for (int i = 0; i < 3; i++)
             {
                 var slot = UIBuild.Rect("Slot " + (i + 1), content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2((i - 1) * 270f, -318f), new Vector2(200f, 200f));
-                UIBuild.DropShadow(slot, 14f, -6f, 0.16f);
-                slotBackdrops[i] = UIBuild.Disc(slot, Palette.Line);
+                                slotBackdrops[i] = UIBuild.Disc(slot, Palette.Line);
                 var portraitRt = UIBuild.Stretch("Portrait", slot, -6f, -6f, -6f, -6f);
                 portraitRt.gameObject.AddComponent<RawImage>().raycastTarget = false;
                 slotPortraits[i] = portraitRt.gameObject.AddComponent<AnimalPreviewImage>();
@@ -406,10 +405,10 @@ namespace WildTamers.EditorTools
             scroll.scrollSensitivity = 40f;
 
             // Buttons.
-            var back = UIBuild.CandyButton("BackButton", content, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-14f, 70f), new Vector2(360f, 150f),
+            var back = UIBuild.CandyButton("BackButton", content, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-14f, 70f), new Vector2(440f, 150f),
                 "Back", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out _, out _);
             UIBuild.DropShadow((RectTransform)back.transform, 24f, -10f, 0.2f);
-            var fight = UIBuild.CandyButton("FightButton", content, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(14f, 70f), new Vector2(560f, 150f),
+            var fight = UIBuild.CandyButton("FightButton", content, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(14f, 70f), new Vector2(440f, 150f),
                 "Fight!", Palette.Primary, Palette.PrimaryDark, 48f, 58f, out var fightLabel, out _);
             UIBuild.DropShadow((RectTransform)fight.transform, 24f, -10f, 0.2f);
 

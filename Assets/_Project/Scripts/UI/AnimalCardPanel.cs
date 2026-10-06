@@ -71,7 +71,9 @@ namespace WildTamers.UI
             styleText.text = data.styleLabel;
             if (levelText != null)
             {
-                levelText.gameObject.SetActive(level > 0);
+                // The text sits inside a pill; hide the whole pill when no level is shown.
+                var pill = levelText.transform.parent;
+                (pill != null ? pill.gameObject : levelText.gameObject).SetActive(level > 0);
                 levelText.text = $"Lv. {level}";
             }
             descriptionText.text = data.description;

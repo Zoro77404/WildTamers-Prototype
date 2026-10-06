@@ -34,7 +34,7 @@ namespace WildTamers.EditorTools
         {
             new Vector2(0.21f, 0.405f), new Vector2(0.50f, 0.35f), new Vector2(0.79f, 0.405f)
         };
-        private static readonly Vector2 WildScreenPoint = new Vector2(0.55f, 0.6f);
+        private static readonly Vector2 WildScreenPoint = new Vector2(0.5f, 0.63f);
 
         private static Vector3[] partySpots = new Vector3[3];
         private static Vector3 wildSpot;
@@ -78,8 +78,8 @@ namespace WildTamers.EditorTools
             var partyActors = new BattleActor[3];
             string[] names = { "PartySpotLeft", "PartySpotMiddle", "PartySpotRight" };
             for (int i = 0; i < 3; i++)
-                partyActors[i] = BuildStage(stage.transform, names[i], partySpots[i], wildSpot, 1.25f, 3.0f, flash, guardMat, domeMesh, puff, turnFx);
-            var wildActor = BuildStage(stage.transform, "WildSpot", wildSpot, partySpots[1], 1.85f, 4.2f, flash, guardMat, domeMesh, puff, turnFx);
+                partyActors[i] = BuildStage(stage.transform, names[i], partySpots[i], wildSpot, 1.0f, 2.6f, flash, guardMat, domeMesh, puff, turnFx);
+            var wildActor = BuildStage(stage.transform, "WildSpot", wildSpot, partySpots[1], 2.3f, 4.8f, flash, guardMat, domeMesh, puff, turnFx);
 
             // ---------- Effects ----------
             var fx = SceneSetup.Group("--FX--");
@@ -303,8 +303,8 @@ namespace WildTamers.EditorTools
             ground.Disc((int)MapMaterial.Park, new Vector3(mid.x, 0.03f, mid.z), 11f, 32);
             // Platforms under your three animals and the boss.
             foreach (var spot in partySpots)
-                props.Cylinder((int)MapMaterial.Sand, spot + Vector3.down * 0.05f, 2.0f, 0.3f, 16, (int)MapMaterial.Path);
-            props.Cylinder((int)MapMaterial.Sand, wildSpot + Vector3.down * 0.05f, 3.0f, 0.3f, 16, (int)MapMaterial.Path);
+                props.Cylinder((int)MapMaterial.Sand, spot + Vector3.down * 0.05f, 1.8f, 0.3f, 16, (int)MapMaterial.Path);
+            props.Cylinder((int)MapMaterial.Sand, wildSpot + Vector3.down * 0.05f, 3.4f, 0.3f, 16, (int)MapMaterial.Path);
 
             var rng = new System.Random(7);
             float R() => (float)rng.NextDouble();

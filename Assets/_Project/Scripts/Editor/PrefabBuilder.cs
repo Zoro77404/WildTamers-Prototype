@@ -376,23 +376,23 @@ namespace WildTamers.EditorTools
                 "HP 40/40", 28f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
 
             // Tag for animals that can't fight right now.
-            var resting = UIBuild.Rect("RestingTag", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -22f), new Vector2(170f, 44f));
-            UIBuild.Round(resting, Palette.Neutral, 22f);
-            var restingText = UIBuild.Text(UIBuild.Stretch("Text", resting), "RESTING", 24f, Color.white, TextAlignmentOptions.Center, bold: true);
+            var resting = UIBuild.Rect("RestingTag", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -10f), new Vector2(150f, 38f));
+            UIBuild.Round(resting, Palette.Neutral, 19f);
+            var restingText = UIBuild.Text(UIBuild.Stretch("Text", resting), "RESTING", 22f, Color.white, TextAlignmentOptions.Center, bold: true);
             resting.gameObject.SetActive(false);
 
             // Pick badge (numbered tick) or an empty circle.
-            var pick = UIBuild.Rect("PickBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -6f), new Vector2(80f, 80f));
+            var pick = UIBuild.Rect("PickBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -14f), new Vector2(80f, 80f));
             UIBuild.Disc(pick, Palette.Teal);
             var pickNumber = UIBuild.Text(UIBuild.Stretch("Number", pick), "1", 46f, Color.white, TextAlignmentOptions.Center, bold: true);
             pick.gameObject.SetActive(false);
-            var empty = UIBuild.Rect("EmptyBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -6f), new Vector2(80f, 80f));
+            var empty = UIBuild.Rect("EmptyBadge", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, -14f), new Vector2(80f, 80f));
             UIBuild.Disc(empty, Palette.Line);
             var emptyInner = UIBuild.Rect("Inner", empty, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(56f, 56f));
             UIBuild.Disc(emptyInner, Palette.PanelAlt);
 
             // Info button.
-            var info = UIBuild.Rect("InfoButton", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-136f, -6f), new Vector2(72f, 72f));
+            var info = UIBuild.Rect("InfoButton", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-136f, -14f), new Vector2(72f, 72f));
             var infoImg = UIBuild.Disc(info, Palette.Neutral, raycast: true);
             UIBuild.Text(UIBuild.Stretch("Text", info), "i", 44f, Color.white, TextAlignmentOptions.Center, bold: true);
             var infoButton = info.gameObject.AddComponent<Button>();

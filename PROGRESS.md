@@ -1,9 +1,9 @@
 # PROGRESS
 plan: PLAN.md
 phase: 3 — Arabian roster + 3v1 battles (no PLAN.md entry; user request in chat 2026-10-06)
-status: in-progress
-tested: Phase 2
-updated: 2026-10-06 18:00
+status: done
+tested: Phase 3
+updated: 2026-10-06 19:10
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
@@ -12,51 +12,44 @@ updated: 2026-10-06 18:00
 - github: https://github.com/Zoro77404/WildTamers-Prototype
 
 ## Steps
-- [x] 3.1 Models imported (Eagle Vol.2; Alpaca, White Horse, Husky, Deer UAA), licenses logged
-- [x] 3.2 8 Arabian species built: data, description, history, prefabs (recolor, hump, horns); old six deleted
-- [x] 3.3 Save v2 + migration (old animals → new species, missing starters added), last team, seen cards; 22 EditMode tests green
-- [x] 3.4 3v1 rules: boss ×3 HP/×1.5 ATK/×1.1 DEF, speed order for 4, weakest-target AI, team run, XP for all 3; sim ~80% win
-- [~] 3.5 Battle scene built (3 spots, HUD, results for 3) — needs visual check in Play Mode
-- [~] 3.6 Team select screen built — needs Play Mode check
-- [~] 3.7 Animal card built (map + battle + Team screen) — needs Play Mode check
-- [ ] 3.8 Play-test win / lose / run / restart; tests green; docs
+(none — Phase 3 done)
 
 ## Done
 - Phase 1 — fake map, player + fake GPS, 6 animals, spawner, starter/encounter/team UI, battle hand-off; reviewed + play-tested (2026-10-01)
 - Phase 2 — turn-based battle (arena, UI, AI, juice), XP/level-ups, JSON save, active pick, reset; 13 automated battles + restart verified (2026-10-01)
+- Phase 3 — Arabian roster (8 animals with description + history), starters Camel/Horse/Falcon, save v2 with migration, team select before each fight, 3v1 boss battle, "New animal!" card + tap-to-view; 22 EditMode tests, play-tested win / lose / run / restart (2026-10-06)
 
 ## Map
-- `Assets/_Project/Scripts/` — Core (GameSession, SaveSystem, GameConfig, location), Map, Player, Animals, UI, Battle, Editor (builders + Tests)
-- `Assets/_Project/Scripts/Editor/*Builder.cs` — menu Wild Tamers/Build/* regenerates assets/scenes
-- `Assets/_Project/Resources/` — AnimalDatabase, GameConfig (all tuning)
-- `Assets/_Project/Prefabs/Animals/` — 6 animal prefabs (AnimalVisual + Animator), WildAnimal wrapper
-- `Assets/_Project/Scenes/MapScene.unity` — --Environment--/MapView, --Player--, --Systems--/MapSceneController, --UI--/MapCanvas
-- `Assets/_Project/Scenes/BattleScene.unity` — --Animals--/PlayerSpot+WildSpot, --Systems--/BattleController, --UI--/BattleCanvas
-- Save file: `%USERPROFILE%/AppData/LocalLow/DefaultCompany/WildTamers-Prototype/wildtamers_save.json`
+- `Assets/_Project/Scripts/` — Core (GameSession, SaveSystem, SaveMigration, PartySelection, GameConfig), Map, Player, Animals, UI, Battle, Editor (builders + Tests)
+- `Assets/_Project/Scripts/Editor/*Builder.cs` — menu Wild Tamers/Build/* regenerates assets/scenes (Animal Assets, Prefabs, Map Scene, Battle Scene)
+- `AnimalAssetBuilder.cs` roster = source of truth for species stats, texts, recolors, hump/horns; Debug menu: Render Animal Contact Sheet, Run Balance Simulation
+- `Assets/_Project/Resources/` — AnimalDatabase, GameConfig (all tuning incl. boss multipliers)
+- `Assets/_Project/Scenes/MapScene.unity` — HUD, TeamPanel, EncounterPopup, TeamSelectScreen, AnimalCard, Toast
+- `Assets/_Project/Scenes/BattleScene.unity` — 3 party spots + WildSpot, BattleController, BattleHUD (boss card + 3 team cards), AnimalCard
+- Save file: `%USERPROFILE%/AppData/LocalLow/DefaultCompany/WildTamers-Prototype/wildtamers_save.json` (version 2)
 
 ## Decisions
 - Input: Input System only (activeInputHandler=1) → Keyboard/Mouse.current APIs
-- Roster: Wolf, Fox, Bull, Stag (Quaternius UAA) + Snake, Frog (Quaternius Easy Enemy). No CC0 bear/eagle/boar in matching animated style → Bull=tank, Stag=glass cannon, Frog=sturdy
-- Starters: Fox (fast), Frog (sturdy), Wolf (well-rounded — relabeled after rebalance)
-- Quaternius Drive quota exceeded → same CC0 models via Poly Pizza GLB (Quaternius account)
+- Roster (user, 2026-10-06): Camel, Arabian Horse, Falcon, Saluki, Arabian Oryx, Arabian Gazelle, Arabian Wolf, Arabian Fox. Closest free CC0 models, recolored: Alpaca+hump, White Horse, Eagle (shorter wings), Husky, Stag (no antlers)+straight horns, Deer+curved horns, Wolf, Fox (big ears)
+- There was no Bear/Boar in the project (old roster: Wolf, Fox, Bull, Stag, Snake, Frog). Old saves: fox→Arabian Fox, wolf→Arabian Wolf, bull→Camel, stag→Gazelle, frog→Oryx, snake→Saluki (bear→Camel, boar→Oryx); level/XP/HP kept; missing starters added at level 5
+- Starters: Camel (tank), Arabian Horse (fast), Falcon (glass cannon); no starter-pick screen any more — three "New animal!" cards instead
+- Battle 3v1: every fighter acts once per round by speed (ties random); boss = 3× HP, +50% ATK, +10% DEF (sim: ~81% win for a sensible starter team at equal level, 65% vs +1, 45% vs +2); boss hits the lowest-HP animal 70% of the time; Run = whole team (avg speed vs boss); guard lasts until the owner's next turn
+- XP after a win: every animal of the party gets the full reward (fainted ones too); wild animal joins at full HP as a normal animal
+- "Healthy" for team select = not fainted and ≥25% HP; if nobody qualifies, anyone not fainted can fight; fewer than 3 able → fight with what you have
+- Fainted/hurt animals stay hurt after a win and regen slowly on the map (1.5%/s); a loss heals the whole team
+- Last fight team is remembered (uids in save); the map HUD chip shows its first animal
+- Cards: "New animal!" shows once per species (seenSpecies in the save), on the map at start and in the battle after Continue; Team screen rows open the same card as "Animal info"
 - Map scale: 1u=1m, fight range 13m, camera dist 26–90 (pitch 36–56)
 - Execution order: FakeLocationProvider -200 → MapView -100 → PlayerAvatar -90 (snaps in Awake)
 - UI animations use UIEase.DeltaTime (unscaled, capped 1/30 s) so load hitches don't skip them
-- Battle placeholder clamps tall animals (player 3.4 m, wild 3.8 m) to stay in frame
-- Battle balance (Python sim): dmg = 0.85·power·ATK²/(ATK+DEF)·level(±1%/lv)·spread 0.85–1.15·crit 12% ×1.5 (normal attacks only)·guard ×0.5; ~4.5 rounds, each species 61–67% vs field at equal level; growth 0.06/lv
-- Wild level offsets weighted -2..+2 = 25/30/25/15/5 (most fights winnable); TeamLevel = avg of top-3 levels
-- XP: win = (10 + 8·wildLv)·gap factor; next level = 20 + 10·L
-- Defend/Run resolve first in a round (priority); skill cooldown = own turns that must pass
-- The fought wild animal is removed from the map after any outcome (win/lose/run)
-- Team HP persists between fights; slow regen on the map (1.5%/s) so the loop stays playable
-- 2.8 play-tests changed the save (incl. a reset); the pre-test save was restored afterwards (copy in `_backup/2026-10-01/save-before-2.8`)
+- Battle math: dmg = 0.85·power·ATK²/(ATK+DEF)·level(±1%/lv)·spread 0.85–1.15·crit 12% ×1.5 (normal attacks only)·guard ×0.5; growth 0.06/lv
+- Wild level offsets weighted -2..+2 = 25/30/25/15/5; TeamLevel = avg of top-3 levels; XP win = (10 + 8·wildLv)·gap factor; next level = 20 + 10·L
 
 ## Notes
-- Asset download staging: `_downloads/` (project root, not imported)
-- Scripts backup before review fixes: `_backup/2026-10-01/Scripts`
-- MCP screenshots: pass output_folder `Temp/Shots` (default lands in Assets/Screenshots)
-- Play-test via MCP: UI clicks = EventSystem.RaycastAll + ExecuteEvents; map taps = MapPointerInput.HandleTap (reflection)
-- Long play-tests: install an EditorApplication.update closure via execute_code after entering Play (domain reload clears it on exit); keep its log in AppDomain data and poll it
+- Asset download staging: `_downloads/` (project root, not imported, git-ignored)
+- Original v1 save backup: `_backup/2026-10-06/save-before-phase3.json` (restored after the play-tests, so the next launch shows the migration)
+- MCP screenshots: pass output_folder `Temp/Shots` (default lands in Assets/Screenshots); Game view size "Portrait1080x1920" was added for portrait shots
+- Play-test via MCP: UI clicks = Button.onClick.Invoke via reflection; battle bot = EditorApplication.update closure pressing the action buttons
 
 ## Later
 - Towers can partly hide animals on the map — lower tallest buildings or add x-ray silhouettes
@@ -68,4 +61,4 @@ updated: 2026-10-06 18:00
 - Scenes MapScene (0) and BattleScene (1) are generated by `Wild Tamers/Build/*` menu items — change the builder, then rebuild
 
 ## Next
-None — every phase in PLAN.md is done ("Later" items are out of scope until a new plan).
+None — Phase 3 is done. Open ideas live under "Later".

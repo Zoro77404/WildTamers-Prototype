@@ -39,7 +39,7 @@ namespace WildTamers.UI
             onLeave = leave;
             resolved = false;
 
-            titleText.text = "Wild encounter!";
+            titleText.text = "Wild boss encounter!";
             nameText.text = data.displayName;
             levelText.text = $"Lv. {level}";
             styleText.text = data.styleLabel;

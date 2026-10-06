@@ -148,15 +148,5 @@ namespace WildTamers.UI
             Hide();
             onBack?.Invoke();
         }
-
-        // ---------- Test hooks ----------
-
-        /// <summary>Picks exactly these animals (play-tests drive the screen through this).</summary>
-        public void ForcePick(IEnumerable<AnimalInstance> animals)
-        {
-            picked.Clear();
-            picked.AddRange(animals.Take(capacity));
-            Refresh();
-        }
     }
 }
