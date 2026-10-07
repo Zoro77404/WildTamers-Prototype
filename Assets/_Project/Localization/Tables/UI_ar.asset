@@ -25,12 +25,12 @@ MonoBehaviour:
       m_Items:
       - rid: 8955012208633315439
   - m_Id: 1615454208
-    m_Localized: "\u0627\u0644\u0635\u062D\u0629 {0}/{1}"
+    m_Localized: "\u0627\u0644\u0635\u062D\u0629 {0} \u0645\u0646 {1}"
     m_Metadata:
       m_Items:
       - rid: 8955012208633315439
   - m_Id: 1615454209
-    m_Localized: "+{0} \u062E\u0628\u0631\u0629"
+    m_Localized: "{0} \u062E\u0628\u0631\u0629"
     m_Metadata:
       m_Items:
       - rid: 8955012208633315439
@@ -219,7 +219,8 @@ MonoBehaviour:
     m_Localized: "\u062A\u062D\u0631\u0643 \u0628\u0645\u0641\u0627\u062A\u064A\u062D
       WASD \u0623\u0648 \u0628\u0627\u0644\u0646\u0642\u0631  \u2022  \u0642\u0631\u0628
       \u0628\u0639\u062C\u0644\u0629 \u0627\u0644\u0641\u0623\u0631\u0629  \u2022 
-      \u062F\u0648\u0651\u0631 \u0628\u0645\u0641\u062A\u0627\u062D\u064A Q/E"
+      \u0623\u062F\u0631 \u0627\u0644\u0643\u0627\u0645\u064A\u0631\u0627 \u0628\u0645\u0641\u062A\u0627\u062D\u064A
+      Q/E"
     m_Metadata:
       m_Items:
       - rid: 8955012208633315439
@@ -452,7 +453,7 @@ MonoBehaviour:
       m_Items:
       - rid: 8955012208633315439
   - m_Id: 1619648589
-    m_Localized: "\u0638\u0647\u0631 <b>{0}</b>!"
+    m_Localized: "\u0638\u0647\u0631 <b>{1}</b>!"
     m_Metadata:
       m_Items:
       - rid: 8955012208633315439
@@ -591,6 +592,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8955012208633315439
+  - m_Id: 9248235446272
+    m_Localized: "{0} \u0645\u0646 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315439
   references:
     version: 2
     RefIds:
@@ -706,3 +712,4 @@ MonoBehaviour:
         - id: 1619648612
         - id: 1619648613
         - id: 1619648614
+        - id: 9248235446272

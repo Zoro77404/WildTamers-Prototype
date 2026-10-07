@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
@@ -47,6 +48,16 @@ namespace WildTamers.UI
             Apply();
         }
 
+        private void OnEnable() => Loc.LanguageChanged += ResetNumber;
+
+        private void OnDisable() => Loc.LanguageChanged -= ResetNumber;
+
+        private void ResetNumber()
+        {
+            lastShownNumber = -1;
+            Apply();
+        }
+
         private void Update()
         {
             float dt = UIEase.DeltaTime;
@@ -86,7 +97,7 @@ namespace WildTamers.UI
                 if (number != lastShownNumber)
                 {
                     lastShownNumber = number;
-                    valueText.text = $"{number}/{maxValue}";
+                    valueText.text = Loc.T("common.fraction", number, maxValue);
                 }
             }
         }

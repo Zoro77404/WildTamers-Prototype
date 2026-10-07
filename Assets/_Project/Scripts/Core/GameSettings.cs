@@ -66,7 +66,10 @@ namespace WildTamers.Core
         }
 
         /// <summary>Language the device uses: Arabic if the system language is Arabic, otherwise English.</summary>
-        public static string DetectDeviceLanguage() => Application.systemLanguage == SystemLanguage.Arabic ? Arabic : English;
+        public static string DetectDeviceLanguage() => LanguageFor(Application.systemLanguage);
+
+        /// <summary>"ar" for an Arabic device, "en" for everything else.</summary>
+        public static string LanguageFor(SystemLanguage device) => device == SystemLanguage.Arabic ? Arabic : English;
 
         public static void EnsureLoaded()
         {

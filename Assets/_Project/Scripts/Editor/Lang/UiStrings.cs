@@ -17,8 +17,9 @@ namespace WildTamers.EditorTools
         {
             // ---------- Common ----------
             new Entry("common.level", "Lv. {0}", "مستوى {0}"),
-            new Entry("common.hp", "HP {0}/{1}", "الصحة {0}/{1}"),
-            new Entry("common.xp", "+{0} XP", "+{0} خبرة"),
+            new Entry("common.hp", "HP {0}/{1}", "الصحة {0} من {1}"),
+            new Entry("common.fraction", "{0}/{1}", "{0} من {1}"),
+            new Entry("common.xp", "+{0} XP", "{0} خبرة"),
             new Entry("common.percent", "{0}%", "{0}٪"),
             new Entry("common.close", "Close", "إغلاق"),
             new Entry("common.back", "Back", "رجوع"),
@@ -70,7 +71,7 @@ namespace WildTamers.EditorTools
             new Entry("hud.team", "TEAM", "الفريق"),
             new Entry("hud.hint",
                 "WASD or click to walk  •  Scroll to zoom  •  Q/E to turn",
-                "تحرك بمفاتيح WASD أو بالنقر  •  قرب بعجلة الفأرة  •  دوّر بمفتاحي Q/E"),
+                "تحرك بمفاتيح WASD أو بالنقر  •  قرب بعجلة الفأرة  •  أدر الكاميرا بمفتاحي Q/E"),
             new Entry("toast.closer", "Get closer!  ({0} m to go)", "اقترب أكثر!  بقي {0} م"),
             new Entry("toast.ranaway", "It ran away!", "لقد هرب!"),
             new Entry("toast.joined", "{0} joined your team!", "انضم {0} إلى فريقك!"),

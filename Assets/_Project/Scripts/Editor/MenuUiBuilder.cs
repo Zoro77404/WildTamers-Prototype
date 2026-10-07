@@ -237,7 +237,7 @@ namespace WildTamers.EditorTools
             root.gameObject.AddComponent<CanvasGroup>();
             var backdrop = UIBuild.Backdrop(root, Palette.Backdrop);
 
-            var card = UIBuild.Rect("Card", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(900f, 1000f));
+            var card = UIBuild.Rect("Card", root, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0f), new Vector2(900f, 880f));
             var body = UIBuild.Stretch("Body", card);
             UIBuild.Round(body, Palette.Panel, 60f, raycast: true);
             UIBuild.DropShadow(body, 40f, -18f, 0.3f);

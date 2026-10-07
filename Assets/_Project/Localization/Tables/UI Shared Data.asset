@@ -443,6 +443,10 @@ MonoBehaviour:
     m_Key: result.levelup
     m_Metadata:
       m_Items: []
+  - m_Id: 9248235446272
+    m_Key: common.fraction
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

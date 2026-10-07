@@ -220,6 +220,26 @@ namespace WildTamers.EditorTools.Tests
         }
 
         [Test]
+        public void FirstLaunchPicksArabicOnlyOnAnArabicDevice()
+        {
+            Assert.AreEqual("ar", GameSettings.LanguageFor(SystemLanguage.Arabic));
+            Assert.AreEqual("en", GameSettings.LanguageFor(SystemLanguage.English));
+            Assert.AreEqual("en", GameSettings.LanguageFor(SystemLanguage.French));
+            Assert.AreEqual("en", GameSettings.LanguageFor(SystemLanguage.Unknown));
+        }
+
+        [Test]
+        public void HealthNumbersReadNaturallyInArabic()
+        {
+            Loc.SetLanguage(GameLanguage.Arabic);
+            Assert.AreEqual("37 من 41", Loc.T("common.fraction", 37, 41));
+            Assert.AreEqual("الصحة 37 من 41", Loc.Hp(37, 41));
+            Loc.SetLanguage(GameLanguage.English);
+            Assert.AreEqual("37/41", Loc.T("common.fraction", 37, 41));
+            Assert.AreEqual("HP 37/41", Loc.Hp(37, 41));
+        }
+
+        [Test]
         public void ABrokenSettingsFileFallsBackToDefaults()
         {
             File.WriteAllText(tempSettings, "{ this is not json");

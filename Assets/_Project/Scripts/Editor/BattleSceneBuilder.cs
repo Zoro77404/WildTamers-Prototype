@@ -428,7 +428,7 @@ namespace WildTamers.EditorTools
             var hud = root.gameObject.AddComponent<BattleHUD>();
 
             // Big card for the wild boss on top, three small cards for your animals above the log.
-            var wildCard = BuildCard(root, "WildCard", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(984f, 214f), CardKind.Wild);
+            var wildCard = BuildCard(root, "WildCard", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -178f), new Vector2(984f, 214f), CardKind.Wild);
             var partyCards = new FighterCard[3];
             string[] cardNames = { "PartyCardLeft", "PartyCardMiddle", "PartyCardRight" };
             for (int i = 0; i < 3; i++)
