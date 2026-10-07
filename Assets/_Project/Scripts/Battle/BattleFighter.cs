@@ -1,4 +1,5 @@
 using WildTamers.Animals;
+using WildTamers.Lang;
 
 namespace WildTamers.Battle
 {
@@ -29,11 +30,11 @@ namespace WildTamers.Battle
         public bool IsPlayer { get; }
         public AnimalData Data => Animal.Data;
 
-        /// <summary>Name used in the battle log ("Wild Camel" for the boss).</summary>
-        public string DisplayName => IsPlayer ? Animal.Name : $"Wild {Animal.Name}";
+        /// <summary>Name used in the battle log ("Wild Camel" for the boss), in the current language.</summary>
+        public string DisplayName => IsPlayer ? Animal.The : Data != null ? Data.LocalizedWild : Animal.Name;
 
-        public string AttackName => Data != null && !string.IsNullOrEmpty(Data.normalAttackName) ? Data.normalAttackName : "Tackle";
-        public string SkillName => Data != null && !string.IsNullOrEmpty(Data.skill.skillName) ? Data.skill.skillName : "Skill";
+        public string AttackName => Data != null ? Data.LocalizedAttackName : Loc.T("act.default.attack");
+        public string SkillName => Data != null ? Data.LocalizedSkillName : Loc.T("act.skill");
         public float SkillPower => Data != null ? Data.skill.power : 2f;
 
         /// <summary>Own turns left before the skill can be used again (0 = ready).</summary>

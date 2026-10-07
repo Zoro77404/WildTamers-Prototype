@@ -14,13 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: camel
   displayName: Camel
-  styleLabel: Slow & tanky
-  description: The camel is a tall desert animal with one big hump. The hump stores
-    fat, so a camel can travel a long way without food. Its wide feet walk easily
-    on soft sand.
-  history: For thousands of years, people in Arabia travelled the desert on camels.
-    Camel caravans carried frankincense, spices and trade goods between faraway towns.
-    Bedouin families also drank camel milk and made cloth from its hair.
   themeColor: {r: 0.83137256, g: 0.63529414, b: 0.29803923, a: 1}
   prefab: {fileID: 2813318335772241718, guid: a081940d9ecd322499648859819c4d99, type: 3}
   mapScale: 1
@@ -29,10 +22,7 @@ MonoBehaviour:
   defense: 12
   speed: 7
   growthPerLevel: 0.06
-  normalAttackName: Stomp
   skill:
-    skillName: Sandstorm Slam
     power: 2.3
     cooldownTurns: 4
-    description: A heavy stomp that throws up a cloud of sand.
   spawnWeight: 0.9

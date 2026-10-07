@@ -8,6 +8,7 @@ using WildTamers.Core;
 using WildTamers.Map;
 using WildTamers.Player;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.EditorTools
 {
@@ -76,12 +77,15 @@ namespace WildTamers.EditorTools
             // ---------- UI ----------
             var uiGroup = SceneSetup.Group("--UI--");
             var canvas = SceneSetup.Canvas("MapCanvas", uiGroup.transform);
-            var hud = BuildHud(canvas.transform, out var teamButtonParent);
+            var hud = BuildHud(canvas.transform, out var teamButtonParent, out var pauseButton);
             var teamPanel = BuildTeamPanel(canvas.transform);
             var popup = BuildEncounterPopup(canvas.transform);
             var teamSelect = BuildTeamSelect(canvas.transform);
             var animalCard = CardBuilder.BuildAnimalCard(canvas.transform);
-            var toast = BuildToast(canvas.transform);
+            var confirm = MenuUiBuilder.BuildConfirmPopup(canvas.transform);
+            var settings = MenuUiBuilder.BuildSettingsPanel(canvas.transform, confirm, null, stayInSceneOnReset: false);
+            var pause = MenuUiBuilder.BuildPauseMenu(canvas.transform, pauseButton, settings, confirm, inBattle: false);
+            var toast = MenuUiBuilder.BuildToast(canvas.transform);
             UIBuild.Set(hud, "teamPanel", teamPanel);
             UIBuild.Set(teamPanel, "animalCard", animalCard);
             UIBuild.Set(teamSelect, "infoCard", animalCard);
@@ -127,11 +131,12 @@ namespace WildTamers.EditorTools
         // HUD
         // ------------------------------------------------------------------
 
-        private static MapHUD BuildHud(Transform canvas, out Transform teamButtonParent)
+        private static MapHUD BuildHud(Transform canvas, out Transform teamButtonParent, out Button pauseButton)
         {
             var root = UIBuild.Stretch("HUD", canvas);
             var hud = root.gameObject.AddComponent<MapHUD>();
             teamButtonParent = root;
+            pauseButton = MenuUiBuilder.BuildPauseButton(root);
 
             // Active animal chip (top-left).
             var chip = UIBuild.Rect("ActiveAnimal", root, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(36f, -60f), new Vector2(460f, 150f));
@@ -157,6 +162,7 @@ namespace WildTamers.EditorTools
             var teamButton = UIBuild.CandyButton("TeamButton", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 64f), new Vector2(236f, 248f),
                 "TEAM", Palette.Primary, Palette.PrimaryDark, 118f, 36f, out var teamLabel, out var teamFace);
             UIBuild.DropShadow((RectTransform)teamButton.transform, 30f, -12f, 0.25f);
+            UIBuild.Key(teamLabel, "hud.team");
             var labelRt = teamLabel.rectTransform;
             labelRt.anchorMin = new Vector2(0f, 0f);
             labelRt.anchorMax = new Vector2(1f, 0f);
@@ -174,9 +180,10 @@ namespace WildTamers.EditorTools
             var hintGroup = hint.gameObject.AddComponent<CanvasGroup>();
             hintGroup.blocksRaycasts = false;
             UIBuild.Round(hint, new Color(0.15f, 0.2f, 0.29f, 0.78f), 40f);
-            UIBuild.Text(UIBuild.Stretch("Text", hint, 24f, 0f, 24f, 0f),
-                "WASD or click to walk  •  Scroll to zoom  •  Q/E to turn", 30f, Color.white);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", hint, 24f, 0f, 24f, 0f),
+                "WASD or click to walk  •  Scroll to zoom  •  Q/E to turn", 30f, Color.white), "hud.hint");
 
+            root.gameObject.AddComponent<RTLMirror>();
             UIBuild.Set(hud, "teamButton", teamButton);
             UIBuild.Set(hud, "activeChip", chipGroup);
             UIBuild.Set(hud, "activePortrait", portrait);
@@ -205,6 +212,7 @@ namespace WildTamers.EditorTools
 
             var title = UIBuild.Label("Title", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -40f), new Vector2(800f, 60f),
                 "Wild encounter!", 42f, Palette.Muted, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(title, "encounter.title");
 
             var previewBg = UIBuild.Rect("PreviewBackdrop", body, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -116f), new Vector2(840f, 620f));
             var previewBgImg = UIBuild.Round(previewBg, Palette.PanelAlt, 46f);
@@ -226,10 +234,13 @@ namespace WildTamers.EditorTools
             var stats = PrefabBuilder.BuildStats(body, new Vector2(80f, -1014f), 760f, 40f, 14f, 30f);
 
             var leave = UIBuild.CandyButton("LeaveButton", body, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-14f, 50f), new Vector2(390f, 150f),
-                "Leave", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out _, out _);
+                "Leave", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out var leaveLabel, out _);
+            UIBuild.Key(leaveLabel, "encounter.leave");
             var fight = UIBuild.CandyButton("FightButton", body, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(14f, 50f), new Vector2(390f, 150f),
-                "Fight!", Palette.Primary, Palette.PrimaryDark, 48f, 58f, out _, out _);
+                "Fight!", Palette.Primary, Palette.PrimaryDark, 48f, 58f, out var fightLabel, out _);
+            UIBuild.Key(fightLabel, "encounter.fight");
 
+            root.gameObject.AddComponent<RTLMirror>();
             var popup = root.gameObject.AddComponent<EncounterPopup>();
             UIBuild.Set(popup, "card", card);
             UIBuild.Set(popup, "preview", preview);
@@ -250,7 +261,7 @@ namespace WildTamers.EditorTools
         // Team panel
         // ------------------------------------------------------------------
 
-        private static TeamPanel BuildTeamPanel(Transform canvas)
+        public static TeamPanel BuildTeamPanel(Transform canvas)
         {
             var root = UIBuild.Stretch("TeamPanel", canvas);
             root.gameObject.AddComponent<CanvasGroup>();
@@ -261,8 +272,8 @@ namespace WildTamers.EditorTools
             UIBuild.Round(body, Palette.Panel, 60f, raycast: true);
             UIBuild.DropShadow(body, 40f, -18f, 0.3f);
 
-            UIBuild.Label("Title", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -44f), new Vector2(640f, 86f),
-                "Your Team", 68f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true);
+            UIBuild.Key(UIBuild.Label("Title", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(56f, -44f), new Vector2(640f, 86f),
+                "Your Team", 68f, Palette.Ink, TextAlignmentOptions.MidlineLeft, bold: true), "team.title");
             var count = UIBuild.Label("Count", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(58f, -128f), new Vector2(500f, 48f),
                 "1 animal", 36f, Palette.Muted, TextAlignmentOptions.MidlineLeft);
 
@@ -272,18 +283,6 @@ namespace WildTamers.EditorTools
             var xImg = x.gameObject.AddComponent<Image>();
             xImg.sprite = UISpriteGenerator.Load(UISpriteGenerator.Close);
             xImg.raycastTarget = false;
-
-            // Small testing helper under the close button (asks for a second tap before wiping the save).
-            var reset = UIBuild.Rect("ResetSave", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -168f), new Vector2(330f, 52f));
-            var resetHit = UIBuild.Plain(reset, new Color(1f, 1f, 1f, 0f), raycast: true);
-            var resetLabel = UIBuild.Text(UIBuild.Stretch("Text", reset), "Reset save", 30f, Palette.Muted, TextAlignmentOptions.MidlineRight, bold: true);
-            resetLabel.fontStyle = FontStyles.Underline;
-            var resetButton = reset.gameObject.AddComponent<Button>();
-            resetButton.targetGraphic = resetHit;
-            resetButton.transition = Selectable.Transition.None;
-            var resetNav = resetButton.navigation;
-            resetNav.mode = Navigation.Mode.None;
-            resetButton.navigation = resetNav;
 
             // Scroll list.
             var scrollRt = UIBuild.Stretch("Scroll", body, 40f, 200f, 40f, 44f);
@@ -307,8 +306,8 @@ namespace WildTamers.EditorTools
             var footer = UIBuild.Rect("Footer", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(880f, 120f));
             var footerLayout = footer.gameObject.AddComponent<LayoutElement>();
             footerLayout.preferredHeight = 120f;
-            UIBuild.Text(UIBuild.Stretch("Text", footer, 20f, 0f, 20f, 0f), "Tap an animal to read its story.\nYou pick your fighters before every battle.", 34f, Palette.Muted,
-                TextAlignmentOptions.Center, wrap: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", footer, 20f, 0f, 20f, 0f), "Tap an animal to read its story.\nYou pick your fighters before every battle.", 34f, Palette.Muted,
+                TextAlignmentOptions.Center, wrap: true), "team.footer");
             scroll.content = content;
             scroll.viewport = viewport;
             scroll.horizontal = false;
@@ -325,8 +324,7 @@ namespace WildTamers.EditorTools
             UIBuild.Set(panel, "backdropButton", backdrop);
             UIBuild.Set(panel, "scroll", scroll);
             UIBuild.Set(panel, "footer", footer);
-            UIBuild.Set(panel, "resetButton", resetButton);
-            UIBuild.Set(panel, "resetLabel", resetLabel);
+            root.gameObject.AddComponent<RTLMirror>();
             root.gameObject.SetActive(false);
             return panel;
         }
@@ -353,8 +351,8 @@ namespace WildTamers.EditorTools
 
             var content = UIBuild.Stretch("Content", root);
 
-            UIBuild.Label("Title", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -76f), new Vector2(1000f, 104f),
-                "Choose your team", 78f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Label("Title", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -76f), new Vector2(1000f, 104f),
+                "Choose your team", 78f, Palette.Ink, TextAlignmentOptions.Center, bold: true), "select.title");
             var subtitle = UIBuild.Label("Subtitle", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -180f), new Vector2(980f, 56f),
                 "Wild Camel  •  Lv. 5", 42f, new Color(Palette.Ink.r, Palette.Ink.g, Palette.Ink.b, 0.85f), TextAlignmentOptions.Center, bold: true);
             var note = UIBuild.Label("Note", content, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -240f), new Vector2(980f, 48f),
@@ -406,12 +404,14 @@ namespace WildTamers.EditorTools
 
             // Buttons.
             var back = UIBuild.CandyButton("BackButton", content, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-14f, 70f), new Vector2(440f, 150f),
-                "Back", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out _, out _);
+                "Back", Palette.Neutral, Palette.NeutralDark, 48f, 54f, out var backLabel, out _);
+            UIBuild.Key(backLabel, "common.back");
             UIBuild.DropShadow((RectTransform)back.transform, 24f, -10f, 0.2f);
             var fight = UIBuild.CandyButton("FightButton", content, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(14f, 70f), new Vector2(440f, 150f),
                 "Fight!", Palette.Primary, Palette.PrimaryDark, 48f, 58f, out var fightLabel, out _);
             UIBuild.DropShadow((RectTransform)fight.transform, 24f, -10f, 0.2f);
 
+            root.gameObject.AddComponent<RTLMirror>();
             var screen = root.gameObject.AddComponent<TeamSelectScreen>();
             UIBuild.Set(screen, "card", content);
             UIBuild.Set(screen, "listContent", list);
@@ -427,24 +427,6 @@ namespace WildTamers.EditorTools
             UIBuild.SetArray(screen, "slotEmpty", slotEmpty);
             root.gameObject.SetActive(false);
             return screen;
-        }
-
-        // ------------------------------------------------------------------
-        // Toast
-        // ------------------------------------------------------------------
-
-        private static ToastMessage BuildToast(Transform canvas)
-        {
-            var rt = UIBuild.Rect("Toast", canvas, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(880f, 124f));
-            var group = rt.gameObject.AddComponent<CanvasGroup>();
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
-            var bg = UIBuild.Round(rt, new Color32(0x26, 0x32, 0x4A, 0xEE), 62f);
-            var label = UIBuild.Text(UIBuild.Stretch("Text", rt, 30f, 0f, 30f, 0f), "Get closer!", 42f, Color.white, TextAlignmentOptions.Center, bold: true);
-            var toast = rt.gameObject.AddComponent<ToastMessage>();
-            UIBuild.Set(toast, "label", label);
-            UIBuild.Set(toast, "background", bg);
-            return toast;
         }
     }
 }

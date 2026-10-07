@@ -42,7 +42,7 @@ namespace WildTamers.EditorTools
 
         private class Species
         {
-            public string Id, Name, Model, Style, Description, History, Attack, Skill, SkillDescription, Theme;
+            public string Id, Name, Model, Theme;
             public float SkillPower, Size, Weight = 1f, Hover, MapScale = 1f;
             /// <summary>Non-uniform tweak of the model's proportions (x = width, y = height, z = length).</summary>
             public Vector3 Stretch = Vector3.one;
@@ -60,11 +60,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "camel", Name = "Camel", Model = Uaa + "Alpaca.glb", Size = 3.0f, Theme = "#D4A24C", Weight = 0.9f,
-                Style = "Slow & tanky",
-                Description = "The camel is a tall desert animal with one big hump. The hump stores fat, so a camel can travel a long way without food. Its wide feet walk easily on soft sand.",
-                History = "For thousands of years, people in Arabia travelled the desert on camels. Camel caravans carried frankincense, spices and trade goods between faraway towns. Bedouin families also drank camel milk and made cloth from its hair.",
-                HP = 50, Atk = 12, Def = 12, Spd = 7, Attack = "Stomp",
-                Skill = "Sandstorm Slam", SkillPower = 2.3f, Cooldown = 4, SkillDescription = "A heavy stomp that throws up a cloud of sand.",
+                HP = 50, Atk = 12, Def = 12, Spd = 7,
+                SkillPower = 2.3f, Cooldown = 4,
                 Colors = new Dictionary<string, string>
                 {
                     { "Main", "#C99A56" }, { "Main_Light", "#E4C78F" }, { "Main_Dark", "#A57E46" },
@@ -77,11 +74,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "arabian_horse", Name = "Arabian Horse", Model = Uaa + "WhiteHorse.glb", Size = 3.2f, Theme = "#8FA8C2", Weight = 0.9f,
-                Style = "Fast & enduring",
-                Description = "The Arabian horse is one of the oldest horse breeds in the world. It has a proud high tail, a curved face and lots of stamina. Arabians are quick, smart and gentle with people.",
-                History = "Bedouin families in Arabia carefully raised Arabian horses for many centuries. The horses carried riders across the desert on long journeys, and mares were cherished almost like family. Today, Arabian blood helps make many other horse breeds fast and strong.",
-                HP = 40, Atk = 13, Def = 9, Spd = 17, Attack = "Kick",
-                Skill = "Desert Gallop", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A thundering charge across the sand.",
+                HP = 40, Atk = 13, Def = 9, Spd = 17,
+                SkillPower = 2.2f, Cooldown = 3,
                 Colors = new Dictionary<string, string>
                 {
                     { "Main", "#C7CBCC" }, { "Main_Light", "#E8EBEB" }, { "Hair", "#6B7078" },
@@ -92,11 +86,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "falcon", Name = "Falcon", Model = Vol2 + "Eagle.fbx", Size = 2.5f, Theme = "#C27C3C", Weight = 0.9f, Hover = 0.55f,
-                Style = "Swift glass cannon",
-                Description = "Falcons are fast birds of prey with sharp eyes and strong claws. A diving peregrine falcon can fly faster than 300 kilometres an hour. That makes it the fastest animal in the world.",
-                History = "Falconry, hunting with trained falcons, has been part of Arab life for many centuries. Bedouin hunters used falcons to catch hares and birds, bringing fresh food to the desert camp. Today falconry is a proud tradition in Saudi Arabia, and UNESCO lists it as living cultural heritage.",
-                HP = 28, Atk = 16, Def = 6, Spd = 20, Attack = "Talon Strike",
-                Skill = "Hunting Dive", SkillPower = 2.6f, Cooldown = 3, SkillDescription = "A lightning-fast dive from the sky.",
+                HP = 28, Atk = 16, Def = 6, Spd = 20,
+                SkillPower = 2.6f, Cooldown = 3,
                 Colors = new Dictionary<string, string>
                 {
                     { "Wings", "#70492F" }, { "Head", "#B38D61" }, { "Beak", "#4A4A4A" }, { "Claws", "#E3B84A" },
@@ -111,11 +102,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "saluki", Name = "Saluki", Model = Uaa + "Husky.glb", Size = 2.6f, Theme = "#DDAA66", Weight = 1f,
-                Style = "Speedy sprinter",
-                Description = "The Saluki is a slim, long-legged hunting dog with a silky coat. It is one of the oldest dog breeds and runs very fast over long distances. Its soft eyes make it look kind and calm.",
-                History = "Bedouin people kept salukis to help hunt gazelles and hares in the open desert, often together with falcons. The Saluki was so respected that it was called El Hor, the noble one. Many tribes did not sell their salukis, but gave them as gifts.",
-                HP = 34, Atk = 13, Def = 8, Spd = 18, Attack = "Bite",
-                Skill = "Sprint Chase", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A burst of speed and a quick snap.",
+                HP = 34, Atk = 13, Def = 8, Spd = 18,
+                SkillPower = 2.2f, Cooldown = 3,
                 Colors = new Dictionary<string, string>
                 {
                     { "Material", "#D3A363" }, { "Material.001", "#F3E3C3" }, { "Material.006", "#9A7442" },
@@ -124,11 +112,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "arabian_oryx", Name = "Arabian Oryx", Model = Uaa + "Stag.glb", Size = 3.0f, Theme = "#C9A27A", Weight = 0.7f,
-                Style = "Sturdy horn fighter",
-                Description = "The Arabian oryx is a pale antelope with two long, straight horns. Its white coat reflects the hot sun, and it can live a long time without drinking. It walks on wide hooves that suit soft sand.",
-                History = "Desert people hunted the oryx for meat and hide, and it nearly disappeared. By 1972 it was gone from the wild. Breeding programmes in zoos saved it, and today oryx live again in reserves in Saudi Arabia and Oman.",
-                HP = 44, Atk = 14, Def = 12, Spd = 9, Attack = "Horn Jab",
-                Skill = "Spear Charge", SkillPower = 2.4f, Cooldown = 4, SkillDescription = "Lowers its long horns and charges.",
+                HP = 44, Atk = 14, Def = 12, Spd = 9,
+                SkillPower = 2.4f, Cooldown = 4,
                 Colors = new Dictionary<string, string>
                 {
                     { "Material", "#F4EFE4" }, { "Material.003", "#FFFFFF" }, { "Material.010", "#8A6A50" },
@@ -140,11 +125,8 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "arabian_gazelle", Name = "Arabian Gazelle", Model = Uaa + "Deer.glb", Size = 2.7f, Theme = "#E0A15B", Weight = 1f,
-                Style = "Graceful & quick",
-                Description = "Gazelles are small, graceful antelopes with slim legs and curved horns. They can run very fast and leap high to escape danger. They live in dry plains and rocky hills, and eat leaves and grass.",
-                History = "Bedouin hunters followed gazelles with salukis and falcons, and gazelle meat was a valued food. Arab poets also praised the gazelle's beauty, often comparing lovely eyes to a gazelle's. Today, protected reserves in Saudi Arabia help gazelles stay safe.",
-                HP = 30, Atk = 12, Def = 7, Spd = 19, Attack = "Quick Kick",
-                Skill = "Leap Dash", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A high spring followed by a fast strike.",
+                HP = 30, Atk = 12, Def = 7, Spd = 19,
+                SkillPower = 2.2f, Cooldown = 3,
                 Colors = new Dictionary<string, string>
                 {
                     { "Main", "#CC9C62" }, { "Main_Light", "#F7EEDB" }, { "Main_Dark", "#8C6540" },
@@ -155,21 +137,15 @@ namespace WildTamers.EditorTools
             new Species
             {
                 Id = "arabian_wolf", Name = "Arabian Wolf", Model = Uaa + "Wolf.glb", Size = 2.7f, Theme = "#A8977C", Weight = 1f,
-                Style = "Well-rounded hunter",
-                Description = "The Arabian wolf is a small wolf that lives in the deserts and rocky hills of Arabia. It has a short, sandy coat and big ears. It hunts at night for hares, rodents and birds, alone or in small packs.",
-                History = "Shepherds in Arabia knew the wolf well and kept careful watch over their flocks at night. The wolf also appears in many old Arabic proverbs and stories. By hunting rodents and hares, it helps keep the desert in balance.",
-                HP = 38, Atk = 14, Def = 9, Spd = 15, Attack = "Bite",
-                Skill = "Howling Fang", SkillPower = 2.2f, Cooldown = 3, SkillDescription = "A howl-charged bite.",
+                HP = 38, Atk = 14, Def = 9, Spd = 15,
+                SkillPower = 2.2f, Cooldown = 3,
                 Colors = new Dictionary<string, string> { { "Main", "#B8A586" }, { "Main_Light", "#EADFCB" } },
             },
             new Species
             {
                 Id = "arabian_fox", Name = "Arabian Fox", Model = Uaa + "Fox.glb", Size = 2.3f, Theme = "#E5A653", Weight = 1.2f,
-                Style = "Sly & speedy",
-                Description = "The Arabian fox is a small desert fox with huge ears and pale, sandy fur. Its big ears give off heat to keep it cool, and furry paws protect it from hot sand. It hunts at night for insects, mice and fruit.",
-                History = "Bedouin travellers knew the fox as a quick, clever survivor of the desert. It appears in many Arabic folk stories as a smart trickster. Foxes also eat mice and insects, which helps protect camps and farms from pests.",
-                HP = 33, Atk = 15, Def = 7, Spd = 17, Attack = "Scratch",
-                Skill = "Sand Dash", SkillPower = 2.0f, Cooldown = 2, SkillDescription = "Kicks up sand, then strikes in a flash.",
+                HP = 33, Atk = 15, Def = 7, Spd = 17,
+                SkillPower = 2.0f, Cooldown = 2,
                 Colors = new Dictionary<string, string>
                 {
                     { "Main", "#E9CC9B" }, { "Main_Light", "#FFF6E2" }, { "Grey", "#B8A07C" },
@@ -486,16 +462,12 @@ namespace WildTamers.EditorTools
             }
             data.id = s.Id;
             data.displayName = s.Name;
-            data.styleLabel = s.Style;
-            data.description = s.Description;
-            data.history = s.History;
             data.themeColor = MaterialLibrary.Hex(s.Theme);
             data.maxHP = s.HP;
             data.attack = s.Atk;
             data.defense = s.Def;
             data.speed = s.Spd;
-            data.normalAttackName = s.Attack;
-            data.skill = new SkillData { skillName = s.Skill, power = s.SkillPower, cooldownTurns = s.Cooldown, description = s.SkillDescription };
+            data.skill = new SkillData { power = s.SkillPower, cooldownTurns = s.Cooldown };
             data.spawnWeight = s.Weight;
             data.mapScale = s.MapScale;
             data.growthPerLevel = GrowthPerLevel;

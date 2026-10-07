@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Animals;
 using WildTamers.Core;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
@@ -37,6 +38,8 @@ namespace WildTamers.UI
         private Action onBack;
         private int capacity;
         private bool resolved;
+        private AnimalData foeData;
+        private int foeLevel;
 
         protected override void Awake()
         {
@@ -53,26 +56,52 @@ namespace WildTamers.UI
             onConfirm = confirm;
             onBack = back;
             resolved = false;
+            foeData = foe;
+            this.foeLevel = foeLevel;
 
             var candidates = session.GetFightCandidates();
             capacity = Mathf.Min(session.Config.partySize, candidates.Count);
             picked.Clear();
             picked.AddRange(session.ChooseDefaultParty());
 
-            subtitleText.text = foe != null ? $"Wild {foe.displayName}  •  Lv. {foeLevel}" : "Pick your fighters";
-            if (noteText != null)
-            {
-                bool short_ = capacity < session.Config.partySize;
-                noteText.gameObject.SetActive(true);
-                noteText.text = short_
-                    ? (capacity == 1 ? "Only 1 animal can fight right now." : $"Only {capacity} animals can fight right now.")
-                    : $"Pick {capacity} animals for this fight.";
-            }
-
+            RefreshTexts();
             Rebuild(session, candidates);
             Refresh();
             Show();
             if (scroll != null) scroll.verticalNormalizedPosition = 1f;
+        }
+
+        protected override void OnShown()
+        {
+            Loc.LanguageChanged -= OnLanguageChanged;
+            Loc.LanguageChanged += OnLanguageChanged;
+        }
+
+        protected override void OnHidden() => Loc.LanguageChanged -= OnLanguageChanged;
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Loc.LanguageChanged -= OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged()
+        {
+            RefreshTexts();
+            Refresh();
+        }
+
+        /// <summary>Subtitle and note under the title, in the current language.</summary>
+        private void RefreshTexts()
+        {
+            var session = GameSession.Instance;
+            subtitleText.text = foeData != null ? Loc.T("select.foe", foeData.LocalizedWild, foeLevel) : Loc.T("select.generic");
+            if (noteText != null)
+            {
+                bool short_ = capacity < session.Config.partySize;
+                noteText.gameObject.SetActive(true);
+                noteText.text = short_ ? Loc.T("select.short", capacity) : Loc.T("select.pick", capacity);
+            }
         }
 
         private void Rebuild(GameSession session, List<AnimalInstance> candidates)
@@ -130,7 +159,7 @@ namespace WildTamers.UI
             bool ready = picked.Count == capacity && capacity > 0;
             fightButton.interactable = ready;
             int missing = capacity - picked.Count;
-            fightLabel.text = ready ? "Fight!" : missing == 1 ? "Pick 1 more" : $"Pick {missing} more";
+            fightLabel.text = ready ? Loc.T("select.fight") : Loc.T("select.more", missing);
         }
 
         private void Confirm()

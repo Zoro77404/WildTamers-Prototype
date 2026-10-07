@@ -68,12 +68,12 @@ namespace WildTamers.UI
         {
             if (fill != null)
             {
-                fill.anchorMax = new Vector2(Visible(shown), fill.anchorMax.y);
+                BarAnchors.Fill(fill, Visible(shown));
                 fill.gameObject.SetActive(shown > 0f);
             }
             if (ghost != null)
             {
-                ghost.anchorMax = new Vector2(Visible(ghostValue), ghost.anchorMax.y);
+                BarAnchors.Fill(ghost, Visible(ghostValue));
                 ghost.gameObject.SetActive(ghostValue > shown + 0.001f);
             }
             if (fillImage != null)

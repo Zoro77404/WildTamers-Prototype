@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Animals;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
@@ -24,6 +25,8 @@ namespace WildTamers.UI
         private Action onFight;
         private Action onLeave;
         private bool resolved;
+        private AnimalData shownData;
+        private int shownLevel;
 
         protected override void Awake()
         {
@@ -39,16 +42,37 @@ namespace WildTamers.UI
             onLeave = leave;
             resolved = false;
 
-            titleText.text = "Wild boss encounter!";
-            nameText.text = data.displayName;
-            levelText.text = $"Lv. {level}";
-            styleText.text = data.styleLabel;
+            shownData = data;
+            shownLevel = level;
+            RefreshTexts();
             if (previewBackdrop != null) previewBackdrop.color = Color.Lerp(data.themeColor, Color.white, 0.7f);
             preview.SetAnimal(data);
             stats.Show(data, level, instant: true);
             fightButton.interactable = true;
             leaveButton.interactable = true;
             Show();
+        }
+
+        private void RefreshTexts()
+        {
+            if (shownData == null) return;
+            nameText.text = shownData.LocalizedName;
+            levelText.text = Loc.Level(shownLevel);
+            styleText.text = shownData.LocalizedStyle;
+        }
+
+        protected override void OnShown()
+        {
+            Loc.LanguageChanged -= RefreshTexts;
+            Loc.LanguageChanged += RefreshTexts;
+        }
+
+        protected override void OnHidden() => Loc.LanguageChanged -= RefreshTexts;
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Loc.LanguageChanged -= RefreshTexts;
         }
 
         private void Fight()

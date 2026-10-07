@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
@@ -23,6 +24,14 @@ namespace WildTamers.UI
             Apply();
         }
 
+        private void OnEnable()
+        {
+            Loc.LanguageChanged += Apply;
+            Apply();
+        }
+
+        private void OnDisable() => Loc.LanguageChanged -= Apply;
+
         private void Update()
         {
             if (Mathf.Approximately(current, target)) return;
@@ -35,7 +44,7 @@ namespace WildTamers.UI
         {
             if (fill == null) return;
             float v = current <= 0f ? 0f : Mathf.Lerp(minVisible, 1f, current);
-            fill.anchorMax = new Vector2(v, fill.anchorMax.y);
+            BarAnchors.Fill(fill, v);
             fill.gameObject.SetActive(current > 0f);
         }
     }

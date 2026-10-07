@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using WildTamers.Battle;
 using WildTamers.Map;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.EditorTools
 {
@@ -45,6 +46,7 @@ namespace WildTamers.EditorTools
             SceneSetup.EnsureLayers();
             UIBuild.LoadAssets();
             UISpriteGenerator.GenerateBattleIcons();
+            LocalizationBuilder.BuildFonts();
             SolveSpots();
             var scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             SceneSetup.ClearScene();
@@ -103,6 +105,14 @@ namespace WildTamers.EditorTools
             var canvas = SceneSetup.Canvas("BattleCanvas", uiGroup.transform);
             var hud = BuildUI(canvas.transform, cam);
             var animalCard = CardBuilder.BuildAnimalCard(canvas.transform);
+
+            // Pause button (top corner), pause menu, settings and the "Leave the battle?" popup.
+            var topBar = UIBuild.Stretch("TopBar", canvas.transform);
+            topBar.gameObject.AddComponent<RTLMirror>();
+            var pauseButton = MenuUiBuilder.BuildPauseButton(topBar);
+            var confirm = MenuUiBuilder.BuildConfirmPopup(canvas.transform);
+            var settings = MenuUiBuilder.BuildSettingsPanel(canvas.transform, confirm, null, stayInSceneOnReset: false);
+            MenuUiBuilder.BuildPauseMenu(canvas.transform, pauseButton, settings, confirm, inBattle: true);
 
             UIBuild.SetArray(controller, "playerActors", partyActors);
             UIBuild.Set(controller, "wildActor", wildActor);
@@ -418,7 +428,7 @@ namespace WildTamers.EditorTools
             var hud = root.gameObject.AddComponent<BattleHUD>();
 
             // Big card for the wild boss on top, three small cards for your animals above the log.
-            var wildCard = BuildCard(root, "WildCard", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(984f, 214f), CardKind.Wild);
+            var wildCard = BuildCard(root, "WildCard", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(984f, 214f), CardKind.Wild);
             var partyCards = new FighterCard[3];
             string[] cardNames = { "PartyCardLeft", "PartyCardMiddle", "PartyCardRight" };
             for (int i = 0; i < 3; i++)
@@ -441,6 +451,7 @@ namespace WildTamers.EditorTools
             // Action buttons in one row.
             var actions = UIBuild.Rect("Actions", root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(1008f, 200f));
             var group = actions.gameObject.AddComponent<CanvasGroup>();
+            actions.gameObject.AddComponent<RTLMirror>();
             var attack = ActionButton(actions, "AttackButton", 0, "Attack", "Stomp", UISpriteGenerator.Claw, Palette.Primary, Palette.PrimaryDark);
             var skill = ActionButton(actions, "SkillButton", 1, "Skill", "Ready!", UISpriteGenerator.Star, MaterialLibrary.Hex("#9B7BFF"), MaterialLibrary.Hex("#7A5AD9"));
             var defend = ActionButton(actions, "DefendButton", 2, "Defend", "Half damage", UISpriteGenerator.Shield, Palette.Def, MaterialLibrary.Hex("#2F7FD6"));
@@ -505,7 +516,7 @@ namespace WildTamers.EditorTools
                 ((TextMeshProUGUI)nameText).fontSizeMax = 64f;
                 var tag = UIBuild.Rect("WildTag", body, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-40f, -28f), new Vector2(214f, 52f));
                 UIBuild.Round(tag, Palette.Danger, 26f);
-                UIBuild.Text(UIBuild.Stretch("Text", tag), "WILD BOSS", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+                UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", tag), "WILD BOSS", 28f, Color.white, TextAlignmentOptions.Center, bold: true), "battle.wildtag");
                 levelText = UIBuild.Label("Level", body, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(48f, -96f), new Vector2(150f, 50f),
                     "Lv. 5", 40f, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
 
@@ -550,7 +561,7 @@ namespace WildTamers.EditorTools
             chipImg.preserveAspect = true;
             chipImg.raycastTarget = false;
             if (wild)
-                UIBuild.Text(UIBuild.Stretch("Text", guardRt, 64f, 0f, 14f, 0f), "GUARD", 28f, Color.white, TextAlignmentOptions.MidlineLeft, bold: true);
+                UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", guardRt, 64f, 0f, 14f, 0f), "GUARD", 28f, Color.white, TextAlignmentOptions.MidlineLeft, bold: true), "battle.guard");
             guardRt.gameObject.SetActive(false);
 
             // "TURN" tag shown while it is this animal's turn.
@@ -559,7 +570,7 @@ namespace WildTamers.EditorTools
                 : UIBuild.Rect("TurnBadge", card, new Vector2(0.5f, 1f), new Vector2(0.5f, 0f), new Vector2(0f, 16f), new Vector2(140f, 44f));
             UIBuild.DropShadow(turnTag, 10f, -4f, 0.25f);
             UIBuild.Round(turnTag, MaterialLibrary.Hex("#FFC93C"), 22f);
-            UIBuild.Text(UIBuild.Stretch("Text", turnTag), "TURN", 28f, Palette.Ink, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", turnTag), "TURN", 28f, Palette.Ink, TextAlignmentOptions.Center, bold: true), "battle.turn");
             turnTag.gameObject.SetActive(false);
 
             // Turn-order number in the corner.
@@ -572,9 +583,10 @@ namespace WildTamers.EditorTools
             // Shown on animals that have fainted.
             var out_ = UIBuild.Rect("FaintedBadge", card, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(wild ? 240f : 150f, 56f));
             UIBuild.Round(out_, Palette.Danger, 28f);
-            UIBuild.Text(UIBuild.Stretch("Text", out_), "FAINTED", wild ? 34f : 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", out_), "FAINTED", wild ? 34f : 28f, Color.white, TextAlignmentOptions.Center, bold: true), "battle.fainted");
             out_.gameObject.SetActive(false);
 
+            card.gameObject.AddComponent<RTLMirror>();
             var fighter = card.gameObject.AddComponent<FighterCard>();
             UIBuild.Set(fighter, "nameText", nameText);
             UIBuild.Set(fighter, "levelText", levelText);
@@ -653,33 +665,8 @@ namespace WildTamers.EditorTools
             return numbers;
         }
 
-        private static Material OutlineFontMaterial()
-        {
-            var font = UIBuild.FontBold;
-            var mat = AssetDatabase.LoadAssetAtPath<Material>(OutlineFontPath);
-            if (mat == null)
-            {
-                mat = new Material(font.material);
-                AssetDatabase.CreateAsset(mat, OutlineFontPath);
-            }
-            else
-            {
-                mat.shader = font.material.shader;
-                mat.CopyPropertiesFromMaterial(font.material);
-            }
-            mat.name = "Fredoka-Bold SDF Outline";
-            mat.SetFloat("_OutlineWidth", 0.26f);
-            mat.SetColor("_OutlineColor", Palette.Ink);
-            mat.EnableKeyword("OUTLINE_ON");
-            mat.SetColor("_UnderlayColor", new Color(0.08f, 0.12f, 0.2f, 0.4f));
-            mat.SetFloat("_UnderlayOffsetX", 0f);
-            mat.SetFloat("_UnderlayOffsetY", -0.9f);
-            mat.SetFloat("_UnderlayDilate", 0.3f);
-            mat.SetFloat("_UnderlaySoftness", 0.25f);
-            mat.EnableKeyword("UNDERLAY_ON");
-            EditorUtility.SetDirty(mat);
-            return mat;
-        }
+        private static Material OutlineFontMaterial() =>
+            LocalizationBuilder.EnsureOutlineMaterial(UIBuild.FontBold, OutlineFontPath, "Fredoka-Bold SDF Outline");
 
         private static BattleResultPanel BuildResultPanel(RectTransform parent)
         {
@@ -707,9 +694,11 @@ namespace WildTamers.EditorTools
             for (int i = 0; i < 3; i++) rows[i] = BuildXpRow(body, i);
 
             var cont = UIBuild.CandyButton("ContinueButton", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(500f, 130f),
-                "Continue", Palette.Primary, Palette.PrimaryDark, 48f, 50f, out _, out _);
+                "Continue", Palette.Primary, Palette.PrimaryDark, 48f, 50f, out var contLabel, out _);
+            UIBuild.Key(contLabel, "result.continue");
             UIBuild.DropShadow((RectTransform)cont.transform, 26f, -10f, 0.2f);
 
+            root.gameObject.AddComponent<RTLMirror>();
             var panel = root.gameObject.AddComponent<BattleResultPanel>();
             UIBuild.Set(panel, "card", card);
             UIBuild.Set(panel, "titleText", title);
@@ -750,9 +739,10 @@ namespace WildTamers.EditorTools
             var chipGroup = chipRt.gameObject.AddComponent<CanvasGroup>();
             chipGroup.blocksRaycasts = false;
             UIBuild.Round(chipRt, Palette.Primary, 24f);
-            UIBuild.Text(UIBuild.Stretch("Text", chipRt), "LEVEL UP!", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", chipRt), "LEVEL UP!", 28f, Color.white, TextAlignmentOptions.Center, bold: true), "result.levelup");
             chipRt.gameObject.SetActive(false);
 
+            row.gameObject.AddComponent<RTLMirror>();
             var xp = row.gameObject.AddComponent<BattleXpRow>();
             UIBuild.Set(xp, "portrait", portrait);
             UIBuild.Set(xp, "portraitBackdrop", portraitBgImg);

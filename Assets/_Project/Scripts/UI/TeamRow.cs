@@ -4,6 +4,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Animals;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.UI
 {
@@ -32,7 +34,7 @@ namespace WildTamers.UI
 
         private void Awake()
         {
-            if (selectButton != null) selectButton.onClick.AddListener(() => onSelected?.Invoke(this));
+            if (selectButton != null) selectButton.onClick.AddListener(() => { AudioManager.Play(Sfx.Click); onSelected?.Invoke(this); });
         }
 
         public void Setup(AnimalInstance animal, int index, bool inLastTeam, Action<TeamRow> selected)
@@ -42,9 +44,7 @@ namespace WildTamers.UI
             onSelected = selected;
 
             var data = animal.Data;
-            nameText.text = animal.Name;
-            levelText.text = $"Lv. {animal.Level}";
-            shownHP = -1;
+            RefreshTexts();
             RefreshHP(instant: true);
             if (activeBadge != null) activeBadge.SetActive(inLastTeam);
             if (choosePill != null) choosePill.SetActive(!inLastTeam);
@@ -56,13 +56,25 @@ namespace WildTamers.UI
             }
         }
 
+        private void OnEnable() => Loc.LanguageChanged += RefreshTexts;
+
+        /// <summary>Name, level and HP text in the current language.</summary>
+        private void RefreshTexts()
+        {
+            if (animal == null) return;
+            nameText.text = animal.Name;
+            levelText.text = Loc.Level(animal.Level);
+            shownHP = -1;
+            RefreshHP(instant: true);
+        }
+
         /// <summary>Updates the HP bar/text if HP changed (the team heals while walking).</summary>
         public void RefreshHP(bool instant = false)
         {
             if (animal == null || animal.CurrentHP == shownHP) return;
             shownHP = animal.CurrentHP;
             hpBar.SetValue(animal.HPFraction, null, instant);
-            hpText.text = $"HP {animal.CurrentHP}/{animal.MaxHP}";
+            hpText.text = Loc.Hp(animal.CurrentHP, animal.MaxHP);
         }
 
         /// <summary>Happy little pop when this row is tapped.</summary>
@@ -88,6 +100,7 @@ namespace WildTamers.UI
 
         private void OnDisable()
         {
+            Loc.LanguageChanged -= RefreshTexts;
             transform.localScale = Vector3.one;
             bounce = null;
         }

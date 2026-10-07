@@ -1,7 +1,10 @@
+using System.Linq;
+using RTLTMPro;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
+using WildTamers.Lang;
 using WildTamers.UI;
 
 namespace WildTamers.EditorTools
@@ -133,10 +136,17 @@ namespace WildTamers.EditorTools
 
         // ---------- Text ----------
 
+        /// <summary>
+        /// Adds a text (an RTLTMPro text, so Arabic letters join and run right to left) and a <see cref="LocalizedText"/>
+        /// that swaps the font and mirrors the alignment in Arabic. Texts that don't wrap shrink to fit their rect.
+        /// Use <see cref="Key"/> afterwards for texts that come from the string table.
+        /// </summary>
         public static TextMeshProUGUI Text(RectTransform rt, string text, float size, Color color,
             TextAlignmentOptions align = TextAlignmentOptions.Center, bool bold = false, bool wrap = false)
         {
-            var t = rt.gameObject.AddComponent<TextMeshProUGUI>();
+            var t = rt.gameObject.AddComponent<RTLTextMeshPro>();
+            t.Farsi = false;
+            t.PreserveNumbers = false;
             t.font = bold && FontBold != null ? FontBold : Font;
             t.text = text;
             t.fontSize = size;
@@ -146,7 +156,28 @@ namespace WildTamers.EditorTools
             // Overflow (not Ellipsis): TMP hides a whole line whose height exceeds the rect, which silently blanks big titles.
             t.overflowMode = TextOverflowModes.Overflow;
             t.raycastTarget = false;
+            if (!wrap)
+            {
+                // Arabic is often wider than English: let every one-line text shrink to its rect instead of spilling out.
+                t.enableAutoSizing = true;
+                t.fontSizeMin = Mathf.Max(10f, size * 0.5f);
+                t.fontSizeMax = size;
+            }
+            rt.gameObject.AddComponent<LocalizedText>();
             return t;
+        }
+
+        /// <summary>Makes a text come from the "UI" string table entry <paramref name="key"/> (the English text is shown in the editor).</summary>
+        public static T Key<T>(T text, string key) where T : TMP_Text
+        {
+            var localized = text.GetComponent<LocalizedText>();
+            var so = new SerializedObject(localized);
+            so.FindProperty("key").stringValue = key;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            var entry = UiStrings.All.FirstOrDefault(e => e.Key == key);
+            if (entry.Key == null) Debug.LogError($"[Wild Tamers] No UI text with key '{key}'.");
+            else text.text = entry.En;
+            return text;
         }
 
         public static TextMeshProUGUI Label(string name, Transform parent, Vector2 anchor, Vector2 pivot, Vector2 pos, Vector2 size,
@@ -205,11 +236,12 @@ namespace WildTamers.EditorTools
 
         /// <summary>Label + rounded bar + value. Returns the StatBar component.</summary>
         public static StatBar StatRow(string name, Transform parent, Vector2 anchor, Vector2 pivot, Vector2 pos, float width, float height,
-            string label, Color fillColor, float labelWidth, float valueWidth, float fontSize)
+            string label, Color fillColor, float labelWidth, float valueWidth, float fontSize, string labelKey = null)
         {
             var row = Rect(name, parent, anchor, pivot, pos, new Vector2(width, height));
-            Label("Label", row, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(labelWidth, height),
+            var labelText = Label("Label", row, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(labelWidth, height),
                 label, fontSize, Palette.Muted, TextAlignmentOptions.MidlineLeft, bold: true);
+            if (labelKey != null) Key(labelText, labelKey);
             var value = Label("Value", row, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(valueWidth, height),
                 "0", fontSize, Palette.Ink, TextAlignmentOptions.MidlineRight, bold: true);
 
@@ -221,6 +253,7 @@ namespace WildTamers.EditorTools
             fill.anchorMax = new Vector2(0.5f, 1f);
             fill.offsetMin = fill.offsetMax = Vector2.zero;
             Round(fill, fillColor, barHeight * 0.5f);
+            fill.gameObject.AddComponent<RTLMirrorIgnore>();
 
             var bar = row.gameObject.AddComponent<StatBar>();
             var so = new SerializedObject(bar);
@@ -238,6 +271,7 @@ namespace WildTamers.EditorTools
             var fill = Stretch("Fill", rt, 4f, 4f, 4f, 4f);
             fill.anchorMax = new Vector2(1f, 1f);
             Round(fill, fillColor, (h - 8f) * 0.5f);
+            fill.gameObject.AddComponent<RTLMirrorIgnore>();
             // Fill is driven by anchorMax.x, so keep its insets via offsets.
             var bar = rt.gameObject.AddComponent<StatBar>();
             var so = new SerializedObject(bar);
@@ -255,7 +289,9 @@ namespace WildTamers.EditorTools
             Round(rt, Palette.Line, h * 0.5f);
             var ghost = Stretch("Ghost", rt, inset, inset, inset, inset);
             Round(ghost, MaterialLibrary.Hex("#FFB8B8"), (h - inset * 2f) * 0.5f);
+            ghost.gameObject.AddComponent<RTLMirrorIgnore>();
             var fill = Stretch("Fill", rt, inset, inset, inset, inset);
+            fill.gameObject.AddComponent<RTLMirrorIgnore>();
             var fillImg = Round(fill, Palette.HpGood, (h - inset * 2f) * 0.5f);
             var bar = rt.gameObject.AddComponent<HealthBar>();
             Set(bar, "fill", fill);

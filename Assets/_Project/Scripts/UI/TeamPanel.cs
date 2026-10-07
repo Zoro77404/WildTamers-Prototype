@@ -4,10 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Core;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
-    /// <summary>List of the player's animals (name, level, HP). Tap one to see its info card; small "Reset save" for testing.</summary>
+    /// <summary>List of the player's animals (name, level, HP). Tap one to see its info card.</summary>
     public class TeamPanel : UIPanel
     {
         [SerializeField] private RectTransform listContent;
@@ -25,15 +26,7 @@ namespace WildTamers.UI
         [Tooltip("Card height that isn't the list: title area and bottom padding.")]
         [SerializeField] private float cardChrome = 244f;
 
-        [Header("Reset save (testing)")]
-        [SerializeField] private Button resetButton;
-        [SerializeField] private TMP_Text resetLabel;
-        [SerializeField] private float confirmWindow = 4f;
-        [SerializeField] private Color resetColor = new Color32(0x7A, 0x86, 0x9A, 0xFF);
-        [SerializeField] private Color confirmColor = new Color32(0xEF, 0x47, 0x6F, 0xFF);
-
         private readonly List<TeamRow> rows = new List<TeamRow>();
-        private float confirmUntil = -1f;
         private float hpTimer;
 
         protected override void Awake()
@@ -41,14 +34,14 @@ namespace WildTamers.UI
             base.Awake();
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
             if (backdropButton != null) backdropButton.onClick.AddListener(Hide);
-            if (resetButton != null) resetButton.onClick.AddListener(OnResetPressed);
         }
 
         protected override void OnShown()
         {
             GameSession.Instance.TeamChanged -= Rebuild;
             GameSession.Instance.TeamChanged += Rebuild;
-            SetResetArmed(false);
+            Loc.LanguageChanged -= Rebuild;
+            Loc.LanguageChanged += Rebuild;
             Rebuild();
             if (scroll != null) scroll.verticalNormalizedPosition = 1f;
         }
@@ -56,13 +49,14 @@ namespace WildTamers.UI
         protected override void OnHidden()
         {
             if (GameSession.Exists) GameSession.Instance.TeamChanged -= Rebuild;
-            SetResetArmed(false);
+            Loc.LanguageChanged -= Rebuild;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
             if (GameSession.Exists) GameSession.Instance.TeamChanged -= Rebuild;
+            Loc.LanguageChanged -= Rebuild;
         }
 
         private void Update()
@@ -76,7 +70,6 @@ namespace WildTamers.UI
                 foreach (var row in rows)
                     if (row.gameObject.activeSelf) row.RefreshHP();
             }
-            if (confirmUntil > 0f && Time.unscaledTime > confirmUntil) SetResetArmed(false);
         }
 
         private void Rebuild()
@@ -91,7 +84,7 @@ namespace WildTamers.UI
                 rows[i].gameObject.SetActive(used);
                 if (used) rows[i].Setup(team[i], i, lastTeam.Contains(team[i]), OnRowSelected);
             }
-            if (countText != null) countText.text = team.Count == 1 ? "1 animal" : $"{team.Count} animals";
+            if (countText != null) countText.text = Loc.T("team.count", team.Count);
             if (footer != null) footer.SetAsLastSibling();
             FitCard();
         }
@@ -108,28 +101,6 @@ namespace WildTamers.UI
             LayoutRebuilder.ForceRebuildLayoutImmediate(listContent);
             float height = LayoutUtility.GetPreferredHeight(listContent) + cardChrome;
             card.sizeDelta = new Vector2(card.sizeDelta.x, Mathf.Clamp(height, minCardHeight, maxCardHeight));
-        }
-
-        // ---------- Reset save ----------
-
-        private void OnResetPressed()
-        {
-            if (confirmUntil < 0f)
-            {
-                SetResetArmed(true);
-                return;
-            }
-            SetResetArmed(false);
-            Hide();
-            GameSession.Instance.ResetSave();
-        }
-
-        private void SetResetArmed(bool armed)
-        {
-            confirmUntil = armed ? Time.unscaledTime + confirmWindow : -1f;
-            if (resetLabel == null) return;
-            resetLabel.text = armed ? "Tap again to reset" : "Reset save";
-            resetLabel.color = armed ? confirmColor : resetColor;
         }
     }
 }

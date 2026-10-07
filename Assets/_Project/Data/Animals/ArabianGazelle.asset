@@ -14,14 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: arabian_gazelle
   displayName: Arabian Gazelle
-  styleLabel: Graceful & quick
-  description: Gazelles are small, graceful antelopes with slim legs and curved horns.
-    They can run very fast and leap high to escape danger. They live in dry plains
-    and rocky hills, and eat leaves and grass.
-  history: Bedouin hunters followed gazelles with salukis and falcons, and gazelle
-    meat was a valued food. Arab poets also praised the gazelle's beauty, often comparing
-    lovely eyes to a gazelle's. Today, protected reserves in Saudi Arabia help gazelles
-    stay safe.
   themeColor: {r: 0.8784314, g: 0.6313726, b: 0.35686275, a: 1}
   prefab: {fileID: 8189007836469060117, guid: 38911c61d1d487e4c836d4fad4cf2c16, type: 3}
   mapScale: 1
@@ -30,10 +22,7 @@ MonoBehaviour:
   defense: 7
   speed: 19
   growthPerLevel: 0.06
-  normalAttackName: Quick Kick
   skill:
-    skillName: Leap Dash
     power: 2.2
     cooldownTurns: 3
-    description: A high spring followed by a fast strike.
   spawnWeight: 1

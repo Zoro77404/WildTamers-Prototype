@@ -36,6 +36,7 @@ namespace WildTamers.UI
         {
             Init();
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
             label.text = message;
             if (background != null) background.color = warning ? warningColor : normalColor;
             if (routine != null) StopCoroutine(routine);

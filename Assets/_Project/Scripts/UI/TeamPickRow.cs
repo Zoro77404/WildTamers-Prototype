@@ -3,6 +3,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Animals;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.UI
 {
@@ -36,8 +38,8 @@ namespace WildTamers.UI
 
         private void Awake()
         {
-            if (selectButton != null) selectButton.onClick.AddListener(() => onToggle?.Invoke(this));
-            if (infoButton != null) infoButton.onClick.AddListener(() => onInfo?.Invoke(this));
+            if (selectButton != null) selectButton.onClick.AddListener(() => { AudioManager.Play(Sfx.Click); onToggle?.Invoke(this); });
+            if (infoButton != null) infoButton.onClick.AddListener(() => { AudioManager.Play(Sfx.Click); onInfo?.Invoke(this); });
         }
 
         public void Setup(AnimalInstance animal, bool selectable, Action<TeamPickRow> toggle, Action<TeamPickRow> info)
@@ -48,23 +50,31 @@ namespace WildTamers.UI
             onInfo = info;
 
             var data = animal.Data;
-            nameText.text = animal.Name;
-            levelText.text = $"Lv. {animal.Level}";
+            RefreshTexts();
             hpBar.SetValue(animal.HPFraction, null, instant: true);
-            hpText.text = $"HP {animal.CurrentHP}/{animal.MaxHP}";
             if (data != null)
             {
                 if (portraitBackdrop != null) portraitBackdrop.color = Color.Lerp(data.themeColor, Color.white, 0.65f);
                 portrait.SetAnimal(data);
             }
-            if (restingTag != null)
-            {
-                restingTag.SetActive(!selectable);
-                if (restingText != null) restingText.text = animal.IsFainted ? "FAINTED" : "RESTING";
-            }
+            if (restingTag != null) restingTag.SetActive(!selectable);
             if (group != null) group.alpha = selectable ? 1f : 0.55f;
             if (selectButton != null) selectButton.interactable = selectable;
             SetPick(0);
+        }
+
+        private void OnEnable() => Loc.LanguageChanged += RefreshTexts;
+
+        private void OnDisable() => Loc.LanguageChanged -= RefreshTexts;
+
+        /// <summary>Name, level, HP and the resting tag in the current language.</summary>
+        private void RefreshTexts()
+        {
+            if (Animal == null) return;
+            nameText.text = Animal.Name;
+            levelText.text = Loc.Level(Animal.Level);
+            hpText.text = Loc.Hp(Animal.CurrentHP, Animal.MaxHP);
+            if (restingText != null) restingText.text = Loc.T(Animal.IsFainted ? "select.fainted" : "select.resting");
         }
 
         /// <summary>Order the animal was picked in (1–3), or 0 when not picked.</summary>

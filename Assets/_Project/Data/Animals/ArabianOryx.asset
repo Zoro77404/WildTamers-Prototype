@@ -14,13 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: arabian_oryx
   displayName: Arabian Oryx
-  styleLabel: Sturdy horn fighter
-  description: The Arabian oryx is a pale antelope with two long, straight horns.
-    Its white coat reflects the hot sun, and it can live a long time without drinking.
-    It walks on wide hooves that suit soft sand.
-  history: Desert people hunted the oryx for meat and hide, and it nearly disappeared.
-    By 1972 it was gone from the wild. Breeding programmes in zoos saved it, and
-    today oryx live again in reserves in Saudi Arabia and Oman.
   themeColor: {r: 0.7882353, g: 0.63529414, b: 0.47843137, a: 1}
   prefab: {fileID: 8203332739735985010, guid: c7fde41ba1ba52a47af6d956a68f1d24, type: 3}
   mapScale: 1
@@ -29,10 +22,7 @@ MonoBehaviour:
   defense: 12
   speed: 9
   growthPerLevel: 0.06
-  normalAttackName: Horn Jab
   skill:
-    skillName: Spear Charge
     power: 2.4
     cooldownTurns: 4
-    description: Lowers its long horns and charges.
   spawnWeight: 0.7

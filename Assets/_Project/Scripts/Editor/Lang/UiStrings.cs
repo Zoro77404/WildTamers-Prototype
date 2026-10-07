@@ -132,7 +132,7 @@ namespace WildTamers.EditorTools
             new Entry("act.default.attack", "Tackle", "ضربة"),
 
             // ---------- Battle: log ----------
-            new Entry("log.appeared", "A wild <b>{0}</b> appeared!", "ظهر <b>{0}</b>!"),
+            new Entry("log.appeared", "A wild <b>{0}</b> appeared!", "ظهر <b>{1}</b>!"),
             new Entry("log.go", "Go, {0}!", "إلى المعركة: {0}!"),
             new Entry("log.what", "What will <b>{0}</b> do?", "ماذا سيفعل <b>{0}</b>؟"),
             new Entry("log.guarding", "<b>{0}</b> is guarding!", "<b>{0}</b> يتخذ وضع الدفاع!"),

@@ -3,7 +3,7 @@ plan: PLAN.md
 phase: 4 — Main menu, settings, pause, Arabic localization (no PLAN.md entry; user request in chat 2026-10-07)
 status: in-progress
 tested: Phase 3
-updated: 2026-10-07 19:24
+updated: 2026-10-07 19:50
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
@@ -15,10 +15,10 @@ updated: 2026-10-07 19:24
 - [x] 4.1 Packages: Unity Localization, RTLTMPro, Tajawal font + Arabic TMP asset — Localization 1.5.13, RTLTMPro embedded, Tajawal static TMP fonts
 - [x] 4.2 Core: Loc facade, GameSettings (saved), string tables en/ar (UI keys) — Loc facade, GameSettings, en/ar tables built (107 UI texts), plurals verified
 - [x] 4.3 Arabic + English animal texts in tables (names, style, description, history, moves) — 8 animals x 9 texts written in Arabic + English, in the Animals table
-- [~] 4.4 Localize every runtime script/builder text (map, battle, cards, popups, toasts)
-- [ ] 4.5 RTL: text component, font swap, alignment + layout mirroring
-- [ ] 4.6 Audio: CC0 music + sfx, AudioManager, button/hit sounds
-- [ ] 4.7 Main menu scene + animated background, Settings, Pause, Confirm popup, Reset save moved
+- [x] 4.4 Localize every runtime script/builder text (map, battle, cards, popups, toasts) — all runtime texts via Loc, log built from functions, tests added
+- [x] 4.5 RTL: text component, font swap, alignment + layout mirroring — RTLTMPro text, font swap, mirrored layouts, bars fill from right
+- [x] 4.6 Audio: CC0 music + sfx, AudioManager, button/hit sounds — CC0 menu/battle music + 7 sfx, AudioManager with crossfade
+- [~] 4.7 Main menu scene + animated background, Settings, Pause, Confirm popup, Reset save moved
 - [ ] 4.8 Rebuild scenes, build settings, scene flow, first-launch language
 - [ ] 4.9 Tests + EN/AR screenshots of every screen, fix issues
 - [ ] 4.10 Docs, PROGRESS, final push

@@ -4,6 +4,8 @@ using System.Linq;
 using UnityEngine;
 using WildTamers.Core;
 using WildTamers.UI;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.Battle
 {
@@ -35,10 +37,6 @@ namespace WildTamers.Battle
         [SerializeField] private Color critColor = new Color32(0xFF, 0xC9, 0x3C, 0xFF);
         [SerializeField] private Color guardColor = new Color32(0x9F, 0xD8, 0xFF, 0xFF);
 
-        private const string DamageHex = "#EF476F";
-        private const string CritHex = "#FF8A3D";
-        private const string GuardHex = "#4DA3FF";
-
         private GameSession session;
         private GameConfig config;
         private readonly List<BattleFighter> party = new List<BattleFighter>();
@@ -60,11 +58,12 @@ namespace WildTamers.Battle
         {
             session = GameSession.Instance;
             config = session.Config;
+            AudioManager.Instance.PlayMusic(Music.Battle);
             if (session.CurrentBattle == null) session.CreateDebugBattle();
             var battle = session.CurrentBattle;
             if (battle == null || battle.Party == null || battle.Party.Count == 0 || battle.Wild == null)
             {
-                hud.SetLog("No animals to battle.");
+                hud.SetLog(() => Loc.T("log.noanimals"));
                 StartCoroutine(ReturnSoon());
                 return;
             }
@@ -100,10 +99,10 @@ namespace WildTamers.Battle
         {
             // ---------- Intro ----------
             StartCoroutine(wildActor.Enter(0.1f, fromAbove: true));
-            hud.SetLog($"A wild <b>{wild.Animal.Name}</b> appeared!");
+            hud.SetLog(() => Loc.T("log.appeared", wild.Animal.Name, wild.DisplayName));
             yield return Wait(1.0f);
             for (int i = 0; i < party.Count; i++) StartCoroutine(actors[party[i]].Enter(0.14f * i, fromAbove: false));
-            hud.SetLog($"Go, {JoinNames(party)}!");
+            hud.SetLog(() => Loc.T("log.go", JoinNames(party)));
             yield return Wait(0.85f + 0.14f * party.Count);
 
             // ---------- Rounds ----------
@@ -157,7 +156,7 @@ namespace WildTamers.Battle
         private IEnumerator PlayerTurn(BattleFighter fighter)
         {
             hud.RefreshActions(fighter, BattleRules.EscapeChance(party, wild, failedEscapes, config));
-            hud.SetLog($"What will <b>{fighter.Animal.Name}</b> do?");
+            hud.SetLog(() => Loc.T("log.what", fighter.Animal.The));
             chosenAction = null;
             hud.SetActionsVisible(true);
             while (chosenAction == null) yield return null;
@@ -194,7 +193,7 @@ namespace WildTamers.Battle
         private IEnumerator Guard(BattleFighter fighter)
         {
             SetGuard(fighter, true);
-            hud.SetLog($"<b>{fighter.DisplayName}</b> is guarding!");
+            hud.SetLog(() => Loc.T("log.guarding", fighter.DisplayName));
             yield return Wait(afterAction + 0.15f);
         }
 
@@ -202,11 +201,14 @@ namespace WildTamers.Battle
         {
             var actorView = actors[actor];
             var targetView = actors[target];
-            string move = skill ? actor.SkillName : actor.AttackName;
             if (skill) actor.UseSkill();
-            hud.SetLog(actor.IsPlayer
-                ? $"<b>{actor.DisplayName}</b> used <b>{move}</b>!"
-                : $"<b>{actor.DisplayName}</b> used <b>{move}</b> on <b>{target.Animal.Name}</b>!");
+            hud.SetLog(() =>
+            {
+                string move = skill ? actor.SkillName : actor.AttackName;
+                return actor.IsPlayer
+                    ? Loc.T("log.used", actor.DisplayName, move)
+                    : Loc.T("log.usedon", actor.DisplayName, move, target.Animal.The);
+            });
 
             var theme = actor.Data != null ? actor.Data.themeColor : Color.white;
             yield return actorView.Attack(targetView, skill, theme, sparks, () =>
@@ -215,10 +217,9 @@ namespace WildTamers.Battle
                 target.Animal.CurrentHP -= hit.Damage;
                 ShowHit(actorView, targetView, target, hit, skill, theme);
 
-                string damage = $"<color={DamageHex}>{hit.Damage} damage</color>";
-                if (hit.Critical) hud.AppendLog($" <color={CritHex}>Critical hit!</color> {damage}");
-                else if (hit.Guarded) hud.AppendLog($" <color={GuardHex}>Guarded:</color> {damage}");
-                else hud.AppendLog($" {damage}");
+                int damage = hit.Damage;
+                bool crit = hit.Critical, guarded = hit.Guarded;
+                hud.AppendLog(() => " " + (crit ? Loc.T("log.crit") + " " : guarded ? Loc.T("log.guarded") + " " : "") + Loc.T("log.damage", damage));
             });
             yield return Wait(afterAction + hud.LogTimeLeft);
 
@@ -231,7 +232,7 @@ namespace WildTamers.Battle
             SetGuard(fighter, false);
             actors[fighter].SetTurnMarker(false);
             hud.CardFor(fighter).SetFainted(true);
-            hud.SetLog($"<b>{fighter.Animal.Name}</b> fainted!");
+            hud.SetLog(() => Loc.T("log.fainted", fighter.DisplayName));
             yield return actors[fighter].Faint();
             yield return Wait(readPause * 0.7f);
         }
@@ -239,6 +240,7 @@ namespace WildTamers.Battle
         private void ShowHit(BattleActor attackerView, BattleActor targetView, BattleFighter target, HitResult hit, bool skill, Color theme)
         {
             targetView.TakeHit(attackerView.transform.position, hit.Critical, hit.Guarded);
+            AudioManager.Play(hit.Critical ? Sfx.Crit : hit.Guarded ? Sfx.Guard : Sfx.Hit);
             var card = hud.CardFor(target);
             card.SetHP(target.Animal);
             card.Punch();
@@ -254,7 +256,7 @@ namespace WildTamers.Battle
             if (hit.Guarded) shake *= 0.5f;
             if (cameraShake != null) cameraShake.Shake(shake);
 
-            string caption = hit.Critical ? "CRITICAL!" : hit.Guarded ? "GUARD" : null;
+            string caption = hit.Critical ? Loc.T("battle.crit") : hit.Guarded ? Loc.T("battle.guardcaption") : null;
             var color2 = hit.Critical ? critColor : hit.Guarded ? guardColor : damageColor;
             float size = hit.Critical ? 1.35f : skill ? 1.15f : 1f;
             hud.Numbers.Show(targetView.HeadPoint, hit.Damage.ToString(), color2, size, caption);
@@ -264,12 +266,12 @@ namespace WildTamers.Battle
         private IEnumerator TryRun(BattleFighter runner)
         {
             float chance = BattleRules.EscapeChance(party, wild, failedEscapes, config);
-            hud.SetLog("Your team tries to run…");
+            hud.SetLog(() => Loc.T("log.tryrun"));
             yield return Wait(0.45f);
             if (Random.value < chance)
             {
                 escaped = true;
-                hud.SetLog("Your team got away safely!");
+                hud.SetLog(() => Loc.T("log.gotaway"));
                 int running = 0;
                 foreach (var fighter in party.Where(p => !p.IsFainted))
                 {
@@ -281,7 +283,7 @@ namespace WildTamers.Battle
             else
             {
                 failedEscapes++;
-                hud.SetLog($"Couldn't get away from the <b>{wild.DisplayName}</b>!");
+                hud.SetLog(() => Loc.T("log.cantrun", wild.DisplayName));
                 yield return actors[runner].Stumble();
                 yield return Wait(afterAction);
             }
@@ -308,18 +310,19 @@ namespace WildTamers.Battle
         private IEnumerator FinishVictory()
         {
             foreach (var fighter in everyone) SetGuard(fighter, false);
-            hud.SetLog($"<b>{wild.DisplayName}</b> fainted!");
+            hud.SetLog(() => Loc.T("log.fainted", wild.DisplayName));
             yield return wildActor.Faint();
             yield return Wait(readPause);
 
             var result = session.CompleteBattle(BattleOutcome.Won);
+            AudioManager.Play(Sfx.Win);
             StartCoroutine(wildActor.Revive(sparks, wild.Data != null ? wild.Data.themeColor : Color.white));
             hud.WildCard.SetHP(wild.Animal);
-            hud.SetLog($"<b>{wild.Animal.Name}</b> joined your team!");
+            hud.SetLog(() => Loc.T("log.joined", wild.Animal.The));
             foreach (var fighter in party.Where(p => !p.IsFainted)) StartCoroutine(actors[fighter].Celebrate());
             yield return Wait(0.95f);
 
-            hud.SetLog($"Everyone gained <b>{result.ExperienceGained} XP</b>!");
+            hud.SetLog(() => Loc.T("log.xp", result.ExperienceGained));
             yield return Wait(0.5f);
             hud.SetLogVisible(false);
             finished = true;
@@ -333,9 +336,10 @@ namespace WildTamers.Battle
         private IEnumerator FinishDefeat()
         {
             foreach (var fighter in everyone) SetGuard(fighter, false);
-            hud.SetLog("Your whole team fainted…");
+            hud.SetLog(() => Loc.T("log.wipe"));
             yield return Wait(readPause);
             session.CompleteBattle(BattleOutcome.Lost);
+            AudioManager.Play(Sfx.Lose);
             hud.SetLogVisible(false);
             finished = true;
             hud.Result.ShowDefeat(party.Select(p => p.Animal).ToList());
@@ -368,12 +372,8 @@ namespace WildTamers.Battle
             session.ReturnToMap();
         }
 
-        private static string JoinNames(IReadOnlyList<BattleFighter> fighters)
-        {
-            var names = fighters.Select(f => $"<b>{f.Animal.Name}</b>").ToList();
-            if (names.Count == 1) return names[0];
-            return string.Join(", ", names.Take(names.Count - 1)) + " and " + names[names.Count - 1];
-        }
+        private static string JoinNames(IReadOnlyList<BattleFighter> fighters) =>
+            Loc.JoinNames(fighters.Select(f => $"<b>{f.Animal.The}</b>").ToList());
 
         private static IEnumerator Wait(float seconds)
         {

@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using WildTamers.Core;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.Battle
 {
@@ -45,6 +46,11 @@ namespace WildTamers.Battle
         private Coroutine logRoutine;
         private Coroutine panelRoutine;
         private int revealedCharacters;
+        private float typedChars;
+        private int typedTotal;
+        private readonly List<Func<string>> logParts = new List<Func<string>>();
+        private BattleFighter actionFighter;
+        private float actionEscapeChance;
 
         public event Action<BattleAction> ActionChosen;
 
@@ -60,6 +66,25 @@ namespace WildTamers.Battle
             runButton.Clicked += () => Choose(BattleAction.Run);
             if (resultPanel != null) resultPanel.HideImmediate();
             SetActionsVisible(false, instant: true);
+        }
+
+        private void OnEnable() => Loc.LanguageChanged += OnLanguageChanged;
+
+        private void OnDisable() => Loc.LanguageChanged -= OnLanguageChanged;
+
+        /// <summary>Redraws the action buttons and the log line in the new language (the log is kept as functions, not text).</summary>
+        private void OnLanguageChanged()
+        {
+            if (actionFighter != null) ApplyActionTexts();
+            if (logParts.Count == 0) return;
+            if (logRoutine != null)
+            {
+                StopCoroutine(logRoutine);
+                logRoutine = null;
+                if (logPanel != null) logPanel.localScale = Vector3.one;
+            }
+            logText.text = BuildLog();
+            logText.maxVisibleCharacters = 99999;
         }
 
         /// <summary>Card slot (0 left, 1 middle, 2 right) for the <paramref name="index"/>-th of <paramref name="count"/> animals.</summary>
@@ -115,20 +140,31 @@ namespace WildTamers.Battle
 
         public void RefreshActions(BattleFighter fighter, float escapeChance)
         {
-            attackButton.Set("Attack", fighter.AttackName);
+            actionFighter = fighter;
+            actionEscapeChance = escapeChance;
+            ApplyActionTexts();
             attackButton.SetInteractable(true);
 
             bool ready = fighter.SkillReady;
-            int left = fighter.SkillCooldown;
-            skillButton.Set("Skill", ready ? fighter.SkillName : left == 1 ? "Ready next turn" : $"Ready in {left} turns");
             skillButton.SetInteractable(ready);
-            skillButton.SetBadge(ready ? null : left.ToString());
-
-            defendButton.Set("Defend", "Half damage");
+            skillButton.SetBadge(ready ? null : fighter.SkillCooldown.ToString());
             defendButton.SetInteractable(true);
-
-            runButton.Set("Run", $"{Mathf.RoundToInt(escapeChance * 100f)}% team escape");
             runButton.SetInteractable(true);
+        }
+
+        /// <summary>Button labels and hints for the fighter whose turn it is, in the current language.</summary>
+        private void ApplyActionTexts()
+        {
+            var fighter = actionFighter;
+            attackButton.Set(Loc.T("act.attack"), fighter.AttackName);
+
+            bool ready = fighter.SkillReady;
+            int left = fighter.SkillCooldown;
+            skillButton.Set(Loc.T("act.skill"), ready ? fighter.SkillName : left == 1 ? Loc.T("act.skill.next") : Loc.T("act.skill.in", left));
+            if (!ready) skillButton.SetBadge(left.ToString());
+
+            defendButton.Set(Loc.T("act.defend"), Loc.T("act.defend.hint"));
+            runButton.Set(Loc.T("act.run"), Loc.T("act.run.hint", Mathf.RoundToInt(actionEscapeChance * 100f)));
         }
 
         public void SetActionsVisible(bool visible, bool instant = false)
@@ -173,7 +209,7 @@ namespace WildTamers.Battle
         private void Update()
         {
             var kb = Keyboard.current;
-            if (kb == null || !actionsOpen) return;
+            if (kb == null || !actionsOpen || Time.timeScale == 0f) return;
             if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame) attackButton.Press();
             else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame) skillButton.Press();
             else if (kb.digit3Key.wasPressedThisFrame || kb.numpad3Key.wasPressedThisFrame) defendButton.Press();
@@ -182,21 +218,34 @@ namespace WildTamers.Battle
 
         // ---------- Log ----------
 
-        /// <summary>Replaces the log line (typed out quickly).</summary>
-        public void SetLog(string text)
+        /// <summary>
+        /// Replaces the log line (typed out quickly; Arabic shows at once). It is given as a function that builds the text,
+        /// so the line can be rebuilt in the other language when the language is switched.
+        /// </summary>
+        public void SetLog(Func<string> line)
         {
+            logParts.Clear();
+            logParts.Add(line);
             revealedCharacters = 0;
-            logText.text = text;
+            logText.text = BuildLog();
             Reveal(pop: true);
         }
 
         /// <summary>Adds to the current line, e.g. the damage once the hit lands.</summary>
-        public void AppendLog(string text)
+        public void AppendLog(Func<string> part)
         {
             logText.ForceMeshUpdate();
             revealedCharacters = logText.textInfo.characterCount;
-            logText.text += text;
+            logParts.Add(part);
+            logText.text = BuildLog();
             Reveal(pop: false);
+        }
+
+        private string BuildLog()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var part in logParts) sb.Append(part());
+            return sb.ToString();
         }
 
         private void Reveal(bool pop)
@@ -214,15 +263,21 @@ namespace WildTamers.Battle
         {
             logText.ForceMeshUpdate();
             int total = logText.textInfo.characterCount;
+            // Right-to-left text is stored back to front, so typing it letter by letter would run backwards:
+            // Arabic shows the whole line at once and only keeps the same pacing.
+            bool rtl = Loc.IsRTL;
             float shown = revealedCharacters;
-            logText.maxVisibleCharacters = revealedCharacters;
+            typedChars = shown;
+            typedTotal = total;
+            logText.maxVisibleCharacters = rtl ? 99999 : revealedCharacters;
             float t = 0f;
             while (shown < total)
             {
                 float dt = UIEase.DeltaTime;
                 t += dt;
                 shown += typeSpeed * dt;
-                logText.maxVisibleCharacters = Mathf.Min(total, Mathf.CeilToInt(shown));
+                typedChars = shown;
+                if (!rtl) logText.maxVisibleCharacters = Mathf.Min(total, Mathf.CeilToInt(shown));
                 if (pop && logPanel != null)
                 {
                     float s = 1f + 0.035f * Mathf.Max(0f, 1f - t / 0.18f);
@@ -241,8 +296,7 @@ namespace WildTamers.Battle
             get
             {
                 if (logRoutine == null) return 0f;
-                int total = logText.textInfo.characterCount;
-                return Mathf.Max(0f, (total - logText.maxVisibleCharacters) / Mathf.Max(1f, typeSpeed));
+                return Mathf.Max(0f, (typedTotal - typedChars) / Mathf.Max(1f, typeSpeed));
             }
         }
 

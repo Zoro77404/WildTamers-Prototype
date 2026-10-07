@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.EditorTools
 {
@@ -69,15 +70,16 @@ namespace WildTamers.EditorTools
                 "Fast & enduring", 38f, Palette.Muted, TextAlignmentOptions.Center);
 
             // Text blocks.
-            Heading(body, "ABOUT", -884f);
+            Heading(body, "ABOUT", -884f, "card.about");
             var description = Paragraph(body, "Description", -930f, 210f);
-            Heading(body, "HISTORY", -1148f);
+            Heading(body, "HISTORY", -1148f, "card.history");
             var history = Paragraph(body, "History", -1194f, 280f);
 
             var close = UIBuild.CandyButton("CloseButton", body, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 34f), new Vector2(520f, 128f),
                 "Awesome!", Palette.Primary, Palette.PrimaryDark, 46f, 50f, out var closeLabel, out _);
             UIBuild.DropShadow((RectTransform)close.transform, 22f, -8f, 0.2f);
 
+            root.gameObject.AddComponent<RTLMirror>();
             var panel = root.gameObject.AddComponent<AnimalCardPanel>();
             UIBuild.Set(panel, "card", card);
             UIBuild.Set(panel, "preview", preview);
@@ -98,11 +100,12 @@ namespace WildTamers.EditorTools
             return panel;
         }
 
-        private static void Heading(RectTransform parent, string text, float y)
+        private static void Heading(RectTransform parent, string text, float y, string key)
         {
             var label = UIBuild.Label(text + " Heading", parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, y), new Vector2(860f, 44f),
                 text, 30f, Palette.Primary, TextAlignmentOptions.MidlineLeft, bold: true);
             label.characterSpacing = 6f;
+            UIBuild.Key(label, key);
         }
 
         private static TextMeshProUGUI Paragraph(RectTransform parent, string name, float y, float height)

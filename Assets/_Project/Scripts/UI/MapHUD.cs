@@ -3,6 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Core;
+using WildTamers.Lang;
 
 namespace WildTamers.UI
 {
@@ -33,6 +34,7 @@ namespace WildTamers.UI
             session = GameSession.Instance;
             teamButton.onClick.AddListener(() => { if (!teamPanel.IsVisible) teamPanel.Show(); });
             session.TeamChanged += Refresh;
+            Loc.LanguageChanged += Refresh;
             Refresh();
             if (hint != null)
             {
@@ -44,6 +46,7 @@ namespace WildTamers.UI
         private void OnDestroy()
         {
             if (session != null) session.TeamChanged -= Refresh;
+            Loc.LanguageChanged -= Refresh;
         }
 
         private void Refresh()
@@ -58,7 +61,7 @@ namespace WildTamers.UI
             }
             if (!has) return;
             activeName.text = active.Name;
-            activeLevel.text = $"Lv. {active.Level}";
+            activeLevel.text = Loc.Level(active.Level);
             shownHP = -1;
             UpdateHP(instant: true);
             if (activePortraitBackdrop != null && active.Data != null)

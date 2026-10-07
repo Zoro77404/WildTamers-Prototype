@@ -1,17 +1,16 @@
 using System;
 using UnityEngine;
+using WildTamers.Lang;
 
 namespace WildTamers.Animals
 {
     [Serializable]
     public class SkillData
     {
-        public string skillName = "Skill";
         [Tooltip("Damage multiplier compared to a normal attack (1 = same as normal attack).")]
         [Min(0f)] public float power = 2f;
         [Tooltip("Turns before the skill can be used again.")]
         [Min(0)] public int cooldownTurns = 3;
-        [TextArea(1, 3)] public string description;
     }
 
     /// <summary>Static definition of an animal species. Stats are the level-1 base values.</summary>
@@ -21,13 +20,8 @@ namespace WildTamers.Animals
         [Header("Identity")]
         [Tooltip("Stable id used for saving. Never change it after release.")]
         public string id;
+        [Tooltip("Label for the editor only. Everything the player reads comes from the 'Animals' string table (see the Localized… properties).")]
         public string displayName;
-        [Tooltip("Short stat style shown in UI, e.g. 'Fast & fragile'.")]
-        public string styleLabel;
-        [Tooltip("What the animal is (2–3 short, simple sentences).")]
-        [TextArea(2, 5)] public string description;
-        [Tooltip("How this animal helped people in Saudi / Arab history and culture (2–3 short, simple sentences, real facts only).")]
-        [TextArea(2, 6)] public string history;
         public Color themeColor = Color.white;
 
         [Header("Visuals")]
@@ -45,12 +39,35 @@ namespace WildTamers.Animals
         [Range(0f, 0.5f)] public float growthPerLevel = 0.06f;
 
         [Header("Moves")]
-        public string normalAttackName = "Tackle";
         public SkillData skill = new SkillData();
 
         [Header("Spawning")]
         [Tooltip("Relative chance to appear in the wild.")]
         [Min(0f)] public float spawnWeight = 1f;
+
+        // ---------- Texts (Unity Localization, table "Animals", keys "<id>.<field>") ----------
+
+        /// <summary>The animal's name in the current language ("Camel", "جمل").</summary>
+        public string LocalizedName => Loc.Animal(id, "name");
+
+        /// <summary>The name with "the" where the language has one (Arabic "الجمل"); used inside sentences.</summary>
+        public string LocalizedThe => Loc.Animal(id, "the");
+
+        /// <summary>The wild animal as the boss of a fight ("Wild Camel", "الجمل البري").</summary>
+        public string LocalizedWild => Loc.Animal(id, "wild");
+
+        /// <summary>Short stat style shown in UI, e.g. "Fast &amp; enduring".</summary>
+        public string LocalizedStyle => Loc.Animal(id, "style");
+
+        /// <summary>What the animal is (2–3 short, simple sentences).</summary>
+        public string LocalizedDescription => Loc.Animal(id, "description");
+
+        /// <summary>How this animal belongs to Saudi / Arab history and culture (2–3 short sentences, real facts only).</summary>
+        public string LocalizedHistory => Loc.Animal(id, "history");
+
+        public string LocalizedAttackName => Loc.Animal(id, "attack");
+        public string LocalizedSkillName => Loc.Animal(id, "skill");
+        public string LocalizedSkillDescription => Loc.Animal(id, "skilldesc");
 
         public int GetMaxHP(int level) => Scale(maxHP, level);
         public int GetAttack(int level) => Scale(attack, level);

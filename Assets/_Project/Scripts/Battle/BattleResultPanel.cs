@@ -8,6 +8,8 @@ using UnityEngine.UI;
 using WildTamers.Animals;
 using WildTamers.Core;
 using WildTamers.UI;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.Battle
 {
@@ -36,6 +38,7 @@ namespace WildTamers.Battle
 
         private Action onContinue;
         private bool canContinue;
+        private Func<string> titleBuilder, messageBuilder;
 
         protected override void Awake()
         {
@@ -49,11 +52,13 @@ namespace WildTamers.Battle
         /// <param name="levelChanged">Called with the animal and its new level whenever an XP bar wraps (to update the battle cards).</param>
         public IEnumerator PlayVictory(BattleResult result, GameConfig config, Action<AnimalInstance, int> levelChanged)
         {
-            titleText.text = "Victory!";
             if (titleBadge != null) titleBadge.color = victoryColor;
             var joined = result.Joined;
-            string joinText = joined != null ? $"<b>{joined.Name}</b> (Lv. {joined.Level}) joined your team!" : "You won!";
-            messageText.text = $"{joinText}\nEach animal of your team gets +{result.ExperienceGained} XP.";
+            int xp = result.ExperienceGained;
+            titleBuilder = () => Loc.T("result.victory");
+            messageBuilder = () => (joined != null ? Loc.T("result.joined", joined.The, joined.Level) : Loc.T("result.won"))
+                                   + "\n" + Loc.T("result.xp", xp);
+            RefreshTexts();
 
             int count = Mathf.Min(rows.Length, result.Party.Count);
             for (int i = 0; i < rows.Length; i++)
@@ -83,7 +88,11 @@ namespace WildTamers.Battle
                 anyLevelUp = true;
                 StartCoroutine(rows[i].ShowLevelUp());
             }
-            if (anyLevelUp) yield return Wait(0.5f);
+            if (anyLevelUp)
+            {
+                AudioManager.Play(Sfx.Pop);
+                yield return Wait(0.5f);
+            }
             SetContinue(true);
         }
 
@@ -95,20 +104,38 @@ namespace WildTamers.Battle
 
         public void ShowDefeat(IReadOnlyList<AnimalInstance> party)
         {
-            titleText.text = "Defeated…";
             if (titleBadge != null) titleBadge.color = defeatColor;
-            messageText.text = party.Count > 1
-                ? "Your whole team fainted.\nIt rested and is fully healed."
-                : $"<b>{party[0].Name}</b> fainted.\nYour team rested and is fully healed.";
+            titleBuilder = () => Loc.T("result.defeat");
+            messageBuilder = () => party.Count > 1 ? Loc.T("result.defeat.all") : Loc.T("result.defeat.one", party[0].The);
+            RefreshTexts();
             foreach (var row in rows) row.gameObject.SetActive(false);
             SetHeight(defeatHeight);
             SetContinue(true);
             Show();
         }
 
+        private void RefreshTexts()
+        {
+            if (titleBuilder == null) return;
+            titleText.text = titleBuilder();
+            messageText.text = messageBuilder();
+        }
+
+        protected override void OnShown()
+        {
+            Loc.LanguageChanged -= RefreshTexts;
+            Loc.LanguageChanged += RefreshTexts;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Loc.LanguageChanged -= RefreshTexts;
+        }
+
         private void Update()
         {
-            if (!canContinue || !IsVisible) return;
+            if (!canContinue || !IsVisible || Time.timeScale == 0f) return;
             var kb = Keyboard.current;
             if (kb != null && (kb.enterKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
                 ContinuePressed();

@@ -4,6 +4,8 @@ using WildTamers.Animals;
 using WildTamers.Core;
 using WildTamers.Player;
 using WildTamers.UI;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.Map
 {
@@ -37,6 +39,7 @@ namespace WildTamers.Map
         private void Start()
         {
             session = GameSession.Instance;
+            AudioManager.Instance.PlayMusic(Music.Menu);
             pointerInput.AnimalTapped += OnAnimalTapped;
             pointerInput.GroundTapped += OnGroundTapped;
 
@@ -92,7 +95,7 @@ namespace WildTamers.Map
 
             if (distance > range)
             {
-                toast.Show($"Get closer!  ({Mathf.CeilToInt(distance - range)} m to go)", warning: true);
+                toast.Show(Loc.T("toast.closer", Mathf.CeilToInt(distance - range)), warning: true);
                 if (rangeIndicator != null) rangeIndicator.FlashWarning();
                 animal.ReactTooFar();
                 return;
@@ -115,7 +118,7 @@ namespace WildTamers.Map
             {
                 encounterPopup.Hide();
                 OnLeave();
-                toast.Show("It ran away!", warning: true);
+                toast.Show(Loc.T("toast.ranaway"), warning: true);
                 return;
             }
 
@@ -128,7 +131,7 @@ namespace WildTamers.Map
             if (session.StartBattle(record, party)) return;
             teamSelect.Hide();
             OnLeave();
-            toast.Show("It ran away!", warning: true);
+            toast.Show(Loc.T("toast.ranaway"), warning: true);
         }
 
         /// <summary>Back on the team select screen returns to the encounter popup.</summary>

@@ -14,14 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: falcon
   displayName: Falcon
-  styleLabel: Swift glass cannon
-  description: Falcons are fast birds of prey with sharp eyes and strong claws. A
-    diving peregrine falcon can fly faster than 300 kilometres an hour. That makes
-    it the fastest animal in the world.
-  history: Falconry, hunting with trained falcons, has been part of Arab life for
-    many centuries. Bedouin hunters used falcons to catch hares and birds, bringing
-    fresh food to the desert camp. Today falconry is a proud tradition in Saudi Arabia,
-    and UNESCO lists it as living cultural heritage.
   themeColor: {r: 0.7607843, g: 0.4862745, b: 0.23529412, a: 1}
   prefab: {fileID: 858263167565880986, guid: 96300e7fadb08aa438da16f0fbf3a644, type: 3}
   mapScale: 1
@@ -30,10 +22,7 @@ MonoBehaviour:
   defense: 6
   speed: 20
   growthPerLevel: 0.06
-  normalAttackName: Talon Strike
   skill:
-    skillName: Hunting Dive
     power: 2.6
     cooldownTurns: 3
-    description: A lightning-fast dive from the sky.
   spawnWeight: 0.9

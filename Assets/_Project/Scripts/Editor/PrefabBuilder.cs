@@ -9,6 +9,7 @@ using WildTamers.Core;
 using WildTamers.Map;
 using WildTamers.Player;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.EditorTools
 {
@@ -254,12 +255,13 @@ namespace WildTamers.EditorTools
             var holder = UIBuild.Rect("Stats", parent, new Vector2(0f, 1f), new Vector2(0f, 1f), topLeft,
                 new Vector2(width, rowHeight * 4f + spacing * 3f));
             string[] labels = { "HP", "ATK", "DEF", "SPD" };
+            string[] keys = { "stat.hp", "stat.atk", "stat.def", "stat.spd" };
             Color[] colors = { Palette.Hp, Palette.Atk, Palette.Def, Palette.Spd };
             var bars = new StatBar[4];
             for (int i = 0; i < 4; i++)
             {
                 bars[i] = UIBuild.StatRow(labels[i], holder, new Vector2(0f, 1f), new Vector2(0f, 1f),
-                    new Vector2(0f, -i * (rowHeight + spacing)), width, rowHeight, labels[i], colors[i], fontSize * 2.6f, fontSize * 2.4f, fontSize);
+                    new Vector2(0f, -i * (rowHeight + spacing)), width, rowHeight, labels[i], colors[i], fontSize * 3.6f, fontSize * 2.4f, fontSize, keys[i]);
             }
             var view = holder.gameObject.AddComponent<AnimalStatsView>();
             UIBuild.Set(view, "hp", bars[0]);
@@ -304,12 +306,12 @@ namespace WildTamers.EditorTools
 
             var badge = UIBuild.Rect("ActiveBadge", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -26f), new Vector2(170f, 56f));
             UIBuild.Round(badge, Palette.Teal, 28f);
-            UIBuild.Text(UIBuild.Stretch("Text", badge), "TEAM", 28f, Color.white, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", badge), "TEAM", 28f, Color.white, TextAlignmentOptions.Center, bold: true), "team.badge");
 
             // Rows of the last fight team show "TEAM", the others "INFO"; tapping anywhere on a row opens the animal's info card.
             var choose = UIBuild.Rect("ChoosePill", rt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -26f), new Vector2(170f, 56f));
             UIBuild.Round(choose, new Color(Palette.Teal.r, Palette.Teal.g, Palette.Teal.b, 0.2f), 28f);
-            UIBuild.Text(UIBuild.Stretch("Text", choose), "INFO", 28f, Palette.TealDark, TextAlignmentOptions.Center, bold: true);
+            UIBuild.Key(UIBuild.Text(UIBuild.Stretch("Text", choose), "INFO", 28f, Palette.TealDark, TextAlignmentOptions.Center, bold: true), "team.info");
 
             var button = root.AddComponent<Button>();
             button.targetGraphic = bgImg;
@@ -335,6 +337,7 @@ namespace WildTamers.EditorTools
             UIBuild.Set(row, "highlight", hlImg);
             UIBuild.Set(row, "selectButton", button);
             UIBuild.Set(row, "choosePill", choose.gameObject);
+            root.AddComponent<RTLMirror>();
             SetUILayer(root);
             Save(root, TeamRowPrefab);
             AssetDatabase.SaveAssets();
@@ -394,7 +397,12 @@ namespace WildTamers.EditorTools
             // Info button.
             var info = UIBuild.Rect("InfoButton", rt, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-136f, -14f), new Vector2(72f, 72f));
             var infoImg = UIBuild.Disc(info, Palette.Neutral, raycast: true);
-            UIBuild.Text(UIBuild.Stretch("Text", info), "i", 44f, Color.white, TextAlignmentOptions.Center, bold: true);
+            // A drawn "i" (not a letter) so it reads the same in every language.
+            if (UISpriteGenerator.Load(UISpriteGenerator.Info) == null) UISpriteGenerator.GenerateMenuIcons();
+            var infoIcon = UIBuild.Stretch("Icon", info, 14f, 14f, 14f, 14f).gameObject.AddComponent<Image>();
+            infoIcon.sprite = UISpriteGenerator.Load(UISpriteGenerator.Info);
+            infoIcon.preserveAspect = true;
+            infoIcon.raycastTarget = false;
             var infoButton = info.gameObject.AddComponent<Button>();
             infoButton.targetGraphic = infoImg;
             var infoNav = infoButton.navigation;
@@ -432,6 +440,7 @@ namespace WildTamers.EditorTools
             UIBuild.Set(row, "selectButton", button);
             UIBuild.Set(row, "infoButton", infoButton);
             UIBuild.Set(row, "group", group);
+            root.AddComponent<RTLMirror>();
             SetUILayer(root);
             Save(root, TeamPickRowPrefab);
             AssetDatabase.SaveAssets();

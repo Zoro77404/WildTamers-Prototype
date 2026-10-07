@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using WildTamers.Animals;
 using WildTamers.Core;
+using WildTamers.Lang;
+using WildTamers.Audio;
 
 namespace WildTamers.UI
 {
@@ -36,6 +38,8 @@ namespace WildTamers.UI
         private Action onClosed;
         private bool isNew;
         private float shownAt;
+        private AnimalData shownData;
+        private int shownLevel;
 
         protected override void Awake()
         {
@@ -64,26 +68,48 @@ namespace WildTamers.UI
             this.isNew = isNew;
             onClosed = closed;
             shownAt = Time.unscaledTime;
+            shownData = data;
+            shownLevel = level;
 
-            headerText.text = isNew ? "NEW ANIMAL!" : "ANIMAL INFO";
+            RefreshTexts();
             if (headerPill != null) headerPill.color = isNew ? newColor : infoColor;
-            nameText.text = data.displayName;
-            styleText.text = data.styleLabel;
             if (levelText != null)
             {
                 // The text sits inside a pill; hide the whole pill when no level is shown.
                 var pill = levelText.transform.parent;
                 (pill != null ? pill.gameObject : levelText.gameObject).SetActive(level > 0);
-                levelText.text = $"Lv. {level}";
             }
-            descriptionText.text = data.description;
-            historyText.text = data.history;
             if (previewBackdrop != null) previewBackdrop.color = Color.Lerp(data.themeColor, Color.white, 0.68f);
             preview.SetAnimal(data);
-            if (closeLabel != null) closeLabel.text = isNew ? "Awesome!" : "Close";
             foreach (var s in sparkles) if (s != null) s.gameObject.SetActive(isNew);
+            if (isNew) AudioManager.Play(Sfx.Pop);
             Show();
             if (isNew && header != null) StartCoroutine(HeaderPop());
+        }
+
+        /// <summary>Every text of the card in the current language (also runs when the language is switched while it is open).</summary>
+        private void RefreshTexts()
+        {
+            if (shownData == null) return;
+            headerText.text = Loc.T(isNew ? "card.new" : "card.info");
+            nameText.text = shownData.LocalizedName;
+            styleText.text = shownData.LocalizedStyle;
+            if (levelText != null) levelText.text = Loc.Level(shownLevel);
+            descriptionText.text = shownData.LocalizedDescription;
+            historyText.text = shownData.LocalizedHistory;
+            if (closeLabel != null) closeLabel.text = Loc.T(isNew ? "card.awesome" : "common.close");
+        }
+
+        protected override void OnShown()
+        {
+            Loc.LanguageChanged -= RefreshTexts;
+            Loc.LanguageChanged += RefreshTexts;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Loc.LanguageChanged -= RefreshTexts;
         }
 
         private void Close()
@@ -94,6 +120,7 @@ namespace WildTamers.UI
 
         protected override void OnHidden()
         {
+            Loc.LanguageChanged -= RefreshTexts;
             var callback = onClosed;
             onClosed = null;
             callback?.Invoke();

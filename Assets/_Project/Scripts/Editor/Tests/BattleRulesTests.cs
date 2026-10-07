@@ -26,6 +26,9 @@ namespace WildTamers.EditorTools.Tests
             Random.InitState(1234);
         }
 
+        [TearDown]
+        public void TearDown() => Lang.Loc.SetLanguage(Lang.GameLanguage.English);
+
         private BattleFighter Fighter(string id, int level, bool player) => new BattleFighter(new AnimalInstance(database.Get(id), level), player);
 
         private BattleFighter Boss(string id, int level)
@@ -53,12 +56,17 @@ namespace WildTamers.EditorTools.Tests
             {
                 Assert.IsNotNull(a.prefab, a.id + " prefab");
                 Assert.IsNotNull(a.prefab.GetComponent<AnimalVisual>(), a.id + " AnimalVisual");
-                foreach (var (label, text) in new[] { ("description", a.description), ("history", a.history) })
+                // Texts live in the "Animals" string table; both languages are checked.
+                foreach (var language in new[] { Lang.GameLanguage.English, Lang.GameLanguage.Arabic })
                 {
-                    Assert.IsFalse(string.IsNullOrWhiteSpace(text), $"{a.id} {label}");
-                    int sentences = text.Count(c => c == '.');
-                    Assert.That(sentences, Is.InRange(2, 3), $"{a.id} {label} should be 2–3 sentences");
-                    Assert.Less(text.Length, 330, $"{a.id} {label} should stay short");
+                    Lang.Loc.SetLanguage(language);
+                    foreach (var (label, text) in new[] { ("description", a.LocalizedDescription), ("history", a.LocalizedHistory) })
+                    {
+                        Assert.IsFalse(string.IsNullOrWhiteSpace(text), $"{a.id} {label} ({language})");
+                        int sentences = text.Count(c => c == '.');
+                        Assert.That(sentences, Is.InRange(2, 3), $"{a.id} {label} ({language}) should be 2–3 sentences");
+                        Assert.Less(text.Length, 330, $"{a.id} {label} ({language}) should stay short");
+                    }
                 }
             }
         }

@@ -46,7 +46,11 @@ namespace WildTamers.Animals
             }
         }
 
-        public string Name => Data != null ? Data.displayName : animalId;
+        /// <summary>Name in the current language.</summary>
+        public string Name => Data != null ? Data.LocalizedName : animalId;
+
+        /// <summary>Name for use inside a sentence ("the Camel"; Arabic "الجمل").</summary>
+        public string The => Data != null ? Data.LocalizedThe : animalId;
         public int Level => level;
         public int Experience => experience;
 

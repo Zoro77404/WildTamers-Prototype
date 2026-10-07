@@ -23,6 +23,7 @@ namespace WildTamers.Lang
         private TMP_FontAsset latinFont;
         private Material latinMaterial;
         private TextAlignmentOptions latinAlignment;
+        private float latinSpacing;
         private bool captured;
 
         public string Key => key;
@@ -53,6 +54,7 @@ namespace WildTamers.Lang
             rtl = text as RTLTextMeshPro;
             latinFont = text.font;
             latinAlignment = text.alignment;
+            latinSpacing = text.characterSpacing;
             var fonts = LocalizationFonts.Instance;
             // The outline material is only used by the floating damage numbers.
             if (fonts != null && text.fontSharedMaterial != null && fonts.ResolveOutline(text.fontSharedMaterial, false) != null)
@@ -87,6 +89,8 @@ namespace WildTamers.Lang
                 }
             }
             text.alignment = arabic && mirrorAlignment ? Mirror(latinAlignment) : latinAlignment;
+            // Spreading letters apart would break the joins between Arabic letters.
+            text.characterSpacing = arabic ? 0f : latinSpacing;
 
             if (rtl != null)
             {

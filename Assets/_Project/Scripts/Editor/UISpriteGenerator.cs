@@ -23,6 +23,8 @@ namespace WildTamers.EditorTools
         public const string Shield = Folder + "/UI_Shield.png";
         public const string Star = Folder + "/UI_Star.png";
         public const string Dash = Folder + "/UI_Dash.png";
+        public const string Info = Folder + "/UI_Info.png";
+        public const string Pause = Folder + "/UI_Pause.png";
         public const string BlobShadow = "Assets/_Project/Textures/FX_BlobShadow.png";
         public const string SoftDot = "Assets/_Project/Textures/FX_SoftDot.png";
 
@@ -54,7 +56,22 @@ namespace WildTamers.EditorTools
             ConfigureTexture(BlobShadow);
             ConfigureTexture(SoftDot);
             GenerateBattleIcons();
+            GenerateMenuIcons();
             AssetDatabase.SaveAssets();
+        }
+
+        /// <summary>White icons used instead of letters so they work in every language: "i" (info) and pause bars.</summary>
+        public static void GenerateMenuIcons()
+        {
+            Directory.CreateDirectory(Folder);
+            WriteSdf(Info, 256, 256, (x, y) => Mathf.Min(
+                Length(x - 128f, y - 190f) - 21f,
+                Segment(x, y, 128f, 70f, 128f, 140f) - 22f));
+            WriteSdf(Pause, 256, 256, (x, y) => Mathf.Min(
+                Segment(x, y, 90f, 70f, 90f, 186f) - 27f,
+                Segment(x, y, 166f, 70f, 166f, 186f) - 27f));
+            AssetDatabase.Refresh();
+            foreach (var path in new[] { Info, Pause }) ConfigureSprite(path, Vector4.zero);
         }
 
         /// <summary>White icons for the battle buttons (claw = attack, shield = defend, star = skill, dash = run).</summary>

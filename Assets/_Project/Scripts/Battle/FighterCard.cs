@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using WildTamers.Animals;
 using WildTamers.Core;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.Battle
 {
@@ -35,14 +36,26 @@ namespace WildTamers.Battle
         [SerializeField] private Color glowColor = new Color32(0xFF, 0xC9, 0x3C, 0xFF);
         [SerializeField] private float liftScale = 1.06f;
 
+        private AnimalInstance animal;
+        private int shownLevel;
         private Coroutine guardRoutine;
         private Coroutine punchRoutine;
         private bool turn;
         private bool fainted;
         private float scale = 1f;
 
+        private void OnEnable() => Loc.LanguageChanged += RefreshTexts;
+
+        private void RefreshTexts()
+        {
+            if (animal == null) return;
+            nameText.text = animal.Name;
+            levelText.text = Loc.Level(shownLevel);
+        }
+
         public void Bind(AnimalInstance animal, GameConfig config)
         {
+            this.animal = animal;
             nameText.text = animal.Name;
             SetLevel(animal.Level);
             hpBar.Set(animal.CurrentHP, animal.MaxHP, instant: true);
@@ -61,7 +74,11 @@ namespace WildTamers.Battle
             if (group != null) group.alpha = 1f;
         }
 
-        public void SetLevel(int level) => levelText.text = $"Lv. {level}";
+        public void SetLevel(int level)
+        {
+            shownLevel = level;
+            levelText.text = Loc.Level(level);
+        }
 
         public void SetHP(AnimalInstance animal, bool instant = false) => hpBar.Set(animal.CurrentHP, animal.MaxHP, instant);
 
@@ -162,6 +179,7 @@ namespace WildTamers.Battle
 
         private void OnDisable()
         {
+            Loc.LanguageChanged -= RefreshTexts;
             transform.localScale = Vector3.one;
             scale = 1f;
         }

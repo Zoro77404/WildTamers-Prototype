@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WildTamers.Animals;
+using WildTamers.Lang;
 
 namespace WildTamers.Core
 {
@@ -27,7 +28,7 @@ namespace WildTamers.Core
         private int nextSpawnId = 1;
         private bool saveDirty;
         private float autosaveTimer;
-        private string pendingMapMessage;
+        private Func<string> pendingMapMessage;
         private bool pendingMapWarning;
 
         public static GameSession Instance
@@ -261,8 +262,11 @@ namespace WildTamers.Core
             SaveSystem.Write(data);
         }
 
-        /// <summary>Testing helper: wipes the save and starts again with the three starter animals.</summary>
-        public void ResetSave()
+        /// <summary>
+        /// Wipes the save and starts again with the three starter animals ("Reset save" in the settings).
+        /// Loads <paramref name="sceneToLoad"/> afterwards; null stays where it is (the main menu).
+        /// </summary>
+        public void ResetSave(string sceneToLoad)
         {
             if (Fader.IsBusy) return;
             SaveSystem.Delete();
@@ -275,7 +279,20 @@ namespace WildTamers.Core
             team.AddRange(SaveMigration.Apply(new SaveData(), Database, Config).Team);
             Save();
             TeamChanged?.Invoke();
-            Fader.LoadScene(SceneNames.Map);
+            if (!string.IsNullOrEmpty(sceneToLoad)) Fader.LoadScene(sceneToLoad);
+        }
+
+        /// <summary>
+        /// Pause menu → Main Menu. A fight that is still going is given up (the wild animal stays where it was);
+        /// everything else is saved as it is.
+        /// </summary>
+        public void ReturnToMainMenu()
+        {
+            if (Fader.IsBusy) return;
+            Time.timeScale = 1f;
+            CurrentBattle = null;
+            Save();
+            Fader.LoadScene(SceneNames.MainMenu);
         }
 
         // ---------- Map API ----------
@@ -313,7 +330,7 @@ namespace WildTamers.Core
         /// <summary>One-shot message for the map after returning from a battle ("Wolf joined your team!").</summary>
         public bool TryTakeMapMessage(out string message, out bool warning)
         {
-            message = pendingMapMessage;
+            message = pendingMapMessage?.Invoke();
             warning = pendingMapWarning;
             pendingMapMessage = null;
             return !string.IsNullOrEmpty(message);
@@ -384,14 +401,15 @@ namespace WildTamers.Core
                     result.JoinedIsNewSpecies = !seenSpecies.Contains(battle.Wild.AnimalId);
                     team.Add(battle.Wild);
                     result.Joined = battle.Wild;
-                    SetMapMessage($"{battle.Wild.Name} joined your team!", false);
+                    var joinedAnimal = battle.Wild;
+                    SetMapMessage(() => Loc.T("toast.joined", joinedAnimal.The), false);
                     break;
                 case BattleOutcome.Lost:
                     HealTeam();
-                    SetMapMessage("Your team rested and is fully healed.", false);
+                    SetMapMessage(() => Loc.T("toast.healed"), false);
                     break;
                 case BattleOutcome.Escaped:
-                    SetMapMessage("Your team got away safely!", false);
+                    SetMapMessage(() => Loc.T("toast.escaped"), false);
                     break;
             }
 
@@ -399,7 +417,7 @@ namespace WildTamers.Core
             return result;
         }
 
-        private void SetMapMessage(string message, bool warning)
+        private void SetMapMessage(Func<string> message, bool warning)
         {
             pendingMapMessage = message;
             pendingMapWarning = warning;

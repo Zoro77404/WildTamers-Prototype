@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using WildTamers.Audio;
 
 namespace WildTamers.UI
 {
     /// <summary>Springy press/hover scale for buttons.</summary>
-    public class ButtonJuice : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler
+    public class ButtonJuice : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
         [SerializeField] private float pressedScale = 0.93f;
         [SerializeField] private float hoverScale = 1.03f;
@@ -30,6 +31,11 @@ namespace WildTamers.UI
         public void OnPointerUp(PointerEventData eventData) => pressed = false;
         public void OnPointerEnter(PointerEventData eventData) => hovered = true;
         public void OnPointerExit(PointerEventData eventData) { hovered = false; pressed = false; }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (selectable == null || selectable.IsInteractable()) AudioManager.Play(Sfx.Click);
+        }
 
         private void Update()
         {

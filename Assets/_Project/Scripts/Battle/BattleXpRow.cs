@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using WildTamers.Animals;
 using WildTamers.Core;
 using WildTamers.UI;
+using WildTamers.Lang;
 
 namespace WildTamers.Battle
 {
@@ -20,14 +21,31 @@ namespace WildTamers.Battle
         [SerializeField] private StatBar xpBar;
         [SerializeField] private CanvasGroup levelUpChip;
 
+        private AnimalInstance shownAnimal;
+        private int shownLevel;
+        private int shownXp;
+
         public bool LevelledUp { get; private set; }
+
+        private void OnEnable() => Loc.LanguageChanged += RefreshTexts;
+
+        private void OnDisable() => Loc.LanguageChanged -= RefreshTexts;
+
+        private void RefreshTexts()
+        {
+            if (shownAnimal == null) return;
+            nameText.text = shownAnimal.Name;
+            levelText.text = Loc.Level(shownLevel);
+            gainText.text = Loc.T("common.xp", shownXp);
+        }
 
         public void Setup(PartyGrowth growth, int xp, GameConfig config)
         {
             var animal = growth.Animal;
-            nameText.text = animal.Name;
-            levelText.text = $"Lv. {growth.Growth.OldLevel}";
-            gainText.text = $"+{xp} XP";
+            shownAnimal = animal;
+            shownLevel = growth.Growth.OldLevel;
+            shownXp = xp;
+            RefreshTexts();
             LevelledUp = growth.Growth.LeveledUp;
             if (animal.Data != null)
             {
@@ -49,7 +67,8 @@ namespace WildTamers.Battle
             {
                 yield return FillBar(from, 1f, 0.55f);
                 level++;
-                levelText.text = $"Lv. {level}";
+                shownLevel = level;
+                levelText.text = Loc.Level(level);
                 levelChanged?.Invoke(level);
                 StartCoroutine(Punch(levelText.rectTransform, 1.35f));
                 from = 0f;

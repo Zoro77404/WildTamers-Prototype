@@ -14,14 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: saluki
   displayName: Saluki
-  styleLabel: Speedy sprinter
-  description: The Saluki is a slim, long-legged hunting dog with a silky coat. It
-    is one of the oldest dog breeds and runs very fast over long distances. Its soft
-    eyes make it look kind and calm.
-  history: Bedouin people kept salukis to help hunt gazelles and hares in the open
-    desert, often together with falcons. The Saluki was so respected that it was
-    called El Hor, the noble one. Many tribes did not sell their salukis, but gave
-    them as gifts.
   themeColor: {r: 0.8666667, g: 0.6666667, b: 0.4, a: 1}
   prefab: {fileID: 6360455936833565258, guid: 713dde55fd179034babcf2c293b1a461, type: 3}
   mapScale: 1
@@ -30,10 +22,7 @@ MonoBehaviour:
   defense: 8
   speed: 18
   growthPerLevel: 0.06
-  normalAttackName: Bite
   skill:
-    skillName: Sprint Chase
     power: 2.2
     cooldownTurns: 3
-    description: A burst of speed and a quick snap.
   spawnWeight: 1

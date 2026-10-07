@@ -14,13 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Animals.AnimalData
   id: arabian_fox
   displayName: Arabian Fox
-  styleLabel: Sly & speedy
-  description: The Arabian fox is a small desert fox with huge ears and pale, sandy
-    fur. Its big ears give off heat to keep it cool, and furry paws protect it from
-    hot sand. It hunts at night for insects, mice and fruit.
-  history: Bedouin travellers knew the fox as a quick, clever survivor of the desert.
-    It appears in many Arabic folk stories as a smart trickster. Foxes also eat mice
-    and insects, which helps protect camps and farms from pests.
   themeColor: {r: 0.8980392, g: 0.6509804, b: 0.3254902, a: 1}
   prefab: {fileID: 2656199748622861958, guid: 88c286db14dd79b469f95601aae3b54c, type: 3}
   mapScale: 1
@@ -29,10 +22,7 @@ MonoBehaviour:
   defense: 7
   speed: 17
   growthPerLevel: 0.06
-  normalAttackName: Scratch
   skill:
-    skillName: Sand Dash
     power: 2
     cooldownTurns: 2
-    description: Kicks up sand, then strikes in a flash.
   spawnWeight: 1.2
