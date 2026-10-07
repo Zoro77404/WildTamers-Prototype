@@ -1,9 +1,9 @@
 # PROGRESS
 plan: PLAN.md
-phase: 3 — Arabian roster + 3v1 battles (no PLAN.md entry; user request in chat 2026-10-06)
-status: done
+phase: 4 — Main menu, settings, pause, Arabic localization (no PLAN.md entry; user request in chat 2026-10-07)
+status: in-progress
 tested: Phase 3
-updated: 2026-10-06 19:10
+updated: 2026-10-07 16:15
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
@@ -12,7 +12,16 @@ updated: 2026-10-06 19:10
 - github: https://github.com/Zoro77404/WildTamers-Prototype
 
 ## Steps
-(none — Phase 3 done)
+- [~] 4.1 Packages: Unity Localization, RTLTMPro, Tajawal font + Arabic TMP asset
+- [ ] 4.2 Core: Loc facade, GameSettings (saved), string tables en/ar (UI keys)
+- [ ] 4.3 Arabic + English animal texts in tables (names, style, description, history, moves)
+- [ ] 4.4 Localize every runtime script/builder text (map, battle, cards, popups, toasts)
+- [ ] 4.5 RTL: text component, font swap, alignment + layout mirroring
+- [ ] 4.6 Audio: CC0 music + sfx, AudioManager, button/hit sounds
+- [ ] 4.7 Main menu scene + animated background, Settings, Pause, Confirm popup, Reset save moved
+- [ ] 4.8 Rebuild scenes, build settings, scene flow, first-launch language
+- [ ] 4.9 Tests + EN/AR screenshots of every screen, fix issues
+- [ ] 4.10 Docs, PROGRESS, final push
 
 ## Done
 - Phase 1 — fake map, player + fake GPS, 6 animals, spawner, starter/encounter/team UI, battle hand-off; reviewed + play-tested (2026-10-01)
