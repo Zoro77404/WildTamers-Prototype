@@ -3,7 +3,7 @@ plan: PLAN.md
 phase: 4 — Main menu, settings, pause, Arabic localization (no PLAN.md entry; user request in chat 2026-10-07)
 status: in-progress
 tested: Phase 3
-updated: 2026-10-07 16:15
+updated: 2026-10-07 19:14
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
@@ -12,8 +12,8 @@ updated: 2026-10-07 16:15
 - github: https://github.com/Zoro77404/WildTamers-Prototype
 
 ## Steps
-- [~] 4.1 Packages: Unity Localization, RTLTMPro, Tajawal font + Arabic TMP asset
-- [ ] 4.2 Core: Loc facade, GameSettings (saved), string tables en/ar (UI keys)
+- [x] 4.1 Packages: Unity Localization, RTLTMPro, Tajawal font + Arabic TMP asset — Localization 1.5.13, RTLTMPro embedded, Tajawal static TMP fonts
+- [~] 4.2 Core: Loc facade, GameSettings (saved), string tables en/ar (UI keys)
 - [ ] 4.3 Arabic + English animal texts in tables (names, style, description, history, moves)
 - [ ] 4.4 Localize every runtime script/builder text (map, battle, cards, popups, toasts)
 - [ ] 4.5 RTL: text component, font swap, alignment + layout mirroring
