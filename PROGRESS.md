@@ -1,41 +1,41 @@
 # PROGRESS
 plan: PLAN.md
-phase: 4 — Main menu, settings, pause, Arabic localization (no PLAN.md entry; user request in chat 2026-10-07)
-status: in-progress
-tested: Phase 3
-updated: 2026-10-07 20:01
+phase: 4 — Main menu, settings, pause, Arabic localization (user request in chat 2026-10-07)
+status: done
+tested: Phase 4
+updated: 2026-10-07 20:05
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
 - Unity 6000.3.10f1, URP, Input System only, glTFast for .glb
 - Style: flat pastel low-poly, bright and friendly (Quaternius CC0 animals, Fredoka font)
+- Languages: English + Arabic (Unity Localization 1.5.13, RTLTMPro, Tajawal); chosen in Settings, first launch follows the device language
 - github: https://github.com/Zoro77404/WildTamers-Prototype
 
 ## Steps
-- [x] 4.1 Packages: Unity Localization, RTLTMPro, Tajawal font + Arabic TMP asset — Localization 1.5.13, RTLTMPro embedded, Tajawal static TMP fonts
-- [x] 4.2 Core: Loc facade, GameSettings (saved), string tables en/ar (UI keys) — Loc facade, GameSettings, en/ar tables built (107 UI texts), plurals verified
-- [x] 4.3 Arabic + English animal texts in tables (names, style, description, history, moves) — 8 animals x 9 texts written in Arabic + English, in the Animals table
-- [x] 4.4 Localize every runtime script/builder text (map, battle, cards, popups, toasts) — all runtime texts via Loc, log built from functions, tests added
-- [x] 4.5 RTL: text component, font swap, alignment + layout mirroring — RTLTMPro text, font swap, mirrored layouts, bars fill from right
-- [x] 4.6 Audio: CC0 music + sfx, AudioManager, button/hit sounds — CC0 menu/battle music + 7 sfx, AudioManager with crossfade
-- [x] 4.7 Main menu scene + animated background, Settings, Pause, Confirm popup, Reset save moved — MainMenuScene, Settings, Pause, Confirm built and play-tested en/ar
-- [x] 4.8 Rebuild scenes, build settings, scene flow, first-launch language — scenes rebuilt, build list MainMenu/Map/Battle, play-from-menu, device language on first launch
-- [~] 4.9 Tests + EN/AR screenshots of every screen, fix issues
-- [ ] 4.10 Docs, PROGRESS, final push
+(none — Phase 4 done)
 
 ## Done
 - Phase 1 — fake map, player + fake GPS, 6 animals, spawner, starter/encounter/team UI, battle hand-off; reviewed + play-tested (2026-10-01)
 - Phase 2 — turn-based battle (arena, UI, AI, juice), XP/level-ups, JSON save, active pick, reset; 13 automated battles + restart verified (2026-10-01)
 - Phase 3 — Arabian roster (8 animals with description + history), starters Camel/Horse/Falcon, save v2 with migration, team select before each fight, 3v1 boss battle, "New animal!" card + tap-to-view; 22 EditMode tests, play-tested win / lose / run / restart (2026-10-06)
+- Phase 4 — MainMenuScene (low-poly desert, idling animals, Play/Team/Settings/Quit), pause menu on map + battle, Settings (language, music/sfx sliders, Reset save with confirm), Unity Localization (UI + Animals tables, en + ar), RTLTMPro + Tajawal Arabic, mirrored layouts, CC0 music + sfx; 36 EditMode tests, every screen play-tested in English and Arabic (2026-10-07)
 
 ## Map
 - `Assets/_Project/Scripts/` — Core (GameSession, SaveSystem, SaveMigration, PartySelection, GameConfig), Map, Player, Animals, UI, Battle, Editor (builders + Tests)
 - `Assets/_Project/Scripts/Editor/*Builder.cs` — menu Wild Tamers/Build/* regenerates assets/scenes (Animal Assets, Prefabs, Map Scene, Battle Scene)
-- `AnimalAssetBuilder.cs` roster = source of truth for species stats, texts, recolors, hump/horns; Debug menu: Render Animal Contact Sheet, Run Balance Simulation
+- `AnimalAssetBuilder.cs` roster = source of truth for species stats, recolors, hump/horns (texts moved to `Editor/Lang/AnimalTexts.cs`); Debug menu: Render Animal Contact Sheet, Run Balance Simulation
 - `Assets/_Project/Resources/` — AnimalDatabase, GameConfig (all tuning incl. boss multipliers)
 - `Assets/_Project/Scenes/MapScene.unity` — HUD, TeamPanel, EncounterPopup, TeamSelectScreen, AnimalCard, Toast
 - `Assets/_Project/Scenes/BattleScene.unity` — 3 party spots + WildSpot, BattleController, BattleHUD (boss card + 3 team cards), AnimalCard
 - Save file: `%USERPROFILE%/AppData/LocalLow/DefaultCompany/WildTamers-Prototype/wildtamers_save.json` (version 2)
+
+- `Assets/_Project/Scripts/Lang/` — `Loc` (all text + language switch), `LocalizedText` (font swap, alignment flip, ForceFix), `RTLMirror`/`RTLMirrorIgnore` (layout flip), `LocalizationFonts`
+- `Assets/_Project/Scripts/Editor/Lang/` — `UiStrings.cs` (107 UI texts en+ar), `AnimalTexts.cs` (8 animals × 9 texts en+ar), `LocalizationBuilder` (menu Wild Tamers/Build/Localization rebuilds the tables), `ArabicFontBuilder` (Tajawal TMP assets)
+- `Assets/_Project/Localization/` — locales, Localization Settings, string tables UI + Animals; `Assets/AddressableAssetsData/` is created by the Localization package
+- `Scripts/Menu/` MainMenuController + scenery scripts; `Scripts/Audio/` AudioManager + AudioLibrary (Resources/AudioLibrary); `Scripts/UI/` SettingsPanel, PauseMenu, PauseButton, ConfirmPopup
+- Scenes: MainMenuScene (build index 0), MapScene (1), BattleScene (2); builders MainMenuSceneBuilder, MenuUiBuilder (shared toast/confirm/settings/pause), ProjectSetupBuilder (audio library, build list, "Play From Main Menu" toggle)
+- Settings file: `%USERPROFILE%/AppData/LocalLow/DefaultCompany/WildTamers-Prototype/wildtamers_settings.json` (language, music, sfx); separate from the save so Reset save never touches it
 
 ## Decisions
 - Input: Input System only (activeInputHandler=1) → Keyboard/Mouse.current APIs
@@ -54,15 +54,28 @@ updated: 2026-10-07 20:01
 - Battle math: dmg = 0.85·power·ATK²/(ATK+DEF)·level(±1%/lv)·spread 0.85–1.15·crit 12% ×1.5 (normal attacks only)·guard ×0.5; growth 0.06/lv
 - Wild level offsets weighted -2..+2 = 25/30/25/15/5; TeamLevel = avg of top-3 levels; XP win = (10 + 8·wildLv)·gap factor; next level = 20 + 10·L
 
+- Phase 4 text: Unity Localization 1.5.13, string tables "UI" and "Animals" (keys `<animalId>.name/the/wild/style/description/history/attack/skill/skilldesc`), Smart Strings with real CLDR plurals (Arabic 1/2/3–10/11+). AnimalData no longer holds any text (`Localized…` properties read the table)
+- Arabic is written from scratch for Saudi players, with no diacritics (RTLTMPro/TMP place marks badly), no "+" in front of numbers (bidi puts it on the wrong side of Arabic-Indic digits) and "٣٧ من ٤١" instead of "37/41" (a slash swaps the two numbers in RTL). Digits are Arabic-Indic in Arabic (RTLTMPro converts every digit through `ForceFix`)
+- Text pipeline: every text is an `RTLTextMeshPro` + `LocalizedText` (UIBuild.Text adds both). English passes through untouched; Arabic gets joined letters, right-to-left, Tajawal font and mirrored alignment. Panel roots carry `RTLMirror` (flips anchors/offsets/pivots from the authored English layout); bars fill from the right via `BarAnchors`. Battle log is kept as functions (`Func<string>`) so it re-renders on a language switch; Arabic log lines show at once (a typewriter would run backwards)
+- Tajawal lacks the isolated Arabic presentation forms; `ArabicFontBuilder` aliases them to the base glyphs. Fredoka fonts have Tajawal as fallback so "العربية" shows in English mode
+- Language buttons never move or mirror (English left, العربية right). First launch: Arabic only if `Application.systemLanguage == Arabic`
+- Pause = `Time.timeScale 0` (UI uses unscaled time). Main Menu from the map leaves at once (autosaved); from a fight it asks "Leave the battle?" and gives the fight up (the wild animal stays). Reset save: on the main menu it stays there with a toast; from pause it restarts at the map (new "New animal!" cards)
+- Music: menu track also plays on the map, battle track in fights; tracks cross-fade and loop through a cross-fade near their end. Sliders map squared to loudness. Sources/credits in RequiredAssets.md
+- Git: work and push on `main` (user said so 2026-10-07); one early plan commit also sits on `Sultan`
+
 ## Notes
 - Asset download staging: `_downloads/` (project root, not imported, git-ignored)
 - Original v1 save backup: `_backup/2026-10-06/save-before-phase3.json` (restored after the play-tests, so the next launch shows the migration)
 - MCP screenshots: pass output_folder `Temp/Shots` (default lands in Assets/Screenshots); Game view size "Portrait1080x1920" was added for portrait shots
 - Play-test via MCP: UI clicks = Button.onClick.Invoke via reflection; battle bot = EditorApplication.update closure pressing the action buttons
 
+- Play-test helpers: `WildTamers.EditorTools.PlaytestHelper` (Click(buttonName), Language(bool), StartBattle(id, level), BotOn/Off, LatinTexts() = visible texts that still have English letters) via execute_code. Wait ~0.5 s after opening a panel before scanning (fade-in). The tests/play-tests rewrite the real save: back it up first (`_backup/2026-10-07/save-before-phase4-tests.json` is the pre-Phase-4 save and was restored)
+
 ## Later
 - Towers can partly hide animals on the map — lower tallest buildings or add x-ray silhouettes
 - Show lead animal HP on the encounter popup
+- Real device pass for Arabic (Android): confirm the Addressables content builds with the player and the font atlas size is fine on low-end phones
+- Optional: mirror the map HUD hint for touch controls when the GPS build lands
 
 ## Architecture (from old ProjectMemory.md)
 - `ILocationProvider` (FakeLocationProvider now, GPS later), `MapView` + `MapTileProvider`, `AnimalData` SOs in `AnimalDatabase`, `GameSession` (DontDestroyOnLoad: team, wild spawns, battle hand-off, SceneFader, PreviewStudio)
@@ -70,4 +83,4 @@ updated: 2026-10-07 20:01
 - Scenes MapScene (0) and BattleScene (1) are generated by `Wild Tamers/Build/*` menu items — change the builder, then rebuild
 
 ## Next
-None — Phase 3 is done. Open ideas live under "Later".
+None — Phase 4 is done. Open ideas live under "Later".

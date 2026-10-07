@@ -1872,7 +1872,7 @@ GameObject:
   - component: {fileID: 5844263382600660109}
   - component: {fileID: 2096112938987472837}
   - component: {fileID: 5159549745331321610}
-  - component: {fileID: 8204861891373273135}
+  - component: {fileID: 5746152320415734986}
   m_Layer: 5
   m_Name: Fill
   m_TagString: Untagged
@@ -1937,7 +1937,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 7.5
---- !u!114 &8204861891373273135
+--- !u!114 &5746152320415734986
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1946,6 +1946,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 8168470665666740068}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 2f74b8c241231af42979a91dadc8d470, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Lang.RTLMirrorIgnore

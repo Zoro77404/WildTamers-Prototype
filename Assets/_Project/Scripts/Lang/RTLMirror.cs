@@ -4,9 +4,6 @@ using UnityEngine.UI;
 
 namespace WildTamers.Lang
 {
-    /// <summary>Marks a rect (and everything under it) that <see cref="RTLMirror"/> must leave alone, e.g. bars that fill from the right themselves.</summary>
-    public class RTLMirrorIgnore : MonoBehaviour { }
-
     /// <summary>
     /// Flips a layout left ↔ right in Arabic: every child rect swaps sides (anchors, offsets, pivot), horizontal layout groups
     /// reverse and left/right padding and alignment swap. Always works from the layout as it was authored (English),
