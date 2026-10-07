@@ -1,0 +1,498 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Animals_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: ca55a918245ad1448b610334f9442d9a, type: 2}
+  m_Metadata:
+    m_Items:
+    - rid: 8955012208633315438
+  m_TableData:
+  - m_Id: 382328832
+    m_Localized: Camel
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688960
+    m_Localized: Camel
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688961
+    m_Localized: Wild Camel
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688962
+    m_Localized: Slow & tanky
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688963
+    m_Localized: The camel is a tall desert animal with one big hump. The hump stores
+      fat, so a camel can travel a long way without food. Its wide feet walk easily
+      on soft sand.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688964
+    m_Localized: For thousands of years, people in Arabia travelled the desert on
+      camels. Camel caravans carried frankincense, spices and trade goods between
+      faraway towns. Bedouin families also drank camel milk and made cloth from its
+      hair.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688965
+    m_Localized: Stomp
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688966
+    m_Localized: Sandstorm Slam
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688967
+    m_Localized: A heavy stomp that throws up a cloud of sand.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688968
+    m_Localized: Arabian Horse
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688969
+    m_Localized: Arabian Horse
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688970
+    m_Localized: Wild Arabian Horse
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688971
+    m_Localized: Fast & enduring
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688972
+    m_Localized: The Arabian horse is one of the oldest horse breeds in the world.
+      It has a proud high tail, a curved face and lots of stamina. Arabians are quick,
+      smart and gentle with people.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688973
+    m_Localized: Bedouin families in Arabia carefully raised Arabian horses for many
+      centuries. The horses carried riders across the desert on long journeys, and
+      mares were cherished almost like family. Today, Arabian blood helps make many
+      other horse breeds fast and strong.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688974
+    m_Localized: Kick
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688975
+    m_Localized: Desert Gallop
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688976
+    m_Localized: A thundering charge across the sand.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688977
+    m_Localized: Falcon
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688978
+    m_Localized: Falcon
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688979
+    m_Localized: Wild Falcon
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688980
+    m_Localized: Swift glass cannon
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688981
+    m_Localized: Falcons are fast birds of prey with sharp eyes and strong claws.
+      A diving peregrine falcon can fly faster than 300 kilometres an hour. That
+      makes it the fastest animal in the world.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688982
+    m_Localized: Falconry, hunting with trained falcons, has been part of Arab life
+      for many centuries. Bedouin hunters used falcons to catch hares and birds,
+      bringing fresh food to the desert camp. Today falconry is a proud tradition
+      in Saudi Arabia, and UNESCO lists it as living cultural heritage.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688983
+    m_Localized: Talon Strike
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688984
+    m_Localized: Hunting Dive
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688985
+    m_Localized: A lightning-fast dive from the sky.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688986
+    m_Localized: Saluki
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688987
+    m_Localized: Saluki
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688988
+    m_Localized: Wild Saluki
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688989
+    m_Localized: Speedy sprinter
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688990
+    m_Localized: The Saluki is a slim, long-legged hunting dog with a silky coat.
+      It is one of the oldest dog breeds and runs very fast over long distances.
+      Its soft eyes make it look kind and calm.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688991
+    m_Localized: Bedouin people kept salukis to help hunt gazelles and hares in the
+      open desert, often together with falcons. The Saluki was so respected that
+      it was called El Hor, the noble one. Many tribes did not sell their salukis,
+      but gave them as gifts.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688992
+    m_Localized: Bite
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688993
+    m_Localized: Sprint Chase
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688994
+    m_Localized: A burst of speed and a quick snap.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688995
+    m_Localized: Arabian Oryx
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688996
+    m_Localized: Arabian Oryx
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688997
+    m_Localized: Wild Arabian Oryx
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688998
+    m_Localized: Sturdy horn fighter
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411688999
+    m_Localized: The Arabian oryx is a pale antelope with two long, straight horns.
+      Its white coat reflects the hot sun, and it can live a long time without drinking.
+      It walks on wide hooves that suit soft sand.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689000
+    m_Localized: Desert people hunted the oryx for meat and hide, and it nearly disappeared.
+      By 1972 it was gone from the wild. Breeding programmes in zoos saved it, and
+      today oryx live again in reserves in Saudi Arabia and Oman.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689001
+    m_Localized: Horn Jab
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689002
+    m_Localized: Spear Charge
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689003
+    m_Localized: Lowers its long horns and charges.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689004
+    m_Localized: Arabian Gazelle
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689005
+    m_Localized: Arabian Gazelle
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689006
+    m_Localized: Wild Arabian Gazelle
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689007
+    m_Localized: Graceful & quick
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689008
+    m_Localized: Gazelles are small, graceful antelopes with slim legs and curved
+      horns. They can run very fast and leap high to escape danger. They live in
+      dry plains and rocky hills, and eat leaves and grass.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689009
+    m_Localized: Bedouin hunters followed gazelles with salukis and falcons, and
+      gazelle meat was a valued food. Arab poets also praised the gazelle's beauty,
+      often comparing lovely eyes to a gazelle's. Today, protected reserves in Saudi
+      Arabia help gazelles stay safe.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689010
+    m_Localized: Quick Kick
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689011
+    m_Localized: Leap Dash
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689012
+    m_Localized: A high spring followed by a fast strike.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689013
+    m_Localized: Arabian Wolf
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689014
+    m_Localized: Arabian Wolf
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689015
+    m_Localized: Wild Arabian Wolf
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689016
+    m_Localized: Well-rounded hunter
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689017
+    m_Localized: The Arabian wolf is a small wolf that lives in the deserts and rocky
+      hills of Arabia. It has a short, sandy coat and big ears. It hunts at night
+      for hares, rodents and birds, alone or in small packs.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689018
+    m_Localized: Shepherds in Arabia knew the wolf well and kept careful watch over
+      their flocks at night. The wolf also appears in many old Arabic proverbs and
+      stories. By hunting rodents and hares, it helps keep the desert in balance.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689019
+    m_Localized: Bite
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689020
+    m_Localized: Howling Fang
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689021
+    m_Localized: A howl-charged bite.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689022
+    m_Localized: Arabian Fox
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689023
+    m_Localized: Arabian Fox
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689024
+    m_Localized: Wild Arabian Fox
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689025
+    m_Localized: Sly & speedy
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689026
+    m_Localized: The Arabian fox is a small desert fox with huge ears and pale, sandy
+      fur. Its big ears give off heat to keep it cool, and furry paws protect it
+      from hot sand. It hunts at night for insects, mice and fruit.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689027
+    m_Localized: Bedouin travellers knew the fox as a quick, clever survivor of the
+      desert. It appears in many Arabic folk stories as a smart trickster. Foxes
+      also eat mice and insects, which helps protect camps and farms from pests.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689028
+    m_Localized: Scratch
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689029
+    m_Localized: Sand Dash
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  - m_Id: 411689030
+    m_Localized: Kicks up sand, then strikes in a flash.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315438
+  references:
+    version: 2
+    RefIds:
+    - rid: 8955012208633315438
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 382328832
+        - id: 411688960
+        - id: 411688961
+        - id: 411688962
+        - id: 411688963
+        - id: 411688964
+        - id: 411688965
+        - id: 411688966
+        - id: 411688967
+        - id: 411688968
+        - id: 411688969
+        - id: 411688970
+        - id: 411688971
+        - id: 411688972
+        - id: 411688973
+        - id: 411688974
+        - id: 411688975
+        - id: 411688976
+        - id: 411688977
+        - id: 411688978
+        - id: 411688979
+        - id: 411688980
+        - id: 411688981
+        - id: 411688982
+        - id: 411688983
+        - id: 411688984
+        - id: 411688985
+        - id: 411688986
+        - id: 411688987
+        - id: 411688988
+        - id: 411688989
+        - id: 411688990
+        - id: 411688991
+        - id: 411688992
+        - id: 411688993
+        - id: 411688994
+        - id: 411688995
+        - id: 411688996
+        - id: 411688997
+        - id: 411688998
+        - id: 411688999
+        - id: 411689000
+        - id: 411689001
+        - id: 411689002
+        - id: 411689003
+        - id: 411689004
+        - id: 411689005
+        - id: 411689006
+        - id: 411689007
+        - id: 411689008
+        - id: 411689009
+        - id: 411689010
+        - id: 411689011
+        - id: 411689012
+        - id: 411689013
+        - id: 411689014
+        - id: 411689015
+        - id: 411689016
+        - id: 411689017
+        - id: 411689018
+        - id: 411689019
+        - id: 411689020
+        - id: 411689021
+        - id: 411689022
+        - id: 411689023
+        - id: 411689024
+        - id: 411689025
+        - id: 411689026
+        - id: 411689027
+        - id: 411689028
+        - id: 411689029
+        - id: 411689030

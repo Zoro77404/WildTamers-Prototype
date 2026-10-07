@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca2ae106f0f750048b82b7b5136418d7, type: 3}
+  m_Name: LocalizationFonts
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Lang.LocalizationFonts
+  latinMedium: {fileID: 11400000, guid: 3650ae35c01eb3e4597e9586bf8c493e, type: 2}
+  latinBold: {fileID: 11400000, guid: 3751eeb9bd5a69c49b35da541673124c, type: 2}
+  arabicMedium: {fileID: 11400000, guid: aa83497f3ca469949b53f26fb33380cf, type: 2}
+  arabicBold: {fileID: 11400000, guid: 0d68384ed241a1f4e950ca75c2732934, type: 2}
+  latinBoldOutline: {fileID: 2100000, guid: ff2a9819470c1fe4a97b4be242353fb5, type: 2}
+  arabicBoldOutline: {fileID: 2100000, guid: 08ba7031d0664a1478f5332ccbb56229, type: 2}

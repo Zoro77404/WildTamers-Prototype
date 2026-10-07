@@ -1,0 +1,683 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UI_en
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: fe33effa32428724cafcafe3e463e600, type: 2}
+  m_Metadata:
+    m_Items:
+    - rid: 8955012208633315440
+  m_TableData:
+  - m_Id: 1548345344
+    m_Localized: Lv. {0}
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1615454208
+    m_Localized: HP {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1615454209
+    m_Localized: +{0} XP
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1615454210
+    m_Localized: '{0}%'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648512
+    m_Localized: Close
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648513
+    m_Localized: Back
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648514
+    m_Localized: Done
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648515
+    m_Localized: '{0}, {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648516
+    m_Localized: '{0} and {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648517
+    m_Localized: HP
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648518
+    m_Localized: ATK
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648519
+    m_Localized: DEF
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648520
+    m_Localized: SPD
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648521
+    m_Localized: Wild Tamers
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648522
+    m_Localized: Play
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648523
+    m_Localized: Team
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648524
+    m_Localized: Settings
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648525
+    m_Localized: Quit
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648526
+    m_Localized: Paused
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648527
+    m_Localized: Resume
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648528
+    m_Localized: Settings
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648529
+    m_Localized: Main Menu
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648530
+    m_Localized: Settings
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648531
+    m_Localized: Language
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648532
+    m_Localized: English
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648533
+    m_Localized: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648534
+    m_Localized: Music
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648535
+    m_Localized: Sound effects
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648536
+    m_Localized: Reset save
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648537
+    m_Localized: Save reset. Fresh start!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648538
+    m_Localized: Reset save?
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648539
+    m_Localized: 'This deletes all your animals and starts a new game.
+
+      This
+      can''t be undone.'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648540
+    m_Localized: Yes, reset
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648541
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648542
+    m_Localized: Leave the battle?
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648543
+    m_Localized: 'Your team will retreat.
+
+      The wild animal stays where it is.'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648544
+    m_Localized: Yes, leave
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648545
+    m_Localized: TEAM
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648546
+    m_Localized: "WASD or click to walk  \u2022  Scroll to zoom  \u2022  Q/E to turn"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648547
+    m_Localized: Get closer!  ({0} m to go)
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648548
+    m_Localized: It ran away!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648549
+    m_Localized: '{0} joined your team!'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648550
+    m_Localized: Your team rested and is fully healed.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648551
+    m_Localized: Your team got away safely!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648552
+    m_Localized: Wild boss encounter!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648553
+    m_Localized: Leave
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648554
+    m_Localized: Fight!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648555
+    m_Localized: Your Team
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648556
+    m_Localized: '{0:plural:{} animal|{} animals}'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648557
+    m_Localized: 'Tap an animal to read its story.
+
+      You pick your fighters
+      before every battle.'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648558
+    m_Localized: TEAM
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648559
+    m_Localized: INFO
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648560
+    m_Localized: Choose your team
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648561
+    m_Localized: "{0}  \u2022  Lv. {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648562
+    m_Localized: Pick your fighters
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648563
+    m_Localized: Pick {0:plural:{} animal|{} animals} for this fight.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648564
+    m_Localized: Only {0:plural:{} animal can|{} animals can} fight right now.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648565
+    m_Localized: Fight!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648566
+    m_Localized: Pick {0} more
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648567
+    m_Localized: FAINTED
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648568
+    m_Localized: RESTING
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648569
+    m_Localized: NEW ANIMAL!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648570
+    m_Localized: ANIMAL INFO
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648571
+    m_Localized: ABOUT
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648572
+    m_Localized: HISTORY
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648573
+    m_Localized: Awesome!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648574
+    m_Localized: WILD BOSS
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648575
+    m_Localized: GUARD
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648576
+    m_Localized: TURN
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648577
+    m_Localized: FAINTED
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648578
+    m_Localized: CRITICAL!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648579
+    m_Localized: GUARD
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648580
+    m_Localized: Attack
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648581
+    m_Localized: Skill
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648582
+    m_Localized: Defend
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648583
+    m_Localized: Run
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648584
+    m_Localized: Half damage
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648585
+    m_Localized: Ready next turn
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648586
+    m_Localized: Ready in {0:plural:{} turn|{} turns}
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648587
+    m_Localized: '{0}% team escape'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648588
+    m_Localized: Tackle
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648589
+    m_Localized: A wild <b>{0}</b> appeared!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648590
+    m_Localized: Go, {0}!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648591
+    m_Localized: What will <b>{0}</b> do?
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648592
+    m_Localized: <b>{0}</b> is guarding!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648593
+    m_Localized: <b>{0}</b> used <b>{1}</b>!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648594
+    m_Localized: <b>{0}</b> used <b>{1}</b> on <b>{2}</b>!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648595
+    m_Localized: <color=#EF476F>{0} damage</color>
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648596
+    m_Localized: <color=#FF8A3D>Critical hit!</color>
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648597
+    m_Localized: <color=#4DA3FF>Guarded:</color>
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648598
+    m_Localized: <b>{0}</b> fainted!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648599
+    m_Localized: "Your team tries to run\u2026"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648600
+    m_Localized: Your team got away safely!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648601
+    m_Localized: Couldn't get away from the <b>{0}</b>!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648602
+    m_Localized: <b>{0}</b> joined your team!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648603
+    m_Localized: Everyone gained <b>{0} XP</b>!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648604
+    m_Localized: "Your whole team fainted\u2026"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648605
+    m_Localized: No animals to battle.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648606
+    m_Localized: Victory!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648607
+    m_Localized: <b>{0}</b> (Lv. {1}) joined your team!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648608
+    m_Localized: You won!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648609
+    m_Localized: Each animal of your team gets +{0} XP.
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648610
+    m_Localized: "Defeated\u2026"
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648611
+    m_Localized: 'Your whole team fainted.
+
+      It rested and is fully healed.'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648612
+    m_Localized: '<b>{0}</b> fainted.
+
+      Your team rested and is fully healed.'
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648613
+    m_Localized: Continue
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  - m_Id: 1619648614
+    m_Localized: LEVEL UP!
+    m_Metadata:
+      m_Items:
+      - rid: 8955012208633315440
+  references:
+    version: 2
+    RefIds:
+    - rid: 8955012208633315440
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 1548345344
+        - id: 1615454208
+        - id: 1615454209
+        - id: 1615454210
+        - id: 1619648512
+        - id: 1619648513
+        - id: 1619648514
+        - id: 1619648515
+        - id: 1619648516
+        - id: 1619648517
+        - id: 1619648518
+        - id: 1619648519
+        - id: 1619648520
+        - id: 1619648521
+        - id: 1619648522
+        - id: 1619648523
+        - id: 1619648524
+        - id: 1619648525
+        - id: 1619648526
+        - id: 1619648527
+        - id: 1619648528
+        - id: 1619648529
+        - id: 1619648530
+        - id: 1619648531
+        - id: 1619648532
+        - id: 1619648533
+        - id: 1619648534
+        - id: 1619648535
+        - id: 1619648536
+        - id: 1619648537
+        - id: 1619648538
+        - id: 1619648539
+        - id: 1619648540
+        - id: 1619648541
+        - id: 1619648542
+        - id: 1619648543
+        - id: 1619648544
+        - id: 1619648545
+        - id: 1619648546
+        - id: 1619648547
+        - id: 1619648548
+        - id: 1619648549
+        - id: 1619648550
+        - id: 1619648551
+        - id: 1619648552
+        - id: 1619648553
+        - id: 1619648554
+        - id: 1619648555
+        - id: 1619648556
+        - id: 1619648557
+        - id: 1619648558
+        - id: 1619648559
+        - id: 1619648560
+        - id: 1619648561
+        - id: 1619648562
+        - id: 1619648563
+        - id: 1619648564
+        - id: 1619648565
+        - id: 1619648566
+        - id: 1619648567
+        - id: 1619648568
+        - id: 1619648569
+        - id: 1619648570
+        - id: 1619648571
+        - id: 1619648572
+        - id: 1619648573
+        - id: 1619648574
+        - id: 1619648575
+        - id: 1619648576
+        - id: 1619648577
+        - id: 1619648578
+        - id: 1619648579
+        - id: 1619648580
+        - id: 1619648581
+        - id: 1619648582
+        - id: 1619648583
+        - id: 1619648584
+        - id: 1619648585
+        - id: 1619648586
+        - id: 1619648587
+        - id: 1619648588
+        - id: 1619648589
+        - id: 1619648590
+        - id: 1619648591
+        - id: 1619648592
+        - id: 1619648593
+        - id: 1619648594
+        - id: 1619648595
+        - id: 1619648596
+        - id: 1619648597
+        - id: 1619648598
+        - id: 1619648599
+        - id: 1619648600
+        - id: 1619648601
+        - id: 1619648602
+        - id: 1619648603
+        - id: 1619648604
+        - id: 1619648605
+        - id: 1619648606
+        - id: 1619648607
+        - id: 1619648608
+        - id: 1619648609
+        - id: 1619648610
+        - id: 1619648611
+        - id: 1619648612
+        - id: 1619648613
+        - id: 1619648614

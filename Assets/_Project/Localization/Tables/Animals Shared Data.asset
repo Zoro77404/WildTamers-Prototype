@@ -1,0 +1,316 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Animals Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: Animals
+  m_TableCollectionNameGuidString: ca55a918245ad1448b610334f9442d9a
+  m_Entries:
+  - m_Id: 382328832
+    m_Key: camel.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688960
+    m_Key: camel.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688961
+    m_Key: camel.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688962
+    m_Key: camel.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688963
+    m_Key: camel.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688964
+    m_Key: camel.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688965
+    m_Key: camel.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688966
+    m_Key: camel.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688967
+    m_Key: camel.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688968
+    m_Key: arabian_horse.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688969
+    m_Key: arabian_horse.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688970
+    m_Key: arabian_horse.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688971
+    m_Key: arabian_horse.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688972
+    m_Key: arabian_horse.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688973
+    m_Key: arabian_horse.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688974
+    m_Key: arabian_horse.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688975
+    m_Key: arabian_horse.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688976
+    m_Key: arabian_horse.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688977
+    m_Key: falcon.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688978
+    m_Key: falcon.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688979
+    m_Key: falcon.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688980
+    m_Key: falcon.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688981
+    m_Key: falcon.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688982
+    m_Key: falcon.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688983
+    m_Key: falcon.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688984
+    m_Key: falcon.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688985
+    m_Key: falcon.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688986
+    m_Key: saluki.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688987
+    m_Key: saluki.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688988
+    m_Key: saluki.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688989
+    m_Key: saluki.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688990
+    m_Key: saluki.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688991
+    m_Key: saluki.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688992
+    m_Key: saluki.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688993
+    m_Key: saluki.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688994
+    m_Key: saluki.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688995
+    m_Key: arabian_oryx.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688996
+    m_Key: arabian_oryx.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688997
+    m_Key: arabian_oryx.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688998
+    m_Key: arabian_oryx.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411688999
+    m_Key: arabian_oryx.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689000
+    m_Key: arabian_oryx.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689001
+    m_Key: arabian_oryx.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689002
+    m_Key: arabian_oryx.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689003
+    m_Key: arabian_oryx.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689004
+    m_Key: arabian_gazelle.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689005
+    m_Key: arabian_gazelle.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689006
+    m_Key: arabian_gazelle.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689007
+    m_Key: arabian_gazelle.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689008
+    m_Key: arabian_gazelle.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689009
+    m_Key: arabian_gazelle.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689010
+    m_Key: arabian_gazelle.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689011
+    m_Key: arabian_gazelle.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689012
+    m_Key: arabian_gazelle.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689013
+    m_Key: arabian_wolf.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689014
+    m_Key: arabian_wolf.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689015
+    m_Key: arabian_wolf.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689016
+    m_Key: arabian_wolf.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689017
+    m_Key: arabian_wolf.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689018
+    m_Key: arabian_wolf.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689019
+    m_Key: arabian_wolf.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689020
+    m_Key: arabian_wolf.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689021
+    m_Key: arabian_wolf.skilldesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689022
+    m_Key: arabian_fox.name
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689023
+    m_Key: arabian_fox.the
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689024
+    m_Key: arabian_fox.wild
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689025
+    m_Key: arabian_fox.style
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689026
+    m_Key: arabian_fox.description
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689027
+    m_Key: arabian_fox.history
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689028
+    m_Key: arabian_fox.attack
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689029
+    m_Key: arabian_fox.skill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 411689030
+    m_Key: arabian_fox.skilldesc
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8955012208633315437
+  references:
+    version: 2
+    RefIds:
+    - rid: 8955012208633315437
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1791390242201
