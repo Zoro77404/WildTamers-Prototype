@@ -28,7 +28,7 @@ MonoBehaviour:
   special:
     vfx: {fileID: 11400000, guid: f16ec4d9e8c666349b6bf1f4f64f8954, type: 2}
     spawnAt: 2
-    offset: {x: 0, y: 0, z: 0}
+    offset: {x: 0, y: 0, z: -1}
     scale: 1
     color: {r: 1, g: 1, b: 1, a: 1}
     colorStrength: 0

@@ -25,5 +25,6 @@ MonoBehaviour:
     fadeOut: 0.15
     shrinkOut: 0
   hitTime: 0.14
-  baseScale: 0.55
+  baseScale: 0.62
   faceCamera: 1
+  leanToCamera: 0

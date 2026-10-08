@@ -323,6 +323,54 @@ namespace WildTamers.Battle
             logGroup.alpha = to;
         }
 
+        // ---------- Big effects ----------
+
+        private Coroutine dimRoutine;
+
+        /// <summary>Viewport rect (0-1, origin bottom-left) the boss's card covers.</summary>
+        public Rect WildCardViewportRect
+        {
+            get
+            {
+                if (wildCard == null) return Rect.zero;
+                var corners = new Vector3[4];
+                ((RectTransform)wildCard.transform).GetWorldCorners(corners);
+                // Screen-space overlay canvas: corners are in pixels.
+                return Rect.MinMaxRect(corners[0].x / Screen.width, corners[0].y / Screen.height, corners[2].x / Screen.width, corners[2].y / Screen.height);
+            }
+        }
+
+        /// <summary>
+        /// Fades the boss's card out while a special effect plays behind it (for <paramref name="seconds"/>), then brings it back,
+        /// so tall effects such as the storm cloud or the tornado are not hidden under the UI.
+        /// </summary>
+        public void DimWildCard(float seconds)
+        {
+            if (wildCard == null || !isActiveAndEnabled) return;
+            if (dimRoutine != null) StopCoroutine(dimRoutine);
+            dimRoutine = StartCoroutine(DimRoutine(wildCard, seconds));
+        }
+
+        private IEnumerator DimRoutine(FighterCard card, float seconds)
+        {
+            const float faded = 0.18f, fadeOut = 0.15f, fadeIn = 0.3f;
+            float t = 0f;
+            for (; t < fadeOut; t += UIEase.GameDeltaTime)
+            {
+                card.SetEffectDim(Mathf.Lerp(1f, faded, t / fadeOut));
+                yield return null;
+            }
+            card.SetEffectDim(faded);
+            for (; t < seconds; t += UIEase.GameDeltaTime) yield return null;
+            for (float f = 0f; f < fadeIn; f += UIEase.GameDeltaTime)
+            {
+                card.SetEffectDim(Mathf.Lerp(faded, 1f, f / fadeIn));
+                yield return null;
+            }
+            card.SetEffectDim(1f);
+            dimRoutine = null;
+        }
+
         // ---------- Status ----------
 
         public void ShowGuard(BattleFighter fighter, bool on) => CardFor(fighter).SetGuard(on);

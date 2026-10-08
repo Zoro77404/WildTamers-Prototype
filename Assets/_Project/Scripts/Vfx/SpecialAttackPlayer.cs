@@ -54,10 +54,10 @@ namespace WildTamers.Vfx
         }
 
         /// <summary>Height (m) of the animal an effect's base size is made for; bigger or smaller animals scale it.</summary>
-        public const float ReferenceHeight = 2.4f;
+        public const float ReferenceHeight = 2.6f;
 
         /// <summary>Size multiplier for an effect placed on an animal <paramref name="height"/> meters tall (the boss is shown much bigger).</summary>
-        public static float SizeFor(float height) => Mathf.Clamp(height / ReferenceHeight, 0.75f, 1.9f);
+        public static float SizeFor(float height) => Mathf.Clamp(height / ReferenceHeight, 0.6f, 1.6f);
 
         /// <summary>
         /// Spawns the effect. Facing: toward the camera for flat effects, else along the attack. <paramref name="sizeScale"/> fits it to
@@ -70,9 +70,31 @@ namespace WildTamers.Vfx
             var along = targetFeet - attackerFeet;
             along.y = 0f;
             var attackFacing = along.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(along.normalized, Vector3.up) : Quaternion.identity;
-            var rotation = fx.vfx.faceCamera ? VfxInstance.FacingCamera(camera, attackFacing) : attackFacing;
+            var rotation = fx.vfx.faceCamera ? VfxInstance.FacingCamera(camera, attackFacing, fx.vfx.leanToCamera) : attackFacing;
             var position = Anchor(fx, attackerFeet, targetBody, targetFeet) + rotation * (fx.offset * sizeScale);
             return VfxInstance.Spawn(fx.vfx, position, rotation, fx.scale * sizeScale, fx.color, fx.colorStrength, fx.speed, manualTick);
+        }
+
+        /// <summary>
+        /// How long (seconds after the effect spawns) a HUD card in front of the effect stays faded: until the effect starts to fade
+        /// out, but at least a moment past the hit and at most a second after it, so the health bar drop is still seen.
+        /// </summary>
+        public static float CardDimTime(SpecialAttackFx fx, float hitIn) =>
+            Mathf.Max(hitIn + 0.4f, Mathf.Min(Duration(fx) - 0.35f, hitIn + 1.0f));
+
+        /// <summary>Highest point (viewport y, 0 = bottom, 1 = top) the effect can reach on screen.</summary>
+        public static float ViewportTop(VfxInstance instance, Camera camera)
+        {
+            if (instance == null || instance.Effect == null || camera == null) return 0f;
+            var b = instance.Effect.LocalBounds;
+            float top = 0f;
+            for (int i = 0; i < 4; i++)
+            {
+                // The four top corners (the far side of a wide effect sits higher on screen than its middle).
+                var corner = new Vector3(i % 2 == 0 ? b.min.x : b.max.x, b.max.y, i < 2 ? b.min.z : b.max.z);
+                top = Mathf.Max(top, camera.WorldToViewportPoint(instance.transform.TransformPoint(corner)).y);
+            }
+            return top;
         }
 
         /// <summary>The special's impact sound (falls back to the Sound Library's heavy hit).</summary>

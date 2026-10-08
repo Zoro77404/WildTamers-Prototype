@@ -32,7 +32,7 @@ namespace WildTamers.EditorTools
                 }
             }
             EditorGUILayout.HelpBox("Open the Battle scene to preview on the real battle stages (it faces the battle camera); " +
-                                    "in any other scene it plays in front of the Scene view camera. Change a value and press Preview again.",
+                                    "in any other scene it plays in the middle of the Scene view. Change a value and press Preview again.",
                 MessageType.None);
         }
 

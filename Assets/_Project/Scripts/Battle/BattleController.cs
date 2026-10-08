@@ -222,7 +222,8 @@ namespace WildTamers.Battle
             {
                 charge = SpecialAttackPlayer.PlanCharge(special, BattleActor.SkillCharge, BattleActor.SkillLunge, out spawnAt);
                 AudioManager.Play(Sfx.Charge);
-                if (special != null && special.vfx != null) StartCoroutine(SpawnSpecial(special, actorView, targetView, spawnAt));
+                if (special != null && special.vfx != null)
+                    StartCoroutine(SpawnSpecial(special, actorView, targetView, spawnAt, charge + BattleActor.SkillLunge));
             }
 
             float started = Time.time;
@@ -246,12 +247,15 @@ namespace WildTamers.Battle
             if (target.IsPlayer && target.IsFainted) yield return Knockout(target);
         }
 
-        private IEnumerator SpawnSpecial(SpecialAttackFx fx, BattleActor attacker, BattleActor target, float delay)
+        private IEnumerator SpawnSpecial(SpecialAttackFx fx, BattleActor attacker, BattleActor target, float delay, float impactAt)
         {
             yield return Wait(delay);
             var onAnimal = fx.spawnAt == VfxAnchor.Attacker ? attacker : target;
-            SpecialAttackPlayer.Spawn(fx, attacker.transform.position, target.BodyPoint, target.transform.position, worldCamera,
+            var effect = SpecialAttackPlayer.Spawn(fx, attacker.transform.position, target.BodyPoint, target.transform.position, worldCamera,
                 SpecialAttackPlayer.SizeFor(onAnimal.WorldHeight));
+            // A tall effect (storm cloud, tornado) reaching up under the boss's card: fade the card while it plays.
+            if (effect != null && SpecialAttackPlayer.ViewportTop(effect, worldCamera) > hud.WildCardViewportRect.yMin)
+                hud.DimWildCard(SpecialAttackPlayer.CardDimTime(fx, impactAt - delay));
         }
 
         private IEnumerator Knockout(BattleFighter fighter)

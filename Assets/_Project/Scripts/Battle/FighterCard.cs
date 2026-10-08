@@ -43,6 +43,7 @@ namespace WildTamers.Battle
         private bool turn;
         private bool fainted;
         private float scale = 1f;
+        private float dim = 1f;
 
         private void OnEnable() => Loc.LanguageChanged += RefreshTexts;
 
@@ -71,7 +72,8 @@ namespace WildTamers.Battle
             SetTurn(false);
             SetOrder(0);
             if (faintedBadge != null) faintedBadge.SetActive(false);
-            if (group != null) group.alpha = 1f;
+            dim = 1f;
+            ApplyAlpha();
         }
 
         public void SetLevel(int level)
@@ -113,7 +115,19 @@ namespace WildTamers.Battle
                 SetGuard(false);
             }
             if (faintedBadge != null) faintedBadge.SetActive(value);
-            if (group != null) group.alpha = value ? 0.55f : 1f;
+            ApplyAlpha();
+        }
+
+        /// <summary>Fades the card (0-1) so a big special effect behind it can be seen; 1 = normal.</summary>
+        public void SetEffectDim(float value)
+        {
+            dim = Mathf.Clamp01(value);
+            ApplyAlpha();
+        }
+
+        private void ApplyAlpha()
+        {
+            if (group != null) group.alpha = (fainted ? 0.55f : 1f) * dim;
         }
 
         private void Update()

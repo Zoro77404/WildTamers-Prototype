@@ -21,9 +21,11 @@ MonoBehaviour:
     speed: 1
     offset: {x: 0, y: 0, z: 0}
     scale: 1
+    stretch: {x: 0.8, y: 1, z: 0.55}
     fadeIn: 0.3
     fadeOut: 0.45
     shrinkOut: 1
   hitTime: 1.72
-  baseScale: 0.38
+  baseScale: 0.55
   faceCamera: 1
+  leanToCamera: 0

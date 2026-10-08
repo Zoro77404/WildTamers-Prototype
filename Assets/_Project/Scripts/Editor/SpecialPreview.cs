@@ -14,12 +14,12 @@ namespace WildTamers.EditorTools
     /// "Preview Special" in the AnimalData Inspector: plays an animal's special-attack effect and sounds in the open scene with
     /// the same timing as a battle (charge-up sound → effect → lunge whoosh → impact sound), without starting a fight.
     /// In the Battle scene it uses the real stages (this animal on the middle spot, a stand-in boss on the wild spot);
-    /// anywhere else it plays on the ground in front of the Scene view camera. Works in and out of Play Mode.
+    /// anywhere else it plays in the middle of the Scene view (its pivot). Works in and out of Play Mode.
     /// </summary>
     public static class SpecialPreview
     {
         private const string BattleScenePath = "Assets/_Project/Scenes/BattleScene.unity";
-        private const string TargetPrefab = "Assets/_Project/Prefabs/Animals/Camel.prefab";
+        private const string TargetPrefab = "Assets/_Project/Prefabs/Animals/ArabianWolf.prefab";
 
         private struct Cue
         {
@@ -60,16 +60,15 @@ namespace WildTamers.EditorTools
                 facing = Camera.main;
                 attackerFeet = middle != null ? middle.transform.position : Vector3.zero;
                 targetFeet = wild != null ? wild.transform.position : Vector3.forward * 8f;
-                float wildScale = wild != null ? wild.transform.lossyScale.y : 1f;
-                float targetHeight = 2.2f * wildScale;
-                targetBody = targetFeet + Vector3.up * targetHeight * 0.5f;
-                size = SpecialAttackPlayer.SizeFor(fx.spawnAt == VfxAnchor.Attacker ? 2.2f : targetHeight);
+                // Stand-ins (outside Play Mode) so the effect can be judged against animals shown as big as in a fight.
+                float attackerHeight = 1.6f, targetHeight = 3.2f;
                 if (!Application.isPlaying)
                 {
-                    // Stand-ins so the effect can be judged against real animals.
-                    ShowModel(data.prefab, middle != null ? middle.transform : null, 1.7f);
-                    ShowModel(AssetDatabase.LoadAssetAtPath<GameObject>(TargetPrefab), wild != null ? wild.transform : null, 1.7f);
+                    attackerHeight = ShowModel(data.prefab, middle);
+                    targetHeight = ShowModel(AssetDatabase.LoadAssetAtPath<GameObject>(TargetPrefab), wild);
                 }
+                targetBody = targetFeet + Vector3.up * targetHeight * 0.5f;
+                size = SpecialAttackPlayer.SizeFor(fx.spawnAt == VfxAnchor.Attacker ? attackerHeight : targetHeight);
             }
             else
             {
@@ -78,14 +77,8 @@ namespace WildTamers.EditorTools
                 var cam = facing != null ? facing.transform : null;
                 var ahead = cam != null ? Vector3.ProjectOnPlane(cam.forward, Vector3.up).normalized : Vector3.forward;
                 if (ahead.sqrMagnitude < 0.01f) ahead = Vector3.forward;
-                var origin = cam != null ? cam.position : Vector3.zero;
-                targetFeet = new Vector3(origin.x, 0f, origin.z) + ahead * 12f;
-                if (cam != null && Mathf.Abs(cam.forward.y) > 0.05f)
-                {
-                    // Where the view looks at the ground, if that is in front of the camera and not too far.
-                    float t = -origin.y / cam.forward.y;
-                    if (t > 2f && t < 60f) targetFeet = origin + cam.forward * t;
-                }
+                // The point the Scene view orbits around is the middle of what it shows.
+                targetFeet = view != null ? view.pivot : (cam != null ? cam.position + ahead * 12f : Vector3.zero);
                 attackerFeet = targetFeet - ahead * 6f;
                 targetBody = targetFeet + Vector3.up * 1.1f;
                 size = 1f;
@@ -156,13 +149,33 @@ namespace WildTamers.EditorTools
             if (clock >= endTime && cues.Count == 0) Stop();
         }
 
-        private static void ShowModel(GameObject prefab, Transform spot, float scale)
+        /// <summary>Shows a stand-in model on a battle stage, sized like the stage shows animals; returns its height.</summary>
+        private static float ShowModel(GameObject prefab, BattleActor stage)
         {
-            if (prefab == null || spot == null) return;
-            var go = Object.Instantiate(prefab, spot.position, spot.rotation);
+            if (prefab == null || stage == null) return 2.6f;
+            var settings = new SerializedObject(stage);
+            float display = settings.FindProperty("displayScale").floatValue;
+            float maxHeight = settings.FindProperty("maxHeight").floatValue;
+            var go = Object.Instantiate(prefab, stage.transform.position, stage.transform.rotation);
             go.hideFlags = HideFlags.HideAndDontSave;
-            go.transform.localScale = Vector3.one * scale * spot.lossyScale.y;
+            go.transform.localScale = Vector3.one * display * stage.transform.lossyScale.y;
+            float height = Height(go);
+            if (height > maxHeight)
+            {
+                go.transform.localScale *= maxHeight / height;
+                height = maxHeight;
+            }
             temporary.Add(go);
+            return height;
+        }
+
+        private static float Height(GameObject go)
+        {
+            var renderers = go.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0) return 2.6f;
+            var b = renderers[0].bounds;
+            foreach (var r in renderers) b.Encapsulate(r.bounds);
+            return b.max.y - go.transform.position.y;
         }
 
         // ---------- Sound (AudioManager in Play Mode, a hidden AudioSource in Edit Mode) ----------

@@ -28,6 +28,8 @@ namespace WildTamers.Vfx
             [Tooltip("Position offset in meters (x = right, y = up, z = away from the camera).")]
             public Vector3 offset;
             [Min(0.01f)] public float scale = 1f;
+            [Tooltip("Extra squash/stretch per axis (x = width, y = height, z = depth toward the camera). (1, 1, 1) = as made.")]
+            public Vector3 stretch = Vector3.one;
             [Tooltip("Seconds to fade and grow in.")]
             [Min(0f)] public float fadeIn;
             [Tooltip("Seconds to fade out at the end of the layer.")]
@@ -46,6 +48,9 @@ namespace WildTamers.Vfx
                 }
             }
 
+            /// <summary>Per-axis size of the layer (scale × stretch; an unset stretch counts as 1).</summary>
+            public Vector3 Size => scale * (stretch == Vector3.zero ? Vector3.one : stretch);
+
             /// <summary>Seconds this layer is on screen at speed 1.</summary>
             public float Duration => hold > 0f ? hold : ClipSpan / Mathf.Max(0.05f, speed);
         }
@@ -63,6 +68,30 @@ namespace WildTamers.Vfx
         [Min(0.01f)] public float baseScale = 1f;
         [Tooltip("Turn the effect so its front faces the camera (flat effects like fire need this).")]
         public bool faceCamera = true;
+        [Tooltip("Lean the effect toward the camera (degrees) around its base. The battle camera looks down, so a lean keeps tall " +
+                 "effects (clouds, tornadoes, flames) facing it and below the boss's health card. Keep 0 for effects flat on the ground.")]
+        [Range(0f, 45f)] public float leanToCamera;
+
+        /// <summary>Space the effect can fill (meters, before the battle scale), around its base point.</summary>
+        public Bounds LocalBounds
+        {
+            get
+            {
+                bool any = false;
+                var bounds = new Bounds(Vector3.zero, Vector3.zero);
+                if (layers == null) return bounds;
+                foreach (var layer in layers)
+                {
+                    if (layer == null || layer.clip == null) continue;
+                    var b = layer.clip.Bounds;
+                    var size = layer.Size;
+                    var lb = new Bounds(layer.offset + Vector3.Scale(b.center, size), Vector3.Scale(b.size, size));
+                    if (!any) { bounds = lb; any = true; }
+                    else bounds.Encapsulate(lb);
+                }
+                return bounds;
+            }
+        }
 
         /// <summary>Total length at speed 1.</summary>
         public float Duration

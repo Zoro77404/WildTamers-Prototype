@@ -45,13 +45,21 @@ namespace WildTamers.Vfx
             return instance;
         }
 
-        /// <summary>Yaw that makes a camera-facing effect show its front (the side the artist built it to be seen from).</summary>
-        public static Quaternion FacingCamera(Camera camera, Quaternion fallback)
+        /// <summary>
+        /// Yaw that makes a camera-facing effect show its front (the side the artist built it to be seen from), leaned
+        /// <paramref name="lean"/> degrees toward the camera around its base.
+        /// </summary>
+        public static Quaternion FacingCamera(Camera camera, Quaternion fallback, float lean = 0f)
         {
-            if (camera == null) return fallback;
-            var forward = camera.transform.forward;
-            forward.y = 0f;
-            return forward.sqrMagnitude < 1e-4f ? fallback : Quaternion.LookRotation(forward.normalized, Vector3.up);
+            var yaw = fallback;
+            if (camera != null)
+            {
+                var forward = camera.transform.forward;
+                forward.y = 0f;
+                if (forward.sqrMagnitude > 1e-4f) yaw = Quaternion.LookRotation(forward.normalized, Vector3.up);
+            }
+            // The effect's front is local -Z (toward the camera): a negative turn around X tips its top that way.
+            return yaw * Quaternion.Euler(-lean, 0f, 0f);
         }
 
         private void Setup(VfxEffect fx, Color color, float recolorAmount, float playSpeed, bool manualTick)
@@ -140,7 +148,7 @@ namespace WildTamers.Vfx
                 transform = go.transform;
                 transform.SetParent(owner.transform, false);
                 transform.localPosition = layer.offset;
-                transform.localScale = Vector3.one * layer.scale;
+                transform.localScale = layer.Size;
                 mesh = clip.CreateMesh();
                 mesh.hideFlags = HideFlags.DontSave;
                 go.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -195,7 +203,7 @@ namespace WildTamers.Vfx
                     fade = Mathf.Min(fade, p);
                     if (layer.shrinkOut) grow *= Mathf.Lerp(0.35f, 1f, p);
                 }
-                transform.localScale = Vector3.one * (layer.scale * grow);
+                transform.localScale = layer.Size * grow;
 
                 block.SetColor(TintId, tint);
                 block.SetFloat(RecolorId, recolor);

@@ -77,7 +77,5 @@ _backup/
 
 # Source VFX over GitHub's 100 MB file limit (the baked copy in Assets/_Project/Data/VFX/Baked is in git — see RequiredAssets.md)
 /Assets/_Project/VFX/Lighting Cloud/LIGHTNING_CLOUD.abc
+/Assets/_Project/VFX/Lighting Cloud/LIGHTNING_CLOUD.abc.meta
 
-# Temporary test scenes
-/Assets/_Project/Scenes/_Temp/
-/Assets/_Project/Scenes/_Temp.meta

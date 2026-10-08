@@ -20,7 +20,7 @@ MonoBehaviour:
     hold: 0
     speed: 1
     offset: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 0.8
     fadeIn: 0
     fadeOut: 0.1
     shrinkOut: 0
@@ -31,21 +31,22 @@ MonoBehaviour:
     hold: 1
     speed: 1
     offset: {x: 0, y: 0, z: 0}
-    scale: 1
+    scale: 1.45
     fadeIn: 0.14
-    fadeOut: 0.12
-    shrinkOut: 0
+    fadeOut: 0.25
+    shrinkOut: 1
   - clip: {fileID: 11400000, guid: 2eb91bf26fafda24cb8efc291bbd8e02, type: 2}
-    start: 1.1
+    start: 1.02
     clipFrom: 0
     clipTo: 0
     hold: 0
     speed: 1
-    offset: {x: 0, y: 0, z: 0}
-    scale: 1
+    offset: {x: 0, y: -1.1, z: -0.1}
+    scale: 2.2
     fadeIn: 0
     fadeOut: 0.12
     shrinkOut: 0
   hitTime: 0.08
-  baseScale: 0.75
+  baseScale: 0.85
   faceCamera: 1
+  leanToCamera: 10

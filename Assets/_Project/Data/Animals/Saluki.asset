@@ -28,11 +28,11 @@ MonoBehaviour:
   special:
     vfx: {fileID: 11400000, guid: 1f3cb27db38ad7f4285c6da96520cff8, type: 2}
     spawnAt: 2
-    offset: {x: 0, y: 0, z: 0}
-    scale: 0.75
-    color: {r: 0.7490196, g: 0.8901961, b: 1, a: 1}
-    colorStrength: 0.7
-    speed: 1.5
+    offset: {x: 0, y: 0, z: -0.5}
+    scale: 0.9
+    color: {r: 0.56078434, g: 0.8901961, b: 1, a: 1}
+    colorStrength: 0.85
+    speed: 1.6
     delay: 0
     sound: {fileID: 8300000, guid: 1d0eb3eb59c40f64c831433b236bda90, type: 3}
     soundVolume: 0.8
