@@ -33,6 +33,7 @@ namespace WildTamers.UI
         {
             base.Awake();
             if (closeButton != null) closeButton.onClick.AddListener(Hide);
+            ClickSound.Hook(backdropButton);
             if (backdropButton != null) backdropButton.onClick.AddListener(Hide);
         }
 

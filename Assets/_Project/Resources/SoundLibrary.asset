@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b47cc1e30bfee2644bf17591fca45ca6, type: 3}
+  m_Name: SoundLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Audio.SoundLibrary
+  mainTheme:
+    clip: {fileID: 8300000, guid: a57eec350b3adb840baaf964a7331c48, type: 3}
+    volume: 0.6
+    pitch: 1
+    pitchVariance: 0
+  battleMusic:
+    clip: {fileID: 8300000, guid: ffbc28e367960d641a9b5e759736d0c3, type: 3}
+    volume: 0.6
+    pitch: 1
+    pitchVariance: 0
+  musicFade: 1.6
+  buttonClick:
+    clip: {fileID: 8300000, guid: 674b8a9c1c452e44babcc0c0a6837d2f, type: 3}
+    volume: 0.5
+    pitch: 1
+    pitchVariance: 0.03
+  pop:
+    clip: {fileID: 8300000, guid: 141cfdddbaa34e840b9751b1c34ded04, type: 3}
+    volume: 0.7
+    pitch: 1
+    pitchVariance: 0.04
+  win:
+    clip: {fileID: 8300000, guid: 73a85578eb660c649a01e8eadea5017f, type: 3}
+    volume: 0.8
+    pitch: 1
+    pitchVariance: 0
+  lose:
+    clip: {fileID: 8300000, guid: 289aec4394f00304b821e319fbc30215, type: 3}
+    volume: 0.7
+    pitch: 1
+    pitchVariance: 0
+  footstep:
+    clip: {fileID: 8300000, guid: ee11b75c73b3363408afd4c38d527ca3, type: 3}
+    volume: 0.18
+    pitch: 1
+    pitchVariance: 0.1
+  normalAttacks:
+  - clip: {fileID: 8300000, guid: c9ab9984cf1c7804b873f78258646ceb, type: 3}
+    volume: 0.45
+    pitch: 1
+    pitchVariance: 0.08
+  - clip: {fileID: 8300000, guid: d20ffa7feaa7c2742b339dfe54ec7ee4, type: 3}
+    volume: 0.45
+    pitch: 1
+    pitchVariance: 0.08
+  - clip: {fileID: 8300000, guid: 0a76e5395fee2704daf0a71e93447893, type: 3}
+    volume: 0.45
+    pitch: 1
+    pitchVariance: 0.08
+  - clip: {fileID: 8300000, guid: 62dc8014c01d82b4eb11ea1b72f01cbb, type: 3}
+    volume: 0.45
+    pitch: 1
+    pitchVariance: 0.08
+  attackSwing:
+    clip: {fileID: 8300000, guid: ac4326d3e266f734b95728526a724971, type: 3}
+    volume: 0.35
+    pitch: 1
+    pitchVariance: 0.06
+  specialCharge:
+    clip: {fileID: 8300000, guid: fd6d0dc4036764f4b9a23dc9619857f3, type: 3}
+    volume: 0.55
+    pitch: 1
+    pitchVariance: 0.03
+  heavyHit:
+    clip: {fileID: 8300000, guid: 1d0eb3eb59c40f64c831433b236bda90, type: 3}
+    volume: 0.6
+    pitch: 0.85
+    pitchVariance: 0.03
+  guard:
+    clip: {fileID: 8300000, guid: 507996815fef4a640b98d4979b4d6978, type: 3}
+    volume: 0.6
+    pitch: 1
+    pitchVariance: 0.04

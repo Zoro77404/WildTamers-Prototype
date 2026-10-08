@@ -25,4 +25,16 @@ MonoBehaviour:
   skill:
     power: 2.2
     cooldownTurns: 3
+  special:
+    vfx: {fileID: 11400000, guid: f16ec4d9e8c666349b6bf1f4f64f8954, type: 2}
+    spawnAt: 2
+    offset: {x: 0, y: 0, z: 0}
+    scale: 1.05
+    color: {r: 0.37254903, g: 0.65882355, b: 1, a: 1}
+    colorStrength: 0.85
+    speed: 1
+    delay: 0
+    sound: {fileID: 8300000, guid: 1d0eb3eb59c40f64c831433b236bda90, type: 3}
+    soundVolume: 0.8
+    soundPitch: 0.9
   spawnWeight: 1

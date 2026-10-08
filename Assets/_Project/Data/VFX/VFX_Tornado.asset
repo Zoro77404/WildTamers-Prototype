@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e207bf1b6a0706348a0b5b6aedd4ff17, type: 3}
+  m_Name: VFX_Tornado
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxEffect
+  layers:
+  - clip: {fileID: 11400000, guid: 67475b69182bfe64e8e6008356b922a2, type: 2}
+    start: 0
+    clipFrom: 0
+    clipTo: 0
+    hold: 1.9
+    speed: 1
+    offset: {x: 0, y: 0, z: 0}
+    scale: 1
+    fadeIn: 0.3
+    fadeOut: 0.4
+    shrinkOut: 1
+  hitTime: 0.3
+  baseScale: 0.62
+  faceCamera: 1

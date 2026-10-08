@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be4d214191f20bc4fbbe1771a52ffe0a, type: 3}
+  m_Name: Tornado
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxClip
+  sourcePath: Assets/_Project/VFX/ternedo/Ternedo.abc
+  data: {fileID: 4900000, guid: 1ad6b9926419dd84eb2f880ee11e0766, type: 3}
+  parts:
+  - name: MAIN_RIBBONS
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: GOLD_HIGHLIGHTS
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: WISPS
+    material: {fileID: 2100000, guid: 671cfee3ed78c4449a9cc63562f6fdb5, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: STREAKS
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: PARTICLES
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: INNER_VORTEX
+    material: {fileID: 2100000, guid: 671cfee3ed78c4449a9cc63562f6fdb5, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  frameRate: 24
+  frameCount: 96
+  vertexCount: 13712
+  bounds:
+    m_Center: {x: 0, y: 2.9000003, z: 0}
+    m_Extent: {x: 1.991165, y: 2.9000003, z: 1.9943492}
+  seamlessLoop: 0

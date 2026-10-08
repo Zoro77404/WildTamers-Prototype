@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be4d214191f20bc4fbbe1771a52ffe0a, type: 3}
+  m_Name: Fire_End
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxClip
+  sourcePath: Assets/_Project/VFX/fire/A_fireEnd.abc
+  data: {fileID: 4900000, guid: d9b40d4610a211b408223876a3a9e7f3, type: 3}
+  parts:
+  - name: flame_collapse
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0.3
+    fadeTo: 0.5
+  - name: core_glow
+    material: {fileID: 2100000, guid: c15b7c70b97eafd41a7273ec62004bf0, type: 2}
+    fadeFrom: 0.15
+    fadeTo: 0.35
+  - name: other
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  frameRate: 24
+  frameCount: 15
+  vertexCount: 1126
+  bounds:
+    m_Center: {x: -0.00000023841858, y: 0.9980191, z: 0}
+    m_Extent: {x: 1.0268409, y: 0.9951745, z: 0.19445834}
+  seamlessLoop: 0

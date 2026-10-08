@@ -25,6 +25,7 @@ namespace WildTamers.UI
             resumeButton.onClick.AddListener(Resume);
             settingsButton.onClick.AddListener(() => { if (settings != null) settings.Show(); });
             mainMenuButton.onClick.AddListener(MainMenuPressed);
+            ClickSound.Hook(backdropButton);
             if (backdropButton != null) backdropButton.onClick.AddListener(Resume);
         }
 

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be4d214191f20bc4fbbe1771a52ffe0a, type: 3}
+  m_Name: Fire_Idle
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxClip
+  sourcePath: Assets/_Project/VFX/fire/A_fireidle.abc
+  data: {fileID: 4900000, guid: 2afe8a1b6fd617244b55a1387eb1d3f5, type: 3}
+  parts:
+  - name: flame_outer
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: flame_core
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: energy_base
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: embers_sparks
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  frameRate: 24
+  frameCount: 96
+  vertexCount: 2898
+  bounds:
+    m_Center: {x: -0.00000023841858, y: 1.372867, z: 0}
+    m_Extent: {x: 0.89145446, y: 1.499849, z: 0.47370774}
+  seamlessLoop: 0

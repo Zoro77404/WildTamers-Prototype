@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be4d214191f20bc4fbbe1771a52ffe0a, type: 3}
+  m_Name: SpikeImpact
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxClip
+  sourcePath: Assets/_Project/VFX/Lroubd Spike Impact/LROUND_SPIKE_IMPACT_VFX.abc
+  data: {fileID: 4900000, guid: d9db47e0c8685d945b16bd1d3d365b63, type: 3}
+  parts:
+  - name: rock_spikes
+    material: {fileID: 2100000, guid: 94a6869c504d5f14d9c77a31598c058b, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: spike_energy_seams
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: shockwave_rings
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0.12
+    fadeTo: 0.6
+  - name: ground_energy_fissures
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0.5
+    fadeTo: 0.95
+  - name: impact_flash
+    material: {fileID: 2100000, guid: c15b7c70b97eafd41a7273ec62004bf0, type: 2}
+    fadeFrom: 0.04
+    fadeTo: 0.3
+  - name: floating_rock_debris
+    material: {fileID: 2100000, guid: 94a6869c504d5f14d9c77a31598c058b, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: energy_sparks
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  frameRate: 24
+  frameCount: 30
+  vertexCount: 12047
+  bounds:
+    m_Center: {x: 0.108501434, y: -2.9532108, z: 0.06604004}
+    m_Extent: {x: 3.6360016, y: 6.973503, z: 4.067234}
+  seamlessLoop: 0

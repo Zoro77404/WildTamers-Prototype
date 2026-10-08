@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be4d214191f20bc4fbbe1771a52ffe0a, type: 3}
+  m_Name: LightningCloud
+  m_EditorClassIdentifier: Assembly-CSharp::WildTamers.Vfx.VfxClip
+  sourcePath: Assets/_Project/VFX/Lighting Cloud/LIGHTNING_CLOUD.abc
+  data: {fileID: 4900000, guid: 77078ed02dd93af45a49d489bd27e70e, type: 3}
+  parts:
+  - name: cloud
+    material: {fileID: 2100000, guid: 94a6869c504d5f14d9c77a31598c058b, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: charge_arcs
+    material: {fileID: 2100000, guid: c15b7c70b97eafd41a7273ec62004bf0, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: charge_aura
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: ngon
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: lightning_aura
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: lightning_gold
+    material: {fileID: 2100000, guid: 96c4c2458d806694f947c276befd4846, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: lightning_core
+    material: {fileID: 2100000, guid: c15b7c70b97eafd41a7273ec62004bf0, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: shock_ring
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: ring_aura
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: impact_rays
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: sparks
+    material: {fileID: 2100000, guid: a8c0833c467ed194a8c7e787059b3df6, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: debris
+    material: {fileID: 2100000, guid: 94a6869c504d5f14d9c77a31598c058b, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  - name: charge_center
+    material: {fileID: 2100000, guid: c15b7c70b97eafd41a7273ec62004bf0, type: 2}
+    fadeFrom: 0
+    fadeTo: 0
+  frameRate: 24
+  frameCount: 120
+  vertexCount: 21730
+  bounds:
+    m_Center: {x: 0.30413628, y: 5.0965877, z: -0.1595459}
+    m_Extent: {x: 8.433163, y: 5.2196617, z: 5.634303}
+  seamlessLoop: 0

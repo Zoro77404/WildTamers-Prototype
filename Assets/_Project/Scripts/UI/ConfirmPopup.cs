@@ -31,6 +31,7 @@ namespace WildTamers.UI
             base.Awake();
             confirmButton.onClick.AddListener(Confirm);
             cancelButton.onClick.AddListener(Cancel);
+            ClickSound.Hook(backdropButton);
             if (backdropButton != null) backdropButton.onClick.AddListener(Cancel);
         }
 

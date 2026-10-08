@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -7,14 +8,18 @@ using WildTamers.Audio;
 namespace WildTamers.EditorTools
 {
     /// <summary>
-    /// Project plumbing that is not a scene: the audio library (import settings for the music and sounds, volume trims),
+    /// Project plumbing that is not a scene: the Sound Library (import settings for the music and sounds, volume trims),
     /// the scenes in the build (main menu first) and "play from the main menu" in the editor.
     /// </summary>
     [InitializeOnLoad]
     public static class ProjectSetupBuilder
     {
-        private const string AudioFolder = "Assets/ThirdParty/OpenGameArt/Audio";
-        private const string LibraryPath = "Assets/_Project/Resources/AudioLibrary.asset";
+        /// <summary>The user's own music and sounds (named by what they are; never moved or renamed).</summary>
+        private const string SoundFolder = "Assets/_Project/Sounds";
+        private const string AttackFolder = SoundFolder + "/Attacks";
+        /// <summary>CC0 interface sounds still used for win / lose / pop / guard.</summary>
+        private const string ExtraFolder = "Assets/ThirdParty/OpenGameArt/Audio";
+        private const string LibraryPath = "Assets/_Project/Resources/SoundLibrary.asset";
         private const string PlayFromMenuKey = "WildTamers.PlayFromMenu";
         private const string PlayFromMenuMenu = "Wild Tamers/Play From Main Menu";
 
@@ -23,40 +28,55 @@ namespace WildTamers.EditorTools
             EditorApplication.delayCall += ApplyPlayModeStartScene;
         }
 
-        // ---------- Audio ----------
+        // ---------- Sound Library ----------
 
-        [MenuItem("Wild Tamers/Build/Audio Library")]
-        public static void BuildAudio()
+        /// <summary>
+        /// Sets import settings and fills the Sound Library. Only empty slots are filled, so a sound dragged in by hand is kept.
+        /// </summary>
+        [MenuItem("Wild Tamers/Build/Sound Library")]
+        public static SoundLibrary BuildAudio()
         {
-            string[] music = { "Music_Menu_DarbukaDelight", "Music_Battle_DarbukaChase" };
-            string[] sfx = { "Sfx_Click", "Sfx_Hit", "Sfx_Crit", "Sfx_Guard", "Sfx_Win", "Sfx_Lose", "Sfx_Pop" };
-            foreach (var n in music) Import(n, streaming: true);
-            foreach (var n in sfx) Import(n, streaming: false);
+            var mainTheme = $"{SoundFolder}/Main theme.mp3";
+            var battle = $"{SoundFolder}/Fighting Song.mp3";
+            Import(mainTheme, streaming: true);
+            Import(battle, streaming: true);
+            foreach (var file in new[] { "ButtonClick", "FootStep" }) Import($"{SoundFolder}/{file}.wav", streaming: false);
+            foreach (var file in new[] { "Attack", "Attack_1", "Attack_2", "Attack_3", "Attack_Swing", "Attack_Charged", "Attack_Heavy" })
+                Import($"{AttackFolder}/{file}.wav", streaming: false);
+            foreach (var file in new[] { "Sfx_Win", "Sfx_Lose", "Sfx_Pop", "Sfx_Guard" }) Import($"{ExtraFolder}/{file}.ogg", streaming: false);
 
             Directory.CreateDirectory(Path.GetDirectoryName(LibraryPath));
-            var library = AssetDatabase.LoadAssetAtPath<AudioLibrary>(LibraryPath);
+            var library = AssetDatabase.LoadAssetAtPath<SoundLibrary>(LibraryPath);
             if (library == null)
             {
-                library = ScriptableObject.CreateInstance<AudioLibrary>();
+                library = ScriptableObject.CreateInstance<SoundLibrary>();
                 AssetDatabase.CreateAsset(library, LibraryPath);
             }
-            Set(library.menuMusic, "Music_Menu_DarbukaDelight", 0.6f);
-            Set(library.battleMusic, "Music_Battle_DarbukaChase", 1f);
-            Set(library.click, "Sfx_Click", 0.8f);
-            Set(library.hit, "Sfx_Hit", 0.75f);
-            Set(library.crit, "Sfx_Crit", 1f);
-            Set(library.guard, "Sfx_Guard", 0.8f);
-            Set(library.win, "Sfx_Win", 0.8f);
-            Set(library.lose, "Sfx_Lose", 0.7f);
-            Set(library.pop, "Sfx_Pop", 0.7f);
+            Fill(library.mainTheme, mainTheme);
+            Fill(library.battleMusic, battle);
+            Fill(library.buttonClick, $"{SoundFolder}/ButtonClick.wav");
+            Fill(library.footstep, $"{SoundFolder}/FootStep.wav");
+            Fill(library.attackSwing, $"{AttackFolder}/Attack_Swing.wav");
+            Fill(library.specialCharge, $"{AttackFolder}/Attack_Charged.wav");
+            Fill(library.heavyHit, $"{AttackFolder}/Attack_Heavy.wav");
+            Fill(library.win, $"{ExtraFolder}/Sfx_Win.ogg");
+            Fill(library.lose, $"{ExtraFolder}/Sfx_Lose.ogg");
+            Fill(library.pop, $"{ExtraFolder}/Sfx_Pop.ogg");
+            Fill(library.guard, $"{ExtraFolder}/Sfx_Guard.ogg");
+            if (library.normalAttacks == null || library.normalAttacks.Length == 0)
+            {
+                library.normalAttacks = new[] { "Attack", "Attack_1", "Attack_2", "Attack_3" }
+                    .Select(n => new SoundLibrary.Sound(0.45f, 1f, 0.08f) { clip = Load($"{AttackFolder}/{n}.wav") })
+                    .ToArray();
+            }
             EditorUtility.SetDirty(library);
             AssetDatabase.SaveAssets();
-            Debug.Log("[Wild Tamers] Audio library built.");
+            Debug.Log("[Wild Tamers] Sound Library built.");
+            return library;
         }
 
-        private static void Import(string name, bool streaming)
+        private static void Import(string path, bool streaming)
         {
-            var path = $"{AudioFolder}/{name}.ogg";
             var importer = AssetImporter.GetAtPath(path) as AudioImporter;
             if (importer == null)
             {
@@ -64,20 +84,28 @@ namespace WildTamers.EditorTools
                 return;
             }
             var settings = importer.defaultSampleSettings;
-            settings.loadType = streaming ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
+            // Music streams from disk (long files); effects are decoded once at load so they start with no delay.
+            var load = streaming ? AudioClipLoadType.Streaming : AudioClipLoadType.DecompressOnLoad;
+            float quality = streaming ? 0.6f : 0.75f;
+            bool mono = !streaming;
+            if (settings.loadType == load && settings.compressionFormat == AudioCompressionFormat.Vorbis &&
+                Mathf.Approximately(settings.quality, quality) && importer.forceToMono == mono && settings.preloadAudioData == !streaming)
+                return;
+            settings.loadType = load;
             settings.compressionFormat = AudioCompressionFormat.Vorbis;
-            settings.quality = streaming ? 0.55f : 0.7f;
+            settings.quality = quality;
             settings.preloadAudioData = !streaming;
             importer.defaultSampleSettings = settings;
-            importer.forceToMono = !streaming;
+            importer.forceToMono = mono;
             importer.loadInBackground = streaming;
             importer.SaveAndReimport();
         }
 
-        private static void Set(AudioLibrary.Entry entry, string name, float volume)
+        private static AudioClip Load(string path) => AssetDatabase.LoadAssetAtPath<AudioClip>(path);
+
+        private static void Fill(SoundLibrary.Sound slot, string path)
         {
-            entry.clip = AssetDatabase.LoadAssetAtPath<AudioClip>($"{AudioFolder}/{name}.ogg");
-            entry.volume = volume;
+            if (slot.clip == null) slot.clip = Load(path);
         }
 
         // ---------- Scenes in the build ----------

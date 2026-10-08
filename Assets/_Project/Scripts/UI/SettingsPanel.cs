@@ -52,6 +52,7 @@ namespace WildTamers.UI
             resetButton.onClick.AddListener(AskReset);
             if (doneButton != null) doneButton.onClick.AddListener(Close);
             if (closeButton != null) closeButton.onClick.AddListener(Close);
+            ClickSound.Hook(backdropButton);
             if (backdropButton != null) backdropButton.onClick.AddListener(Close);
         }
 
@@ -109,7 +110,7 @@ namespace WildTamers.UI
             // The slider was let go a moment ago: save, and let the player hear the new effect volume.
             lastChange = -1f;
             GameSettings.Flush();
-            if (sfxChanged) AudioManager.Play(Sfx.Hit, 0.8f);
+            if (sfxChanged) AudioManager.Play(Sfx.NormalAttack);
             sfxChanged = false;
         }
 

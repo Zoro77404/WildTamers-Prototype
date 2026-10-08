@@ -1,4 +1,5 @@
 using UnityEngine;
+using WildTamers.Audio;
 using WildTamers.Core;
 using WildTamers.Map;
 
@@ -29,9 +30,14 @@ namespace WildTamers.Player
         [SerializeField] private float waddleAngle = 7f;
         [SerializeField] private float leanAngle = 8f;
 
+        [Header("Footsteps")]
+        [Tooltip("Slowest speed (m/s) that still plays footstep sounds.")]
+        [SerializeField] private float footstepMinSpeed = 0.6f;
+
         private Vector3 lastPosition;
         private float speed;
         private float stepPhase;
+        private int lastStep;
 
         public float Speed => speed;
         public LocationProviderBase LocationProvider => locationProvider;
@@ -77,6 +83,14 @@ namespace WildTamers.Player
             float moving = Mathf.Clamp01(speed / 4f);
             stepPhase += speed * stepsPerMeter * dt;
             float s = Mathf.Sin(stepPhase * Mathf.PI);
+
+            // A foot lands each time the bob touches the ground (every whole step).
+            int step = Mathf.FloorToInt(stepPhase);
+            if (step != lastStep)
+            {
+                lastStep = step;
+                if (speed > footstepMinSpeed) AudioManager.Play(Sfx.Footstep, Mathf.Lerp(0.6f, 1f, moving));
+            }
 
             float bob = Mathf.Abs(s) * bobHeight * moving;
             float breathe = 1f + Mathf.Sin(Time.time * 2.2f) * 0.018f * (1f - moving);

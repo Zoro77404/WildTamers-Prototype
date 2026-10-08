@@ -59,6 +59,9 @@ namespace WildTamers.Battle
         /// <summary>Point just above the animal's head (for damage numbers).</summary>
         public Vector3 HeadPoint => motion != null ? motion.position + Vector3.up * (height * transform.lossyScale.y + 0.35f) : transform.position;
 
+        /// <summary>Height of the animal in meters as shown (the boss spot is scaled up).</summary>
+        public float WorldHeight => height * transform.lossyScale.y;
+
         /// <summary>Middle of the body (for hit sparks).</summary>
         public Vector3 BodyPoint => motion != null ? motion.position + Vector3.up * (height * 0.5f * transform.lossyScale.y) : transform.position;
 
@@ -209,13 +212,23 @@ namespace WildTamers.Battle
         // Attacks
         // ------------------------------------------------------------------
 
+        /// <summary>Normal special-attack wind-up (seconds); longer when its effect needs time to build up.</summary>
+        public const float SkillCharge = 0.32f;
+        /// <summary>Seconds from the end of the wind-up to the impact of a special attack.</summary>
+        public const float SkillLunge = 0.2f;
+        /// <summary>Back-step before a normal attack.</summary>
+        public const float AttackWindUp = 0.1f;
+        /// <summary>Seconds from the end of the back-step to the impact of a normal attack.</summary>
+        public const float AttackLunge = 0.13f;
+
         /// <summary>
-        /// Lunge at the target. <paramref name="onImpact"/> runs at the moment of contact (apply damage there).
-        /// Skills charge up first and leap in an arc.
+        /// Lunge at the target. <paramref name="onLunge"/> runs as the lunge starts (whoosh), <paramref name="onImpact"/> at the moment
+        /// of contact (apply damage there). Skills charge up first for <paramref name="chargeTime"/> seconds and leap in an arc.
         /// </summary>
-        public IEnumerator Attack(BattleActor target, bool skill, Color skillColor, BattleSparks sparks, Action onImpact)
+        public IEnumerator Attack(BattleActor target, bool skill, Color skillColor, BattleSparks sparks, Action onImpact,
+            float chargeTime = SkillCharge, Action onLunge = null)
         {
-            if (motion == null) { onImpact?.Invoke(); yield break; }
+            if (motion == null) { onLunge?.Invoke(); onImpact?.Invoke(); yield break; }
 
             var toTarget = target.transform.position - transform.position;
             toTarget.y = 0f;
@@ -224,24 +237,42 @@ namespace WildTamers.Battle
             dirLocal.y = 0f;
             float reach = Mathf.Max(0.5f, distance * (skill ? skillLungeShare : lungeShare) - 0.4f) / Mathf.Max(0.01f, transform.lossyScale.x);
 
-            if (skill)
-            {
-                // Charge: crouch, sparks swirl at the feet.
-                if (sparks != null) sparks.Ring(transform.position + Vector3.up * 0.3f, skillColor, length * 0.6f + 0.6f, 22);
-                yield return Squash(0.32f, 0.82f);
-            }
-            else
-            {
-                yield return Move(Vector3.zero, -dirLocal * 0.35f, 0.1f, Ease.Out, 0f);
-            }
+            if (skill) yield return ChargeUp(chargeTime, skillColor, sparks);
+            else yield return Move(Vector3.zero, -dirLocal * 0.35f, AttackWindUp, Ease.Out, 0f);
 
+            onLunge?.Invoke();
             if (visual != null) visual.Play(AnimalVisual.Attack, 0.06f);
-            yield return Move(skill ? Vector3.zero : -dirLocal * 0.35f, dirLocal * reach, skill ? 0.2f : 0.13f, Ease.In, skill ? 1.1f : 0f);
+            yield return Move(skill ? Vector3.zero : -dirLocal * 0.35f, dirLocal * reach, skill ? SkillLunge : AttackLunge, Ease.In, skill ? 1.1f : 0f);
 
             onImpact?.Invoke();
             for (float t = 0f; t < 0.09f; t += UIEase.GameDeltaTime) yield return null;
 
             yield return Move(dirLocal * reach, Vector3.zero, 0.32f, Ease.InOut, 0f);
+        }
+
+        /// <summary>Crouch and gather power: sparks swirl at the feet; a long charge trembles and keeps sending up sparks.</summary>
+        private IEnumerator ChargeUp(float duration, Color color, BattleSparks sparks)
+        {
+            const float sparkEvery = 0.45f;
+            float down = Mathf.Min(0.25f, duration);
+            float nextSparks = 0f;
+            for (float t = 0f; t < duration; t += UIEase.GameDeltaTime)
+            {
+                if (sparks != null && t >= nextSparks)
+                {
+                    sparks.Ring(transform.position + Vector3.up * 0.3f, color, length * 0.6f + 0.6f, 22);
+                    nextSparks += sparkEvery;
+                }
+                float sy = Mathf.Lerp(1f, 0.82f, Mathf.Sin(Mathf.Clamp01(t / down) * Mathf.PI * 0.5f));
+                float sxz = 1f / Mathf.Sqrt(sy);
+                motion.localScale = new Vector3(sxz, sy, sxz);
+                // Long charges shake harder as the power builds.
+                float tremble = duration > 0.45f ? Mathf.Sin(t * 70f) * 0.05f * Mathf.Clamp01(t / duration) : 0f;
+                motion.localPosition = new Vector3(tremble, 0f, 0f);
+                yield return null;
+            }
+            motion.localScale = Vector3.one;
+            motion.localPosition = Vector3.zero;
         }
 
         public void TakeHit(Vector3 fromPosition, bool critical, bool guarded)
@@ -447,19 +478,6 @@ namespace WildTamers.Battle
                 yield return null;
             }
             motion.localPosition = to;
-        }
-
-        private IEnumerator Squash(float duration, float amount)
-        {
-            for (float t = 0f; t < duration; t += UIEase.GameDeltaTime)
-            {
-                float p = t / duration;
-                float sy = Mathf.Lerp(1f, amount, Mathf.Sin(p * Mathf.PI * 0.5f));
-                float sxz = 1f / Mathf.Sqrt(sy);
-                motion.localScale = new Vector3(sxz, sy, sxz);
-                yield return null;
-            }
-            motion.localScale = Vector3.one;
         }
 
         private IEnumerator Turn(float yaw, float duration)

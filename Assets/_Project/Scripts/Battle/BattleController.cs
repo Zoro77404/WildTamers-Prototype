@@ -6,6 +6,8 @@ using WildTamers.Core;
 using WildTamers.UI;
 using WildTamers.Lang;
 using WildTamers.Audio;
+using WildTamers.Animals;
+using WildTamers.Vfx;
 
 namespace WildTamers.Battle
 {
@@ -39,6 +41,7 @@ namespace WildTamers.Battle
 
         private GameSession session;
         private GameConfig config;
+        private Camera worldCamera;
         private readonly List<BattleFighter> party = new List<BattleFighter>();
         private readonly List<BattleFighter> everyone = new List<BattleFighter>();
         private readonly Dictionary<BattleFighter, BattleActor> actors = new Dictionary<BattleFighter, BattleActor>();
@@ -58,6 +61,7 @@ namespace WildTamers.Battle
         {
             session = GameSession.Instance;
             config = session.Config;
+            worldCamera = cameraShake != null ? cameraShake.GetComponent<Camera>() : Camera.main;
             AudioManager.Instance.PlayMusic(Music.Battle);
             if (session.CurrentBattle == null) session.CreateDebugBattle();
             var battle = session.CurrentBattle;
@@ -211,20 +215,43 @@ namespace WildTamers.Battle
             });
 
             var theme = actor.Data != null ? actor.Data.themeColor : Color.white;
+            // Specials: the wind-up lasts as long as the effect needs so that its hit moment (bolt, spikes, flare) lands on the impact.
+            var special = skill && actor.Data != null ? actor.Data.special : null;
+            float charge = BattleActor.SkillCharge, spawnAt = 0f;
+            if (skill)
+            {
+                charge = SpecialAttackPlayer.PlanCharge(special, BattleActor.SkillCharge, BattleActor.SkillLunge, out spawnAt);
+                AudioManager.Play(Sfx.Charge);
+                if (special != null && special.vfx != null) StartCoroutine(SpawnSpecial(special, actorView, targetView, spawnAt));
+            }
+
+            float started = Time.time;
             yield return actorView.Attack(targetView, skill, theme, sparks, () =>
             {
                 var hit = BattleRules.RollDamage(actor, target, skill ? actor.SkillPower : 1f, config);
                 target.Animal.CurrentHP -= hit.Damage;
-                ShowHit(actorView, targetView, target, hit, skill, theme);
+                ShowHit(actorView, targetView, target, hit, skill, theme, special);
 
                 int damage = hit.Damage;
                 bool crit = hit.Critical, guarded = hit.Guarded;
                 hud.AppendLog(() => " " + (crit ? Loc.T("log.crit") + " " : guarded ? Loc.T("log.guarded") + " " : "") + Loc.T("log.damage", damage));
-            });
-            yield return Wait(afterAction + hud.LogTimeLeft);
+            }, charge, () => AudioManager.Play(Sfx.Swing));
+            float elapsed = Time.time - started;
+
+            // Let a special's effect play out (most of it) before the next turn starts.
+            float effectLeft = special != null && special.vfx != null ? spawnAt + SpecialAttackPlayer.Duration(special) - elapsed - 0.35f : 0f;
+            yield return Wait(Mathf.Max(afterAction + hud.LogTimeLeft, Mathf.Min(effectLeft, 1.6f)));
 
             // One of yours went down: it is out for the rest of the fight.
             if (target.IsPlayer && target.IsFainted) yield return Knockout(target);
+        }
+
+        private IEnumerator SpawnSpecial(SpecialAttackFx fx, BattleActor attacker, BattleActor target, float delay)
+        {
+            yield return Wait(delay);
+            var onAnimal = fx.spawnAt == VfxAnchor.Attacker ? attacker : target;
+            SpecialAttackPlayer.Spawn(fx, attacker.transform.position, target.BodyPoint, target.transform.position, worldCamera,
+                SpecialAttackPlayer.SizeFor(onAnimal.WorldHeight));
         }
 
         private IEnumerator Knockout(BattleFighter fighter)
@@ -237,10 +264,14 @@ namespace WildTamers.Battle
             yield return Wait(readPause * 0.7f);
         }
 
-        private void ShowHit(BattleActor attackerView, BattleActor targetView, BattleFighter target, HitResult hit, bool skill, Color theme)
+        private void ShowHit(BattleActor attackerView, BattleActor targetView, BattleFighter target, HitResult hit, bool skill, Color theme,
+            SpecialAttackFx special)
         {
             targetView.TakeHit(attackerView.transform.position, hit.Critical, hit.Guarded);
-            AudioManager.Play(hit.Critical ? Sfx.Crit : hit.Guarded ? Sfx.Guard : Sfx.Hit);
+            // Normal hits: one of the attack sounds at random; critical hits: the heavy hit; specials: the animal's special sound.
+            if (skill) SpecialAttackPlayer.PlayImpactSound(special);
+            else AudioManager.Play(hit.Critical ? Sfx.Heavy : Sfx.NormalAttack);
+            if (hit.Guarded) AudioManager.Play(Sfx.Guard);
             var card = hud.CardFor(target);
             card.SetHP(target.Animal);
             card.Punch();

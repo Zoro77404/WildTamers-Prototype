@@ -1,9 +1,9 @@
 # PROGRESS
 plan: PLAN.md
-phase: 4 — Main menu, settings, pause, Arabic localization (user request in chat 2026-10-07)
-status: done
+phase: 5 — User's own sounds + special-attack VFX (user request in chat 2026-10-08)
+status: in-progress
 tested: Phase 4
-updated: 2026-10-07 20:05
+updated: 2026-10-08 18:40
 
 ## About
 - Wild Tamers prototype: Pokémon GO–style, low-poly animals, PC/Editor now, phone portrait (1080x1920) target
@@ -13,7 +13,12 @@ updated: 2026-10-07 20:05
 - github: https://github.com/Zoro77404/WildTamers-Prototype
 
 ## Steps
-(none — Phase 4 done)
+- [x] 5.1 VFX are Alembic (.abc) — Alembic 2.4.7 installed, each tested in a temp scene
+- [x] 5.2 Bake pipeline (VfxClip/VfxEffect/VfxInstance, vertex-color shader), 4 effects
+- [x] 5.3 Sound Library + music, clicks, footsteps, attack sounds wired (code)
+- [~] 5.4 AnimalData Special fields + defaults + Preview Special button
+- [ ] 5.5 Battle play-test: placement, size, timing per animal, tuned from screenshots
+- [ ] 5.6 Tests, sound check in play, cleanup, docs
 
 ## Done
 - Phase 1 — fake map, player + fake GPS, 6 animals, spawner, starter/encounter/team UI, battle hand-off; reviewed + play-tested (2026-10-01)
